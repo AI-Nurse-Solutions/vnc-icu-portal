@@ -47,3 +47,7 @@
 - [x] WCAG text labels on all color-coded indicators
 - [x] 12 Vitest unit tests passing
 - [x] Final checkpoint and delivery
+
+## Bug Fixes
+
+- [x] Fix invalid credentials error on login — switched drizzle DB connection from single string URL to mysql2 createPool for reliable concurrent connections
