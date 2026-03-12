@@ -1,0 +1,218 @@
+import { useEffect } from "react";
+import { useLocation, Route, Switch } from "wouter";
+import { useEmployee } from "@/hooks/useEmployee";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+  Calendar, ClipboardList, Settings, Users, FileDown,
+  LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell
+} from "lucide-react";
+import { useState } from "react";
+import MyRequests from "./employee/MyRequests";
+import NewRequest from "./employee/NewRequest";
+import CalendarView from "./employee/CalendarView";
+import ManagerReview from "./manager/ManagerReview";
+import PolicySettings from "./manager/PolicySettings";
+import ExportData from "./manager/ExportData";
+import AdminEmployees from "./admin/AdminEmployees";
+import AdminAuditLog from "./admin/AdminAuditLog";
+import AdminImport from "./admin/AdminImport";
+
+function NavItem({ href, icon: Icon, label, active, onClick }: {
+  href: string; icon: any; label: string; active: boolean; onClick?: () => void;
+}) {
+  const [, navigate] = useLocation();
+  return (
+    <button
+      onClick={() => { navigate(href); onClick?.(); }}
+      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group ${
+        active
+          ? "bg-primary/15 text-primary border border-primary/30"
+          : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+      }`}
+    >
+      <Icon className={`w-4 h-4 shrink-0 ${active ? "text-primary" : "group-hover:text-foreground"}`} />
+      <span>{label}</span>
+    </button>
+  );
+}
+
+export default function Dashboard() {
+  const [location, navigate] = useLocation();
+  const { employee, isLoading, isManager, isAdmin } = useEmployee();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => { navigate("/login"); },
+  });
+
+  useEffect(() => {
+    if (!isLoading && !employee) {
+      navigate("/login");
+    }
+  }, [isLoading, employee]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <HeartPulse className="w-8 h-8 text-primary animate-pulse" />
+          <p className="text-muted-foreground text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!employee) return null;
+
+  const currentPath = location.replace("/dashboard", "") || "/";
+
+  const employeeNav = [
+    { href: "/dashboard", label: "Calendar View", icon: Calendar },
+    { href: "/dashboard/my-requests", label: "My Requests", icon: ClipboardList },
+    { href: "/dashboard/new-request", label: "New Request", icon: Bell },
+  ];
+
+  const managerNav = [
+    { href: "/dashboard/manager/review", label: "Review Requests", icon: BarChart3 },
+    { href: "/dashboard/manager/export", label: "Export Data", icon: FileDown },
+    { href: "/dashboard/manager/policy", label: "Policy Settings", icon: Settings },
+  ];
+
+  const adminNav = [
+    { href: "/dashboard/admin/employees", label: "Employees", icon: Users },
+    { href: "/dashboard/admin/import", label: "CSV Import", icon: FileDown },
+    { href: "/dashboard/admin/audit", label: "Audit Log", icon: Shield },
+  ];
+
+  const Sidebar = ({ onClose }: { onClose?: () => void }) => (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-border/40">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
+          <HeartPulse className="w-4 h-4 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-foreground truncate">VNC ICU Portal</p>
+          <p className="text-xs text-muted-foreground truncate">Van Ness Campus</p>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="ml-auto text-muted-foreground hover:text-foreground">
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Nav */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">My Portal</p>
+          <div className="space-y-1">
+            {employeeNav.map(n => (
+              <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
+            ))}
+          </div>
+        </div>
+
+        {isManager && (
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Management</p>
+            <div className="space-y-1">
+              {managerNav.map(n => (
+                <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isAdmin && (
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Administration</p>
+            <div className="space-y-1">
+              {adminNav.map(n => (
+                <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* User footer */}
+      <div className="border-t border-border/40 px-3 py-4">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-secondary/40 mb-2">
+          <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-primary">{employee.firstName.charAt(0)}</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-foreground truncate">{employee.firstName} {employee.lastName}</p>
+            <p className="text-xs text-muted-foreground truncate capitalize">{employee.role} · {employee.shift}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          onClick={() => logoutMutation.mutate()}
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen bg-background overflow-hidden">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex flex-col w-64 shrink-0 bg-sidebar border-r border-sidebar-border">
+        <Sidebar />
+      </aside>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-sidebar border-r border-sidebar-border flex flex-col">
+            <Sidebar onClose={() => setSidebarOpen(false)} />
+          </aside>
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile header */}
+        <header className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-border/40 bg-card/80 backdrop-blur-sm">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="text-muted-foreground hover:text-foreground p-1"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <HeartPulse className="w-5 h-5 text-primary" />
+          <span className="text-sm font-semibold text-foreground">VNC ICU Portal</span>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto">
+          <Switch>
+            <Route path="/dashboard" component={CalendarView} />
+            <Route path="/dashboard/my-requests" component={MyRequests} />
+            <Route path="/dashboard/new-request" component={NewRequest} />
+            {isManager && <Route path="/dashboard/manager/review" component={ManagerReview} />}
+            {isManager && <Route path="/dashboard/manager/export" component={ExportData} />}
+            {isManager && <Route path="/dashboard/manager/policy" component={PolicySettings} />}
+            {isAdmin && <Route path="/dashboard/admin/employees" component={AdminEmployees} />}
+            {isAdmin && <Route path="/dashboard/admin/import" component={AdminImport} />}
+            {isAdmin && <Route path="/dashboard/admin/audit" component={AdminAuditLog} />}
+            <Route>
+              <div className="flex items-center justify-center h-full">
+                <p className="text-muted-foreground">Page not found</p>
+              </div>
+            </Route>
+          </Switch>
+        </main>
+      </div>
+    </div>
+  );
+}

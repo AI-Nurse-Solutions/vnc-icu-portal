@@ -1,0 +1,191 @@
+import { TRPCError } from "@trpc/server";
+import { nanoid } from "nanoid";
+import { z } from "zod";
+import { COOKIE_NAME } from "../../shared/const";
+import { verifyJwt } from "../_core/jwt";
+import { publicProcedure, router } from "../_core/trpc";
+import {
+  createEmployee,
+  getAllEmployees,
+  getAuditLog,
+  getEmployeeById,
+  logAudit,
+  updateEmployee,
+} from "../db";
+import { sendInviteEmail } from "../email";
+
+async function requireAdmin(ctx: any) {
+  const token = ctx.req.cookies?.[COOKIE_NAME] || ctx.req.headers.authorization?.replace("Bearer ", "");
+  if (!token) throw new TRPCError({ code: "UNAUTHORIZED" });
+  const payload = await verifyJwt(token);
+  if (!payload?.employeeId) throw new TRPCError({ code: "UNAUTHORIZED" });
+  const emp = await getEmployeeById(payload.employeeId as number);
+  if (!emp || emp.role !== "admin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+  }
+  return emp;
+}
+
+export const adminRouter = router({
+  // List all employees
+  listEmployees: publicProcedure.query(async ({ ctx }) => {
+    await requireAdmin(ctx);
+    const emps = await getAllEmployees();
+    return emps.map(e => ({
+      id: e.id,
+      employeeNumber: e.employeeNumber,
+      firstName: e.firstName,
+      lastName: e.lastName,
+      email: e.email,
+      shift: e.shift,
+      role: e.role,
+      seniorityDate: e.seniorityDate instanceof Date ? e.seniorityDate.toISOString().split("T")[0] : String(e.seniorityDate).split("T")[0],
+      isActive: e.isActive,
+    }));
+  }),
+
+  // Invite a new employee
+  inviteEmployee: publicProcedure
+    .input(z.object({
+      employeeNumber: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      email: z.string().email(),
+      shift: z.enum(["AM", "PM", "NOC"]),
+      seniorityDate: z.string(),
+      role: z.enum(["employee", "manager", "admin"]).default("employee"),
+      origin: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      const token = nanoid(48);
+      const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
+      await createEmployee({
+        employeeNumber: input.employeeNumber,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email.toLowerCase(),
+        shift: input.shift,
+        seniorityDate: new Date(input.seniorityDate),
+        role: input.role,
+        inviteToken: token,
+        inviteTokenExpiresAt: expiresAt,
+        isActive: false,
+      });
+
+      const inviteUrl = `${input.origin}/accept-invite?token=${token}`;
+      await sendInviteEmail(input.email, input.firstName, inviteUrl, input.role);
+
+      await logAudit({ actorId: admin.id, action: "invite_employee", targetType: "employee", targetId: input.email, details: { role: input.role } });
+
+      return { success: true };
+    }),
+
+  // Update employee
+  updateEmployee: publicProcedure
+    .input(z.object({
+      id: z.number(),
+      firstName: z.string().optional(),
+      lastName: z.string().optional(),
+      shift: z.enum(["AM", "PM", "NOC"]).optional(),
+      role: z.enum(["employee", "manager", "admin"]).optional(),
+      seniorityDate: z.string().optional(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      const { id, ...updates } = input;
+      const updateData: any = { ...updates };
+      if (updates.seniorityDate) updateData.seniorityDate = new Date(updates.seniorityDate);
+      await updateEmployee(id, updateData);
+      await logAudit({ actorId: admin.id, action: "update_employee", targetType: "employee", targetId: String(id), details: updates });
+      return { success: true };
+    }),
+
+  // Deactivate employee
+  deactivateEmployee: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      await updateEmployee(input.id, { isActive: false });
+      await logAudit({ actorId: admin.id, action: "deactivate_employee", targetType: "employee", targetId: String(input.id) });
+      return { success: true };
+    }),
+
+  // Import employees from CSV data (already parsed on frontend)
+  importEmployees: publicProcedure
+    .input(z.object({
+      rows: z.array(z.object({
+        employee_number: z.string(),
+        first_name: z.string(),
+        last_name: z.string(),
+        seniority_date: z.string(),
+        shift: z.enum(["AM", "PM", "NOC"]),
+        email: z.string().email(),
+        role: z.enum(["employee", "manager", "admin"]).default("employee"),
+      })),
+      origin: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      const results = { created: 0, updated: 0, errors: [] as string[] };
+
+      for (const row of input.rows) {
+        try {
+          const { getAllEmployees } = await import("../db");
+          const existing = (await getAllEmployees()).find(e => e.employeeNumber === row.employee_number);
+
+          if (existing) {
+            await updateEmployee(existing.id, {
+              firstName: row.first_name,
+              lastName: row.last_name,
+              seniorityDate: new Date(row.seniority_date),
+              shift: row.shift,
+              email: row.email.toLowerCase(),
+              role: row.role,
+            });
+            results.updated++;
+          } else {
+            const token = nanoid(48);
+            const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+            await createEmployee({
+              employeeNumber: row.employee_number,
+              firstName: row.first_name,
+              lastName: row.last_name,
+              email: row.email.toLowerCase(),
+              shift: row.shift,
+              seniorityDate: new Date(row.seniority_date),
+              role: row.role,
+              inviteToken: token,
+              inviteTokenExpiresAt: expiresAt,
+              isActive: false,
+            });
+            const inviteUrl = `${input.origin}/accept-invite?token=${token}`;
+            await sendInviteEmail(row.email, row.first_name, inviteUrl, row.role);
+            results.created++;
+          }
+        } catch (e: any) {
+          results.errors.push(`Row ${row.employee_number}: ${e.message}`);
+        }
+      }
+
+      await logAudit({
+        actorId: admin.id,
+        action: "csv_import",
+        targetType: "employee",
+        targetId: "bulk",
+        details: results,
+      });
+
+      return results;
+    }),
+
+  // Get audit log
+  getAuditLog: publicProcedure
+    .input(z.object({ limit: z.number().min(1).max(500).default(100) }))
+    .query(async ({ input, ctx }) => {
+      await requireAdmin(ctx);
+      return getAuditLog(input.limit);
+    }),
+});
