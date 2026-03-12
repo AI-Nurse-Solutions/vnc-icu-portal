@@ -81,9 +81,16 @@ export const authRouter = router({
         otpLockedUntil: undefined,
       });
 
+      const smtpConfigured = !!(process.env.SMTP_USER && (process.env.SMTP_PASSWORD || process.env.SMTP_PASS));
       await sendOtpEmail(emp.email, emp.firstName, otp);
 
-      return { success: true, email: emp.email, message: "OTP sent to your email." };
+      // When SMTP is not configured, return the OTP directly so users can log in
+      return {
+        success: true,
+        email: emp.email,
+        message: smtpConfigured ? "OTP sent to your email." : "SMTP not configured — use the code shown below.",
+        devOtp: smtpConfigured ? undefined : otp,
+      };
     }),
 
   // Step 2: verify OTP and issue session

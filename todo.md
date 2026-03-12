@@ -51,3 +51,6 @@
 ## Bug Fixes
 
 - [x] Fix invalid credentials error on login — switched drizzle DB connection from single string URL to mysql2 createPool for reliable concurrent connections
+- [ ] Fix persistent invalid credentials — deep trace browser login flow
+- [x] Fixed SMTP env var mismatch (SMTP_PASSWORD vs SMTP_PASS) — OTP emails now deliver via Gmail
+- [x] Updated admin account email to great.ai.nurses@gmail.com for real OTP delivery

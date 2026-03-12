@@ -16,11 +16,19 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
+  const [devOtp, setDevOtp] = useState<string | undefined>(undefined);
 
   const initiateMutation = trpc.auth.initiateLogin.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       setStep("otp");
-      toast.success("OTP sent to your email. Check your inbox.");
+      if (data.devOtp) {
+        setDevOtp(data.devOtp);
+        setOtp(data.devOtp);
+        toast.info("Dev mode: OTP auto-filled below. Add SMTP credentials to enable email delivery.");
+      } else {
+        setDevOtp(undefined);
+        toast.success("OTP sent to your email. Check your inbox.");
+      }
     },
     onError: (e) => toast.error(e.message),
   });
@@ -130,9 +138,17 @@ export default function Login() {
                   <ShieldCheck className="w-5 h-5 text-primary" />
                   <h2 className="text-lg font-semibold text-foreground">Two-Factor Verification</h2>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  A 6-digit code was sent to <span className="text-foreground font-medium">{email}</span>. Code expires in 10 minutes.
-                </p>
+                {devOtp ? (
+                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 mb-3">
+                    <p className="text-xs font-semibold text-amber-400 uppercase tracking-wide mb-1">⚠ SMTP not configured — Dev Mode</p>
+                    <p className="text-sm text-amber-200/80">Your one-time code is: <span className="font-mono font-bold text-amber-300 text-base tracking-widest">{devOtp}</span></p>
+                    <p className="text-xs text-amber-200/50 mt-1">Add Gmail credentials in Settings → Secrets to enable email delivery.</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    A 6-digit code was sent to <span className="text-foreground font-medium">{email}</span>. Code expires in 10 minutes.
+                  </p>
+                )}
               </div>
               <form onSubmit={handleOtp} className="space-y-6">
                 <div className="flex justify-center">

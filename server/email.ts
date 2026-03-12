@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 
 function getTransporter() {
   const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASSWORD;
+  const pass = process.env.SMTP_PASS || process.env.SMTP_PASSWORD;
   const from = process.env.SMTP_FROM || user;
 
   if (!user || !pass) {
