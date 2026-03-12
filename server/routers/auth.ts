@@ -48,10 +48,10 @@ export const authRouter = router({
     }
   }),
 
-  // Step 1: verify email/password, send OTP
+  // Login: verify email/password and issue session directly (MFA disabled)
   initiateLogin: publicProcedure
     .input(z.object({ email: z.string().email(), password: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const emp = await getEmployeeByEmail(input.email.toLowerCase());
       if (!emp || !emp.isActive) {
         throw new Error("Invalid credentials");
@@ -60,36 +60,32 @@ export const authRouter = router({
         throw new Error("Account not set up. Please use your invitation link.");
       }
 
-      // Check lockout
-      if (emp.otpLockedUntil && new Date() < new Date(emp.otpLockedUntil)) {
-        const remaining = Math.ceil((new Date(emp.otpLockedUntil).getTime() - Date.now()) / 60000);
-        throw new Error(`Account locked. Try again in ${remaining} minute(s).`);
-      }
-
       const valid = await bcryptjs.compare(input.password, emp.passwordHash);
       if (!valid) {
         throw new Error("Invalid credentials");
       }
 
-      // Generate OTP
-      const otp = generateOtp();
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-      await updateEmployee(emp.id, {
-        otpCode: otp,
-        otpExpiresAt: expiresAt,
-        otpAttempts: 0,
-        otpLockedUntil: undefined,
-      });
+      // Issue JWT session immediately (MFA/OTP disabled)
+      const token = await signJwt({ employeeId: emp.id, role: emp.role });
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 8 * 60 * 60 * 1000 });
 
-      const smtpConfigured = !!(process.env.SMTP_USER && (process.env.SMTP_PASSWORD || process.env.SMTP_PASS));
-      await sendOtpEmail(emp.email, emp.firstName, otp);
+      await logAudit({ actorId: emp.id, action: "login", targetType: "employee", targetId: String(emp.id), details: { email: emp.email } });
 
-      // When SMTP is not configured, return the OTP directly so users can log in
       return {
         success: true,
         email: emp.email,
-        message: smtpConfigured ? "OTP sent to your email." : "SMTP not configured — use the code shown below.",
-        devOtp: smtpConfigured ? undefined : otp,
+        mfaRequired: false,
+        employee: {
+          id: emp.id,
+          employeeNumber: emp.employeeNumber,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          email: emp.email,
+          shift: emp.shift,
+          role: emp.role,
+          seniorityDate: emp.seniorityDate,
+        },
       };
     }),
 

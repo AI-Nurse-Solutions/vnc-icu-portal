@@ -54,3 +54,4 @@
 - [ ] Fix persistent invalid credentials — deep trace browser login flow
 - [x] Fixed SMTP env var mismatch (SMTP_PASSWORD vs SMTP_PASS) — OTP emails now deliver via Gmail
 - [x] Updated admin account email to great.ai.nurses@gmail.com for real OTP delivery
+- [x] Disabled MFA/OTP — login now issues session directly after email + password check
