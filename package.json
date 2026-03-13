@@ -4,15 +4,14 @@
   "private": true,
   "description": "VNC ICU Vacation Request Portal",
   "scripts": {
-    "install:all": "cd server && npm install && cd ../client && npm install",
-    "build": "cd client && npm run build",
-    "start": "cd server && node src/index.js",
-    "migrate": "cd server && node migrations/run.js",
-    "seed": "cd server && node seeds/run.js",
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "node server/src/index.js",
+    "migrate": "node server/migrations/run.js",
+    "seed": "node server/seeds/run.js",
     "setup": "npm run migrate && npm run seed",
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "postinstall": "npm run install:all && npm run build"
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,2 +1,2 @@
-web: cd server && node src/index.js
-release: cd server && node migrations/run.js
+web: node server/src/index.js
+release: node server/migrations/run.js
