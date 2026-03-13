@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: vnc-icu-portal
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: cd server && node migrations/run.js && node src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vnc-icu-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+
+databases:
+  - name: vnc-icu-db
+    plan: starter
+    databaseName: vnc_icu
+    postgresMajorVersion: "16"
