@@ -1,10 +1,12 @@
 const { Router } = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { parse } = require('csv-parse/sync');
 const { stringify } = require('csv-stringify/sync');
 const db = require('../config/db');
 const { requireRole } = require('../middleware/auth');
 const { logAction } = require('../services/audit');
+const { sendInvite } = require('../services/email');
 
 const router = Router();
 
@@ -12,7 +14,7 @@ const router = Router();
 router.get('/employees', requireRole('manager', 'admin'), async (req, res) => {
   try {
     const { rows } = await db.query(`
-      SELECT id, employee_number, first_name, last_name, seniority_date, shift, email, role, is_active, created_at
+      SELECT id, employee_number, first_name, last_name, seniority_date, shift, email, role, is_active, has_set_password, created_at
       FROM employees ORDER BY last_name, first_name
     `);
     res.json(rows);
@@ -35,10 +37,10 @@ router.post('/employees/import', requireRole('admin'), async (req, res) => {
     });
 
     await client.query('BEGIN');
-    const defaultHash = await bcrypt.hash('changeme123', 10);
     let imported = 0;
     let skipped = 0;
     const errors = [];
+    const newEmployees = []; // Track newly created employees for invite emails
 
     for (const rec of records) {
       try {
@@ -56,15 +58,27 @@ router.post('/employees/import', requireRole('admin'), async (req, res) => {
           continue;
         }
 
-        await client.query(`
-          INSERT INTO employees (employee_number, first_name, last_name, seniority_date, shift, email, role, password_hash)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        // Generate invite token and random placeholder password for new employees
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
+        const placeholderHash = await bcrypt.hash(crypto.randomBytes(16).toString('hex'), 10);
+
+        const result = await client.query(`
+          INSERT INTO employees (employee_number, first_name, last_name, seniority_date, shift, email, role, password_hash, invite_token, invite_expires_at, has_set_password)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, FALSE)
           ON CONFLICT (employee_number) DO UPDATE SET
             first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name,
             seniority_date = EXCLUDED.seniority_date, shift = EXCLUDED.shift,
             email = EXCLUDED.email, updated_at = NOW()
-        `, [empNum, firstName, lastName, seniorityDate, shift, email, role, defaultHash]);
+          RETURNING id, (xmax = 0) as is_new
+        `, [empNum, firstName, lastName, seniorityDate, shift, email, role, placeholderHash, token, expiresAt]);
+
         imported++;
+
+        // Track new employees (not updated) for sending invite emails
+        if (result.rows[0]?.is_new) {
+          newEmployees.push({ id: result.rows[0].id, email, firstName, token });
+        }
       } catch (e) {
         errors.push(`Error importing ${rec.employee_number}: ${e.message}`);
         skipped++;
@@ -75,10 +89,21 @@ router.post('/employees/import', requireRole('admin'), async (req, res) => {
     await logAction({
       actorId: req.session.userId, action: 'csv_import',
       targetType: 'employee', targetId: null,
-      details: { imported, skipped, errors: errors.slice(0, 5) },
+      details: { imported, skipped, newEmployees: newEmployees.length, errors: errors.slice(0, 5) },
     });
 
-    res.json({ imported, skipped, errors: errors.slice(0, 10) });
+    // Send invite emails to newly created employees (outside transaction)
+    let invitesSent = 0;
+    for (const emp of newEmployees) {
+      try {
+        await sendInvite(emp.email, emp.firstName, emp.token);
+        invitesSent++;
+      } catch (emailErr) {
+        console.error(`Failed to send invite to ${emp.email}:`, emailErr.message);
+      }
+    }
+
+    res.json({ imported, skipped, invitesSent, errors: errors.slice(0, 10) });
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ error: 'Import failed: ' + err.message });
@@ -252,6 +277,47 @@ router.put('/employees/:id', requireRole('admin'), async (req, res) => {
     });
     res.json({ message: 'Employee updated' });
   } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Resend invite email to an employee who hasn't set their password yet
+router.post('/employees/:id/resend-invite', requireRole('admin'), async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      'SELECT id, email, first_name, has_set_password FROM employees WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    const emp = rows[0];
+
+    if (emp.has_set_password) {
+      return res.status(400).json({ error: 'Employee has already set their password' });
+    }
+
+    // Generate new token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
+    await db.query(
+      'UPDATE employees SET invite_token = $1, invite_expires_at = $2, updated_at = NOW() WHERE id = $3',
+      [token, expiresAt, emp.id]
+    );
+
+    await sendInvite(emp.email, emp.first_name, token);
+
+    await logAction({
+      actorId: req.session.userId, action: 'resend_invite',
+      targetType: 'employee', targetId: emp.id,
+    });
+
+    res.json({ message: `Invite resent to ${emp.email}` });
+  } catch (err) {
+    console.error('Resend invite error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

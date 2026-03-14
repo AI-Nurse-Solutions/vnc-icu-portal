@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { Lock, Mail, KeyRound } from 'lucide-react';
@@ -25,7 +25,11 @@ export default function LoginPage() {
         toast.info('OTP sent to your email');
       }
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed');
+      if (err.response?.data?.needsSetup) {
+        toast.info('Please check your email for the invite link to set your password.');
+      } else {
+        toast.error(err.response?.data?.error || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -84,6 +88,11 @@ export default function LoginPage() {
               style={{ width: '100%', justifyContent: 'center' }}>
               {loading ? 'Sending OTP…' : 'Login'}
             </button>
+            <div style={{ textAlign: 'center', marginTop: '0.25rem' }}>
+              <Link to="/forgot-password" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', textDecoration: 'underline' }}>
+                Forgot Password?
+              </Link>
+            </div>
           </form>
         ) : (
           <form onSubmit={handleOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

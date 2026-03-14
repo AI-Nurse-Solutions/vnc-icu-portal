@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import api from '../lib/api';
 import { useToast } from '../hooks/useToast';
-import { Settings, Users, Upload, CalendarOff, Clock, FileText, Download, Trash2, Save, Plus } from 'lucide-react';
+import { Settings, Users, Upload, CalendarOff, Clock, FileText, Download, Trash2, Save, Plus, Mail } from 'lucide-react';
 
 const toSafeDate = (d) => {
   if (!d) return null;
@@ -126,15 +126,25 @@ function EmployeesTab() {
     onError: (err) => toast.error(err.response?.data?.error || 'Failed'),
   });
 
+  const resendInviteMut = useMutation({
+    mutationFn: (id) => api.post(`/admin/employees/${id}/resend-invite`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-employees'] }); toast.success('Invite resent'); },
+    onError: (err) => toast.error(err.response?.data?.error || 'Failed to resend invite'),
+  });
+
   return (
     <div className="card" style={{ padding: 0 }}>
       <table>
         <thead>
-          <tr><th>Name</th><th>Email</th><th>Role</th><th>Shift</th><th>Seniority</th><th>Active</th><th></th></tr>
+          <tr><th>Name</th><th>Email</th><th>Role</th><th>Shift</th><th>Seniority</th><th>Status</th><th>Active</th><th></th></tr>
         </thead>
         <tbody>
           {employees.map((emp) => (
-            <EmployeeRow key={emp.id} emp={emp} onUpdate={(data) => updateMut.mutate({ id: emp.id, data })} />
+            <EmployeeRow key={emp.id} emp={emp}
+              onUpdate={(data) => updateMut.mutate({ id: emp.id, data })}
+              onResendInvite={() => resendInviteMut.mutate(emp.id)}
+              resendPending={resendInviteMut.isPending}
+            />
           ))}
         </tbody>
       </table>
@@ -142,7 +152,7 @@ function EmployeesTab() {
   );
 }
 
-function EmployeeRow({ emp, onUpdate }) {
+function EmployeeRow({ emp, onUpdate, onResendInvite, resendPending }) {
   const [editing, setEditing] = useState(false);
   const [role, setRole] = useState(emp.role);
   const [shift, setShift] = useState(emp.shift);
@@ -158,8 +168,22 @@ function EmployeeRow({ emp, onUpdate }) {
         <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
           {emp.seniority_date && format(toSafeDate(emp.seniority_date), 'MMM yyyy')}
         </td>
+        <td>
+          {emp.has_set_password
+            ? <span className="badge badge-green">Active</span>
+            : <span className="badge badge-yellow">Pending Invite</span>
+          }
+        </td>
         <td>{emp.is_active ? <span className="badge badge-green">Yes</span> : <span className="badge badge-red">No</span>}</td>
-        <td><button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button></td>
+        <td style={{ display: 'flex', gap: '0.25rem' }}>
+          <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
+          {!emp.has_set_password && (
+            <button className="btn btn-secondary btn-sm" onClick={onResendInvite} disabled={resendPending}
+              style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Mail size={12} /> Resend
+            </button>
+          )}
+        </td>
       </tr>
     );
   }
@@ -184,6 +208,12 @@ function EmployeeRow({ emp, onUpdate }) {
       </td>
       <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
         {emp.seniority_date && format(toSafeDate(emp.seniority_date), 'MMM yyyy')}
+      </td>
+      <td>
+        {emp.has_set_password
+          ? <span className="badge badge-green">Active</span>
+          : <span className="badge badge-yellow">Pending Invite</span>
+        }
       </td>
       <td>
         <select value={active ? 'yes' : 'no'} onChange={(e) => setActive(e.target.value === 'yes')} style={{ fontSize: '0.75rem' }}>
@@ -211,7 +241,10 @@ function ImportTab() {
     setLoading(true);
     try {
       const { data } = await api.post('/admin/employees/import', { csvData: csvText });
-      toast.success(`Imported ${data.imported} employees`);
+      const msg = data.invitesSent > 0
+        ? `Imported ${data.imported} employees. ${data.invitesSent} invite email(s) sent.`
+        : `Imported ${data.imported} employees.`;
+      toast.success(msg);
       qc.invalidateQueries({ queryKey: ['admin-employees'] });
       setCsvText('');
     } catch (err) {

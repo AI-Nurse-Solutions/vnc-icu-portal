@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
+import SetPasswordPage from './pages/SetPasswordPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CalendarPage from './pages/CalendarPage';
 import RequestsPage from './pages/RequestsPage';
 import ReviewPage from './pages/ReviewPage';
@@ -40,6 +42,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/calendar" replace /> : <LoginPage />} />
+      <Route path="/signup" element={user ? <Navigate to="/calendar" replace /> : <SetPasswordPage />} />
+      <Route path="/forgot-password" element={user ? <Navigate to="/calendar" replace /> : <ForgotPasswordPage />} />
       <Route
         element={
           <ProtectedRoute>
