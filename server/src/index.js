@@ -71,6 +71,12 @@ if (isProduction) {
   });
 }
 
-app.listen(PORT, () => {
+// Log startup diagnostics
+console.log('Starting VNC ICU server...');
+console.log(`  PORT=${PORT}, NODE_ENV=${process.env.NODE_ENV}`);
+console.log(`  DATABASE_URL=${process.env.DATABASE_URL ? 'set (' + process.env.DATABASE_URL.split('@')[1]?.split('/')[0] + ')' : 'NOT SET'}`);
+console.log(`  SESSION_SECRET=${process.env.SESSION_SECRET ? 'set' : 'NOT SET'}`);
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`VNC ICU server running on port ${PORT} [${isProduction ? 'production' : 'development'}]`);
 });

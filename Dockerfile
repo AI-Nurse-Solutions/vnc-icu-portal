@@ -26,5 +26,5 @@ ENV PORT=3001
 
 EXPOSE 3001
 
-# Run migrations then start the server
-CMD ["sh", "-c", "node server/migrations/run.js && node server/src/index.js"]
+# Run migrations (allow failure) then start the server
+CMD ["sh", "-c", "node server/migrations/run.js || echo 'Migration warning - continuing...'; node server/src/index.js"]
