@@ -53,8 +53,8 @@ router.post('/login', async (req, res) => {
 
     res.json({ message: 'OTP sent to your email', requireOTP: true });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Login error:', err.message, err.stack);
+    res.status(500).json({ error: 'Internal server error', detail: err.message });
   }
 });
 
