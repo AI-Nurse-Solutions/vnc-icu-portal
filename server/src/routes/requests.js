@@ -27,9 +27,15 @@ router.get('/my', requireAuth, async (req, res) => {
 router.post('/', requireAuth, async (req, res) => {
   const client = await db.pool.connect();
   try {
-    const { requestType, continuityType, dates, comment } = req.body;
+    const { requestType, continuityType, dates, comment, priority } = req.body;
     if (!requestType || !dates || !Array.isArray(dates) || dates.length === 0) {
       return res.status(400).json({ error: 'Request type and dates are required' });
+    }
+
+    // Validate priority: required for vacation (1-9), not allowed for education
+    const priorityValue = requestType === 'vacation' ? (parseInt(priority) || null) : null;
+    if (requestType === 'vacation' && (!priorityValue || priorityValue < 1 || priorityValue > 9)) {
+      return res.status(400).json({ error: 'Priority (1-9) is required for vacation requests' });
     }
 
     await client.query('BEGIN');
@@ -71,9 +77,9 @@ router.post('/', requireAuth, async (req, res) => {
     }
 
     const result = await client.query(`
-      INSERT INTO requests (employee_id, request_type, continuity_type, comment)
-      VALUES ($1, $2, $3, $4) RETURNING id
-    `, [req.session.userId, requestType, continuityType || 'continuous', comment || null]);
+      INSERT INTO requests (employee_id, request_type, continuity_type, comment, priority)
+      VALUES ($1, $2, $3, $4, $5) RETURNING id
+    `, [req.session.userId, requestType, continuityType || 'continuous', comment || null, priorityValue]);
 
     const requestId = result.rows[0].id;
 
@@ -87,7 +93,7 @@ router.post('/', requireAuth, async (req, res) => {
     await logAction({
       actorId: req.session.userId, action: 'submit_request',
       targetType: 'request', targetId: requestId,
-      details: { requestType, dates, continuityType },
+      details: { requestType, dates, continuityType, priority: priorityValue },
     });
 
     await client.query('COMMIT');

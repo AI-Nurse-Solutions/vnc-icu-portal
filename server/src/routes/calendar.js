@@ -32,6 +32,7 @@ router.get('/demand', requireAuth, async (req, res) => {
       JOIN employees e ON e.id = r.employee_id
       WHERE rd.date >= $1 AND rd.date <= $2
         AND r.status IN ('approved', 'pending')
+        AND r.request_type = 'vacation'
       GROUP BY rd.date, e.shift
       ORDER BY rd.date
     `, [startDate, endDate]);

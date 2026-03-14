@@ -53,14 +53,15 @@ export default function RequestsPage() {
       <div className="card" style={{ padding: 0 }}>
         <table>
           <thead>
-            <tr><th>Type</th><th>Continuity</th><th>Dates</th><th>Days</th><th>Status</th><th>Submitted</th><th></th></tr>
+            <tr><th>Type</th><th>Priority</th><th>Continuity</th><th>Dates</th><th>Days</th><th>Status</th><th>Submitted</th><th></th></tr>
           </thead>
           <tbody>
             {requests.length === 0 ? (
-              <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No requests yet</td></tr>
+              <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No requests yet</td></tr>
             ) : requests.map((r) => (
               <tr key={r.id}>
                 <td><span className={`badge ${r.request_type === 'vacation' ? 'badge-green' : 'badge-blue'}`}>{r.request_type}</span></td>
+                <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{r.priority || '—'}</td>
                 <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{r.continuity_type}</td>
                 <td style={{ fontSize: '0.8125rem' }}>{formatDates(r.dates)}</td>
                 <td style={{ fontSize: '0.8125rem' }}>{r.dates?.length || 0}</td>
@@ -85,6 +86,7 @@ function RequestForm({ onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     requestType: 'vacation',
     continuityType: 'continuous',
+    priority: '',
     startDate: '',
     endDate: '',
     comment: '',
@@ -94,6 +96,7 @@ function RequestForm({ onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.startDate || !formData.endDate) { toast.error('Please select dates'); return; }
+    if (formData.requestType === 'vacation' && !formData.priority) { toast.error('Please select a priority'); return; }
 
     // Convert date range to array of date strings (YYYY-MM-DD)
     const start = parseISO(formData.startDate);
@@ -109,6 +112,7 @@ function RequestForm({ onClose, onSuccess }) {
         continuityType: formData.continuityType,
         dates,
         comment: formData.comment || undefined,
+        priority: formData.requestType === 'vacation' ? parseInt(formData.priority) : undefined,
       });
       toast.success('Request submitted!');
       onSuccess();
@@ -140,6 +144,17 @@ function RequestForm({ onClose, onSuccess }) {
             <option value="intermittent">Intermittent</option>
           </select>
         </div>
+        {formData.requestType === 'vacation' && (
+          <div className="form-group">
+            <label>Priority</label>
+            <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })} required>
+              <option value="">Select priority…</option>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="form-group">
           <label>Start Date</label>
           <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} required />

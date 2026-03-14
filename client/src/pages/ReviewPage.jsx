@@ -82,6 +82,7 @@ export default function ReviewPage() {
                 <th>#</th>
                 <th>Employee</th>
                 <th>Type</th>
+                <th>Priority</th>
                 <th>Continuity</th>
                 <th>Dates</th>
                 <th>Days</th>
@@ -93,7 +94,7 @@ export default function ReviewPage() {
             <tbody>
               {pending.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                  <td colSpan={10} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
                     No pending requests
                   </td>
                 </tr>
@@ -107,6 +108,7 @@ export default function ReviewPage() {
                         {r.request_type}
                       </span>
                     </td>
+                    <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{r.priority || '—'}</td>
                     <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{r.continuity_type}</td>
                     <td style={{ fontSize: '0.8125rem' }}>{formatDates(r.dates)}</td>
                     <td style={{ fontSize: '0.8125rem' }}>{r.dates?.length || 0}</td>
@@ -192,6 +194,7 @@ export default function ReviewPage() {
               <tr>
                 <th>Employee</th>
                 <th>Type</th>
+                <th>Priority</th>
                 <th>Dates</th>
                 <th>Status</th>
                 <th>Decided By</th>
@@ -201,7 +204,7 @@ export default function ReviewPage() {
             <tbody>
               {allRequests.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
                     No requests found
                   </td>
                 </tr>
@@ -214,6 +217,7 @@ export default function ReviewPage() {
                         {r.request_type}
                       </span>
                     </td>
+                    <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{r.priority || '—'}</td>
                     <td style={{ fontSize: '0.8125rem' }}>{formatDates(r.dates)}</td>
                     <td>{statusBadge(r.status)}</td>
                     <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{r.decided_by_name || '—'}</td>
