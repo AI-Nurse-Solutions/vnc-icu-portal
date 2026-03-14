@@ -16,6 +16,8 @@ RUN rm -rf client/src client/node_modules client/package.json client/package-loc
 
 # Environment
 ENV NODE_ENV=production
+ENV PORT=3001
+EXPOSE 3001
 
 # Run migrations then start server
 CMD ["sh", "-c", "node server/migrations/run.js || echo 'Migration warning - continuing...'; node server/src/index.js"]
