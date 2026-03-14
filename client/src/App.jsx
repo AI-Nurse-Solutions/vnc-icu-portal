@@ -47,7 +47,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/calendar" replace />} />
+        <Route index element={<Navigate to={user ? "/calendar" : "/login"} replace />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/requests" element={<RequestsPage />} />
         <Route
