@@ -107,13 +107,15 @@ export default function LoginPage() {
           </form>
         )}
 
-        {/* Dev login */}
-        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-          <button onClick={handleDevLogin} disabled={loading}
-            style={{ background: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', textDecoration: 'underline' }}>
-            Dev Login (skip OTP)
-          </button>
-        </div>
+        {/* Dev login — only in development */}
+        {import.meta.env.DEV && (
+          <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+            <button onClick={handleDevLogin} disabled={loading}
+              style={{ background: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', textDecoration: 'underline' }}>
+              Dev Login (skip OTP)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

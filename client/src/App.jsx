@@ -25,7 +25,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--text-muted)', fontSize: '1.125rem' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        height: '100vh', background: 'var(--bg-primary)', color: 'var(--text-muted)', fontSize: '1.125rem',
+      }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>VNC ICU</div>
           Loading…
