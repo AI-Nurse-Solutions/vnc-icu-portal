@@ -1,6 +1,8 @@
 [build]
 builder = "dockerfile"
 dockerfilePath = "Dockerfile"
+# Disable Docker layer cache to ensure client changes are always rebuilt
+dockerNoCache = true
 
 [deploy]
 healthcheckPath = "/api/health"

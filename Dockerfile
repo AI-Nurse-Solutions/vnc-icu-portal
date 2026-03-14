@@ -3,6 +3,8 @@ FROM node:22-alpine AS client-build
 WORKDIR /app/client
 COPY client/package.json client/package-lock.json* ./
 RUN npm install
+# Cache bust: ensure client source changes always trigger a rebuild
+ARG CACHEBUST=1
 COPY client/ ./
 RUN npm run build
 
