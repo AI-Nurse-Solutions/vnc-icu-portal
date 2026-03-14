@@ -73,9 +73,16 @@ app.get('/api/health', (req, res) => {
 // --- Production: serve built React frontend ---
 if (isProduction) {
   const clientDist = path.join(__dirname, '../../client/dist');
-  app.use(express.static(clientDist));
-  // All non-API routes → index.html (React Router handles client routing)
+  // Hashed assets (JS/CSS) — cache forever (immutable)
+  app.use('/assets', express.static(path.join(clientDist, 'assets'), {
+    maxAge: '1y',
+    immutable: true,
+  }));
+  // Other static files
+  app.use(express.static(clientDist, { maxAge: 0 }));
+  // All non-API routes → index.html with no-cache so browser always gets latest
   app.get('*', (req, res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
