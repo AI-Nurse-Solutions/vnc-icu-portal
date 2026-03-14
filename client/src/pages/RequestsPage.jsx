@@ -6,6 +6,12 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
 import { Plus, X } from 'lucide-react';
 
+const toSafeDate = (d) => {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  return new Date(typeof d === 'string' && d.length === 10 ? d + 'T12:00:00' : d);
+};
+
 export default function RequestsPage() {
   const { user } = useAuth();
   const toast = useToast();
@@ -30,9 +36,9 @@ export default function RequestsPage() {
 
   const formatDates = (dates) => {
     if (!dates || dates.length === 0) return '—';
-    const sorted = [...dates].sort();
-    if (sorted.length === 1) return format(new Date(sorted[0] + 'T12:00:00'), 'MMM d, yyyy');
-    return `${format(new Date(sorted[0] + 'T12:00:00'), 'MMM d')} – ${format(new Date(sorted[sorted.length - 1] + 'T12:00:00'), 'MMM d, yyyy')}`;
+    const sorted = [...dates].sort((a, b) => new Date(a) - new Date(b));
+    if (sorted.length === 1) return format(toSafeDate(sorted[0]), 'MMM d, yyyy');
+    return `${format(toSafeDate(sorted[0]), 'MMM d')} – ${format(toSafeDate(sorted[sorted.length - 1]), 'MMM d, yyyy')}`;
   };
 
   return (

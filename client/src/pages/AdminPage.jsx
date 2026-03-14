@@ -5,6 +5,12 @@ import api from '../lib/api';
 import { useToast } from '../hooks/useToast';
 import { Settings, Users, Upload, CalendarOff, Clock, FileText, Download, Trash2, Save, Plus } from 'lucide-react';
 
+const toSafeDate = (d) => {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  return new Date(typeof d === 'string' && d.length === 10 ? d + 'T12:00:00' : d);
+};
+
 const TABS = [
   { key: 'config', label: 'Configuration', icon: Settings },
   { key: 'employees', label: 'Employees', icon: Users },
@@ -150,7 +156,7 @@ function EmployeeRow({ emp, onUpdate }) {
         <td><span className={`badge ${emp.role === 'admin' ? 'badge-red' : emp.role === 'manager' ? 'badge-yellow' : 'badge-blue'}`}>{emp.role}</span></td>
         <td style={{ fontSize: '0.8125rem' }}>{emp.shift}</td>
         <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-          {emp.seniority_date && format(new Date(emp.seniority_date + 'T12:00:00'), 'MMM yyyy')}
+          {emp.seniority_date && format(toSafeDate(emp.seniority_date), 'MMM yyyy')}
         </td>
         <td>{emp.is_active ? <span className="badge badge-green">Yes</span> : <span className="badge badge-red">No</span>}</td>
         <td><button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button></td>
@@ -177,7 +183,7 @@ function EmployeeRow({ emp, onUpdate }) {
         </select>
       </td>
       <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-        {emp.seniority_date && format(new Date(emp.seniority_date + 'T12:00:00'), 'MMM yyyy')}
+        {emp.seniority_date && format(toSafeDate(emp.seniority_date), 'MMM yyyy')}
       </td>
       <td>
         <select value={active ? 'yes' : 'no'} onChange={(e) => setActive(e.target.value === 'yes')} style={{ fontSize: '0.75rem' }}>
@@ -278,7 +284,7 @@ function BlackoutsTab() {
             <tr><td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '1rem' }}>No blackout dates</td></tr>
           ) : blackouts.map((b) => (
             <tr key={b.id}>
-              <td style={{ fontWeight: 500 }}>{format(new Date(b.date + 'T12:00:00'), 'MMM d, yyyy')}</td>
+              <td style={{ fontWeight: 500 }}>{format(toSafeDate(b.date), 'MMM d, yyyy')}</td>
               <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{b.reason || '—'}</td>
               <td>
                 <button className="btn btn-secondary btn-sm" onClick={() => delMut.mutate(b.id)} style={{ color: 'var(--danger)' }}>
@@ -349,9 +355,9 @@ function DeadlinesTab() {
             <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '1rem' }}>No deadlines set</td></tr>
           ) : deadlines.map((d) => (
             <tr key={d.id}>
-              <td style={{ fontWeight: 500 }}>{format(new Date(d.deadline_date + 'T12:00:00'), 'MMM d, yyyy')}</td>
-              <td style={{ fontSize: '0.8125rem' }}>{format(new Date(d.coverage_start + 'T12:00:00'), 'MMM d, yyyy')}</td>
-              <td style={{ fontSize: '0.8125rem' }}>{format(new Date(d.coverage_end + 'T12:00:00'), 'MMM d, yyyy')}</td>
+              <td style={{ fontWeight: 500 }}>{format(toSafeDate(d.deadline_date), 'MMM d, yyyy')}</td>
+              <td style={{ fontSize: '0.8125rem' }}>{format(toSafeDate(d.coverage_start), 'MMM d, yyyy')}</td>
+              <td style={{ fontSize: '0.8125rem' }}>{format(toSafeDate(d.coverage_end), 'MMM d, yyyy')}</td>
               <td>{d.year}</td>
               <td>
                 <button className="btn btn-secondary btn-sm" onClick={() => delMut.mutate(d.id)} style={{ color: 'var(--danger)' }}>

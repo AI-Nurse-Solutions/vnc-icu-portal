@@ -5,6 +5,12 @@ import api from '../lib/api';
 import { ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import clsx from 'clsx';
 
+const toSafeDate = (d) => {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  return new Date(typeof d === 'string' && d.length === 10 ? d + 'T12:00:00' : d);
+};
+
 const SHIFTS = ['AM', 'PM', 'NOC'];
 
 function getDemandColor(count, yellowThreshold, redThreshold) {
@@ -112,7 +118,7 @@ export default function CalendarPage() {
       {selectedDate && drillDown && (
         <div className="card" style={{ marginTop: '1rem' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-            {format(new Date(selectedDate + 'T12:00:00'), 'EEEE, MMMM d, yyyy')}
+            {format(toSafeDate(selectedDate), 'EEEE, MMMM d, yyyy')}
           </h3>
           {SHIFTS.map((shift) => {
             const items = drillDown.requests?.filter((r) => r.shift === shift) || [];

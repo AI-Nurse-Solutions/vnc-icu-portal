@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import api from '../lib/api';
 import { useToast } from '../hooks/useToast';
-import { CheckCircle, XCircle, Filter } from 'lucide-react';
+import { CircleCheck, CircleX, Filter } from 'lucide-react';
 
 export default function ReviewPage() {
   const toast = useToast();
@@ -41,11 +41,24 @@ export default function ReviewPage() {
     onError: (err) => toast.error(err.response?.data?.error || 'Failed to decide'),
   });
 
+  // Safely convert a date value (Date object or string) for date-fns
+  const toSafeDate = (d) => {
+    if (!d) return null;
+    if (d instanceof Date) return d;
+    // String date like "2024-01-15"
+    return new Date(typeof d === 'string' && d.length === 10 ? d + 'T12:00:00' : d);
+  };
+
   const formatDates = (dates) => {
     if (!dates || dates.length === 0) return '—';
-    const sorted = [...dates].sort();
-    if (sorted.length === 1) return format(new Date(sorted[0] + 'T12:00:00'), 'MMM d, yyyy');
-    return `${format(new Date(sorted[0] + 'T12:00:00'), 'MMM d')} – ${format(new Date(sorted[sorted.length - 1] + 'T12:00:00'), 'MMM d, yyyy')}`;
+    const sorted = [...dates].sort((a, b) => new Date(a) - new Date(b));
+    if (sorted.length === 1) return format(toSafeDate(sorted[0]), 'MMM d, yyyy');
+    return `${format(toSafeDate(sorted[0]), 'MMM d')} – ${format(toSafeDate(sorted[sorted.length - 1]), 'MMM d, yyyy')}`;
+  };
+
+  const getName = (r) => {
+    if (r.first_name && r.last_name) return `${r.first_name} ${r.last_name.charAt(0)}.`;
+    return r.first_name || '—';
   };
 
   const statusBadge = (s) => {
@@ -88,7 +101,7 @@ export default function ReviewPage() {
                 pending.map((r, idx) => (
                   <tr key={r.id}>
                     <td style={{ color: 'var(--text-muted)' }}>{idx + 1}</td>
-                    <td style={{ fontWeight: 500 }}>{r.display_name}</td>
+                    <td style={{ fontWeight: 500 }}>{getName(r)}</td>
                     <td>
                       <span className={`badge ${r.request_type === 'vacation' ? 'badge-green' : 'badge-blue'}`}>
                         {r.request_type}
@@ -98,10 +111,10 @@ export default function ReviewPage() {
                     <td style={{ fontSize: '0.8125rem' }}>{formatDates(r.dates)}</td>
                     <td style={{ fontSize: '0.8125rem' }}>{r.dates?.length || 0}</td>
                     <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                      {r.seniority_date && format(new Date(r.seniority_date + 'T12:00:00'), 'MMM yyyy')}
+                      {r.seniority_date && format(toSafeDate(r.seniority_date), 'MMM yyyy')}
                     </td>
                     <td style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                      {r.submitted_at && format(new Date(r.submitted_at), 'MMM d, yyyy')}
+                      {r.submitted_at && format(toSafeDate(r.submitted_at), 'MMM d, yyyy')}
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
@@ -120,7 +133,7 @@ export default function ReviewPage() {
                               onClick={() => decideMutation.mutate({ id: r.id, status: 'approved' })}
                               disabled={decideMutation.isPending}
                             >
-                              <CheckCircle size={14} />
+                              <CircleCheck size={14} />
                             </button>
                             <button
                               className="btn btn-sm"
@@ -128,7 +141,7 @@ export default function ReviewPage() {
                               onClick={() => decideMutation.mutate({ id: r.id, status: 'denied' })}
                               disabled={decideMutation.isPending}
                             >
-                              <XCircle size={14} />
+                              <CircleX size={14} />
                             </button>
                             <button
                               className="btn btn-secondary btn-sm"
@@ -195,7 +208,7 @@ export default function ReviewPage() {
               ) : (
                 allRequests.map((r) => (
                   <tr key={r.id}>
-                    <td style={{ fontWeight: 500 }}>{r.display_name || r.first_name}</td>
+                    <td style={{ fontWeight: 500 }}>{getName(r)}</td>
                     <td>
                       <span className={`badge ${r.request_type === 'vacation' ? 'badge-green' : 'badge-blue'}`}>
                         {r.request_type}
