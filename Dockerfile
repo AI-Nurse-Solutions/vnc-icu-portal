@@ -22,9 +22,6 @@ COPY --from=client-build /app/client/dist ./client/dist
 
 # Environment
 ENV NODE_ENV=production
-ENV PORT=3001
-
-EXPOSE 3001
 
 # Run migrations (allow failure) then start the server
 CMD ["sh", "-c", "node server/migrations/run.js || echo 'Migration warning - continuing...'; node server/src/index.js"]
