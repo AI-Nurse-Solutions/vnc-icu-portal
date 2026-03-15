@@ -64,3 +64,6 @@
 - [x] Pre-submission summary list showing all selected dates with remove buttons
 - [x] Output clean date array to NewRequest form on submit
 - [x] Fixed invalid credentials — root cause was missing cookie-parser middleware; req.cookies was always undefined so session JWT was never read back after login
+- [x] Fixed unclickable manager/admin nav items — moved from conditional route registration to always-registered routes with RoleGuard components inside each page
+- [x] Show employee seniority date on MyRequests page — displayed in employee info card at top
+- [x] Show priority number next to each request on MyRequests page — shows shift-wide seniority rank (#N of M in shift)

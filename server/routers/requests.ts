@@ -6,6 +6,7 @@ import { COOKIE_NAME } from "../../shared/const";
 import {
   getEmployeeById,
   getManagersAndAdmins,
+  getAllEmployees,
   createRequest,
   getRequestsByEmployee,
   getRequestDates,
@@ -13,6 +14,7 @@ import {
   updateRequest,
   countApprovedVacationDays,
   getBlackoutDates,
+  getAllRequestsWithEmployees,
   logAudit,
 } from "../db";
 import {
@@ -135,11 +137,24 @@ export const requestsRouter = router({
     }),
 
   // Get my requests
-  myRequests: publicProcedure.query(async ({ ctx }) => {
+   myRequests: publicProcedure.query(async ({ ctx }) => {
     const emp = await getAuthEmployee(ctx);
     if (!emp) throw new TRPCError({ code: "UNAUTHORIZED" });
-
     const reqs = await getRequestsByEmployee(emp.id);
+
+    // Compute seniority-based priority rank among all active employees in the same shift
+    // Priority = position when all employees in shift are sorted by seniorityDate asc, then submittedAt asc
+    const allEmployees = await getAllEmployees();
+    const shiftEmployees = allEmployees
+      .filter(e => e.shift === emp.shift && e.isActive)
+      .sort((a, b) => {
+        const sa = a.seniorityDate instanceof Date ? a.seniorityDate : new Date(a.seniorityDate);
+        const sb = b.seniorityDate instanceof Date ? b.seniorityDate : new Date(b.seniorityDate);
+        return sa.getTime() - sb.getTime();
+      });
+    const shiftPriority = shiftEmployees.findIndex(e => e.id === emp.id) + 1;
+    const totalInShift = shiftEmployees.length;
+
     const result = [];
     for (const req of reqs) {
       const dates = await getRequestDates(req.id);
@@ -149,6 +164,9 @@ export const requestsRouter = router({
           const date = d.date instanceof Date ? d.date : new Date(d.date);
           return date.toISOString().split("T")[0];
         }),
+        seniorityDate: emp.seniorityDate,
+        shiftPriority,
+        totalInShift,
       });
     }
     return result;

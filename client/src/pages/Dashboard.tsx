@@ -19,6 +19,22 @@ import AdminEmployees from "./admin/AdminEmployees";
 import AdminAuditLog from "./admin/AdminAuditLog";
 import AdminImport from "./admin/AdminImport";
 
+/** Guard component — shows "Access Denied" if the user lacks the required role */
+function RoleGuard({ allowed, children }: { allowed: boolean; children: React.ReactNode }) {
+  if (!allowed) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center space-y-2">
+          <Shield className="w-10 h-10 text-muted-foreground mx-auto" />
+          <p className="text-foreground font-medium">Access Denied</p>
+          <p className="text-muted-foreground text-sm">You do not have permission to view this page.</p>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 function NavItem({ href, icon: Icon, label, active, onClick }: {
   href: string; icon: any; label: string; active: boolean; onClick?: () => void;
 }) {
@@ -65,8 +81,6 @@ export default function Dashboard() {
   }
 
   if (!employee) return null;
-
-  const currentPath = location.replace("/dashboard", "") || "/";
 
   const employeeNav = [
     { href: "/dashboard", label: "Calendar View", icon: Calendar },
@@ -193,18 +207,42 @@ export default function Dashboard() {
           <span className="text-sm font-semibold text-foreground">VNC ICU Portal</span>
         </header>
 
-        {/* Page content */}
+        {/* Page content — all routes always registered; role guard inside each protected page */}
         <main className="flex-1 overflow-y-auto">
           <Switch>
             <Route path="/dashboard" component={CalendarView} />
             <Route path="/dashboard/my-requests" component={MyRequests} />
             <Route path="/dashboard/new-request" component={NewRequest} />
-            {isManager && <Route path="/dashboard/manager/review" component={ManagerReview} />}
-            {isManager && <Route path="/dashboard/manager/export" component={ExportData} />}
-            {isManager && <Route path="/dashboard/manager/policy" component={PolicySettings} />}
-            {isAdmin && <Route path="/dashboard/admin/employees" component={AdminEmployees} />}
-            {isAdmin && <Route path="/dashboard/admin/import" component={AdminImport} />}
-            {isAdmin && <Route path="/dashboard/admin/audit" component={AdminAuditLog} />}
+            <Route path="/dashboard/manager/review">
+              <RoleGuard allowed={isManager}>
+                <ManagerReview />
+              </RoleGuard>
+            </Route>
+            <Route path="/dashboard/manager/export">
+              <RoleGuard allowed={isManager}>
+                <ExportData />
+              </RoleGuard>
+            </Route>
+            <Route path="/dashboard/manager/policy">
+              <RoleGuard allowed={isManager}>
+                <PolicySettings />
+              </RoleGuard>
+            </Route>
+            <Route path="/dashboard/admin/employees">
+              <RoleGuard allowed={isAdmin}>
+                <AdminEmployees />
+              </RoleGuard>
+            </Route>
+            <Route path="/dashboard/admin/import">
+              <RoleGuard allowed={isAdmin}>
+                <AdminImport />
+              </RoleGuard>
+            </Route>
+            <Route path="/dashboard/admin/audit">
+              <RoleGuard allowed={isAdmin}>
+                <AdminAuditLog />
+              </RoleGuard>
+            </Route>
             <Route>
               <div className="flex items-center justify-center h-full">
                 <p className="text-muted-foreground">Page not found</p>
