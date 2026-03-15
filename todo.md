@@ -68,3 +68,4 @@
 - [x] Show employee seniority date on MyRequests page — displayed in employee info card at top
 - [x] Show priority number next to each request on MyRequests page — shows shift-wide seniority rank (#N of M in shift)
 - [x] Fixed 404 on all admin/manager nav pages — wouter wildcard route syntax was wrong; fixed with regex route `path={/^\/dashboard(\/.*)?$/}` in App.tsx; removed duplicate useLocation hook that caused hooks violation
+- [x] Added request priority dropdown to New Request form (Routine / Preferred / Critical) — DB migration applied, router updated, color-coded dropdown with contextual helper text

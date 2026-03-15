@@ -44,6 +44,7 @@ export const requests = mysqlTable("requests", {
   employeeId: int("employee_id").notNull(),
   requestType: mysqlEnum("request_type", ["vacation", "education"]).notNull(),
   continuityType: mysqlEnum("continuity_type", ["continuous", "intermittent"]).notNull(),
+  priority: mysqlEnum("priority", ["routine", "preferred", "critical"]).notNull().default("routine"),
   comment: text("comment"),
   status: mysqlEnum("status", ["pending", "approved", "denied", "withdrawn"]).notNull().default("pending"),
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),

@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, differenceInCalendarDays } from "date-fns";
-import { Loader2, Send, X, AlertTriangle, Info, Bell, CalendarDays, List } from "lucide-react";
+import { Loader2, Send, X, AlertTriangle, Info, Bell, CalendarDays, List, ChevronDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEmployee } from "@/hooks/useEmployee";
 import { useLocation } from "wouter";
 import { ICUDatePicker } from "@/components/ICUDatePicker";
@@ -19,6 +20,7 @@ export default function NewRequest() {
   const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set());
   const [requestType, setRequestType] = useState<"vacation" | "education">("vacation");
   const [continuityType, setContinuityType] = useState<"continuous" | "intermittent">("continuous");
+  const [priority, setPriority] = useState<"routine" | "preferred" | "critical">("routine");
   const [comment, setComment] = useState("");
 
   // Derive year/month from the first selected date or today for data fetching
@@ -51,6 +53,7 @@ export default function NewRequest() {
     submitMutation.mutate({
       requestType,
       continuityType,
+      priority,
       dates: sortedSelected,
       comment: comment.trim() || undefined,
     });
@@ -272,6 +275,57 @@ export default function NewRequest() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* ── Request Priority ─────────────────────────────────── */}
+          <div className="bg-card border border-border/40 rounded-xl p-4">
+            <Label htmlFor="priority" className="text-sm font-semibold mb-3 block">
+              Request Priority
+            </Label>
+            <Select value={priority} onValueChange={(v) => setPriority(v as typeof priority)}>
+              <SelectTrigger
+                id="priority"
+                className={`w-full border transition-colors ${
+                  priority === "critical"
+                    ? "border-red-500/50 bg-red-500/8 text-red-400"
+                    : priority === "preferred"
+                    ? "border-amber-500/50 bg-amber-500/8 text-amber-400"
+                    : "border-border/60 text-foreground"
+                }`}
+              >
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border/60">
+                <SelectItem value="routine">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                    <span>Routine</span>
+                    <span className="text-xs text-muted-foreground ml-1">— Standard scheduling request</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="preferred">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                    <span>Preferred</span>
+                    <span className="text-xs text-muted-foreground ml-1">— Important personal event</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="critical">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+                    <span>Critical</span>
+                    <span className="text-xs text-muted-foreground ml-1">— Urgent / non-negotiable</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-2">
+              {priority === "critical"
+                ? "Manager will be notified of urgency. Use sparingly."
+                : priority === "preferred"
+                ? "Flags this request as higher importance for manager review."
+                : "Default priority — no special flag."}
+            </p>
           </div>
 
           {/* ── Date Pattern ─────────────────────────────────────── */}

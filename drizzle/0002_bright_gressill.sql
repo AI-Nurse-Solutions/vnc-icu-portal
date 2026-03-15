@@ -1,0 +1,1 @@
+ALTER TABLE `requests` ADD `priority` enum('routine','preferred','critical') DEFAULT 'routine' NOT NULL;

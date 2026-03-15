@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `requests` ADD `priority` enum('routine','preferred','critical') DEFAULT 'routine' NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute ALTER TABLE `requests` ADD `priority` enum('routine','preferred','critical') DEFAULT 'routine' NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 488
+}
