@@ -18,8 +18,7 @@ function Router() {
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/accept-invite" component={AcceptInvite} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/dashboard/:rest*" component={Dashboard} />
+      <Route path={/^\/dashboard(\/.*)?$/} component={Dashboard} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

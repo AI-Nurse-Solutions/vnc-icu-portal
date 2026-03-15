@@ -67,3 +67,4 @@
 - [x] Fixed unclickable manager/admin nav items — moved from conditional route registration to always-registered routes with RoleGuard components inside each page
 - [x] Show employee seniority date on MyRequests page — displayed in employee info card at top
 - [x] Show priority number next to each request on MyRequests page — shows shift-wide seniority rank (#N of M in shift)
+- [x] Fixed 404 on all admin/manager nav pages — wouter wildcard route syntax was wrong; fixed with regex route `path={/^\/dashboard(\/.*)?$/}` in App.tsx; removed duplicate useLocation hook that caused hooks violation

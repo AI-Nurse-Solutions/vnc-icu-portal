@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, Route, Switch } from "wouter";
+import { useLocation } from "wouter";
 import { useEmployee } from "@/hooks/useEmployee";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,9 @@ function NavItem({ href, icon: Icon, label, active, onClick }: {
 }
 
 export default function Dashboard() {
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
+  // Use window.location.pathname for reliable full-path matching in nested wouter routes
+  const location = typeof window !== 'undefined' ? window.location.pathname : '/';
   const { employee, isLoading, isManager, isAdmin } = useEmployee();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -207,48 +209,38 @@ export default function Dashboard() {
           <span className="text-sm font-semibold text-foreground">VNC ICU Portal</span>
         </header>
 
-        {/* Page content — all routes always registered; role guard inside each protected page */}
+        {/* Page content — routes use location directly for reliable matching */}
         <main className="flex-1 overflow-y-auto">
-          <Switch>
-            <Route path="/dashboard" component={CalendarView} />
-            <Route path="/dashboard/my-requests" component={MyRequests} />
-            <Route path="/dashboard/new-request" component={NewRequest} />
-            <Route path="/dashboard/manager/review">
-              <RoleGuard allowed={isManager}>
-                <ManagerReview />
-              </RoleGuard>
-            </Route>
-            <Route path="/dashboard/manager/export">
-              <RoleGuard allowed={isManager}>
-                <ExportData />
-              </RoleGuard>
-            </Route>
-            <Route path="/dashboard/manager/policy">
-              <RoleGuard allowed={isManager}>
-                <PolicySettings />
-              </RoleGuard>
-            </Route>
-            <Route path="/dashboard/admin/employees">
-              <RoleGuard allowed={isAdmin}>
-                <AdminEmployees />
-              </RoleGuard>
-            </Route>
-            <Route path="/dashboard/admin/import">
-              <RoleGuard allowed={isAdmin}>
-                <AdminImport />
-              </RoleGuard>
-            </Route>
-            <Route path="/dashboard/admin/audit">
-              <RoleGuard allowed={isAdmin}>
-                <AdminAuditLog />
-              </RoleGuard>
-            </Route>
-            <Route>
-              <div className="flex items-center justify-center h-full">
-                <p className="text-muted-foreground">Page not found</p>
-              </div>
-            </Route>
-          </Switch>
+          {location === "/dashboard" && <CalendarView />}
+          {location === "/dashboard/my-requests" && <MyRequests />}
+          {location === "/dashboard/new-request" && <NewRequest />}
+          {location === "/dashboard/manager/review" && (
+            <RoleGuard allowed={isManager}><ManagerReview /></RoleGuard>
+          )}
+          {location === "/dashboard/manager/export" && (
+            <RoleGuard allowed={isManager}><ExportData /></RoleGuard>
+          )}
+          {location === "/dashboard/manager/policy" && (
+            <RoleGuard allowed={isManager}><PolicySettings /></RoleGuard>
+          )}
+          {location === "/dashboard/admin/employees" && (
+            <RoleGuard allowed={isAdmin}><AdminEmployees /></RoleGuard>
+          )}
+          {location === "/dashboard/admin/import" && (
+            <RoleGuard allowed={isAdmin}><AdminImport /></RoleGuard>
+          )}
+          {location === "/dashboard/admin/audit" && (
+            <RoleGuard allowed={isAdmin}><AdminAuditLog /></RoleGuard>
+          )}
+          {![
+            "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
+            "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
+            "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit"
+          ].includes(location) && (
+            <div className="flex items-center justify-center h-full min-h-64">
+              <p className="text-muted-foreground">Page not found</p>
+            </div>
+          )}
         </main>
       </div>
     </div>
