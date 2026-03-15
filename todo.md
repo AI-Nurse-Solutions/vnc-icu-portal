@@ -63,3 +63,4 @@
 - [x] Enforce blackout dates and policy limits inside the component
 - [x] Pre-submission summary list showing all selected dates with remove buttons
 - [x] Output clean date array to NewRequest form on submit
+- [x] Fixed invalid credentials — root cause was missing cookie-parser middleware; req.cookies was always undefined so session JWT was never read back after login
