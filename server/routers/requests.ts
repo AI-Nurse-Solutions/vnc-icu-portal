@@ -47,7 +47,7 @@ export const requestsRouter = router({
     .input(z.object({
       requestType: z.enum(["vacation", "education"]),
       continuityType: z.enum(["continuous", "intermittent"]),
-      priority: z.enum(["routine", "preferred", "critical"]).default("routine"),
+      priority: z.number().int().min(1).max(9).default(5),
       dates: z.array(z.string()).min(1).max(60),
       comment: z.string().max(500).optional(),
     }))

@@ -151,8 +151,8 @@ export default function CalendarView() {
           </div>
         </div>
 
-        {/* Drill-down panel */}
-        <div className="xl:col-span-1">
+        {/* Drill-down panel — desktop right column + mobile below */}
+        <div className="xl:col-span-1 hidden xl:block">
           {selectedDate ? (
             <div className="bg-card border border-border/60 rounded-xl p-4 animate-slide-up sticky top-4">
               <div className="flex items-center justify-between mb-3">
@@ -239,6 +239,78 @@ export default function CalendarView() {
           )}
         </div>
       </div>
+
+      {/* Mobile drill-down panel — shown below calendar on small screens */}
+      {selectedDate && (
+        <div className="xl:hidden mt-4 bg-card border border-border/60 rounded-xl p-4 animate-slide-up">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-foreground text-sm">
+              {format(new Date(selectedDate + "T12:00:00"), "EEEE, MMM d")}
+            </h3>
+            <button onClick={() => setSelectedDate(null)} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+          </div>
+          {/* Shift tabs */}
+          <div className="flex gap-1 mb-4 bg-secondary/40 rounded-lg p-1">
+            {SHIFTS.map(s => (
+              <button
+                key={s}
+                onClick={() => setSelectedShift(s)}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition-all ${
+                  selectedShift === s
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+          {monthData?.days[selectedDate] && (
+            <div className="mb-3">
+              <DemandPill
+                status={monthData.days[selectedDate][selectedShift].status}
+                label={`${monthData.days[selectedDate][selectedShift].count} of ${monthData.days[selectedDate][selectedShift].cap} slots used — ${monthData.days[selectedDate][selectedShift].label}`}
+                count={monthData.days[selectedDate][selectedShift].count}
+                cap={monthData.days[selectedDate][selectedShift].cap}
+              />
+            </div>
+          )}
+          {drillLoading ? (
+            <div className="space-y-2">
+              {[1,2,3].map(i => <div key={i} className="h-8 bg-muted/40 rounded animate-pulse" />)}
+            </div>
+          ) : drillDown && drillDown.length > 0 ? (
+            <div className="space-y-1">
+              {drillDown.map((r, idx) => {
+                const cap = monthData?.days[selectedDate]?.[selectedShift]?.cap ?? 8;
+                const isAboveCap = idx === cap;
+                return (
+                  <div key={r.requestId}>
+                    {isAboveCap && <div className="rank-cutoff my-2 pt-2" />}
+                    <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs ${
+                      idx < cap ? "bg-secondary/30" : "bg-destructive/5 opacity-70"
+                    }`}>
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                        idx < cap ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                      }`}>{r.rank}</span>
+                      <span className="font-medium text-foreground flex-1 truncate">{r.displayName}</span>
+                      <span className={r.requestType === "vacation" ? "badge-vacation" : "badge-education"}>
+                        {r.requestType === "vacation" ? "Vac" : "Edu"}
+                      </span>
+                      <span className={`badge-${r.status}`}>{r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-6 text-muted-foreground text-xs">
+              <Info className="w-5 h-5 mx-auto mb-2 opacity-50" />
+              No requests for this shift on this date
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

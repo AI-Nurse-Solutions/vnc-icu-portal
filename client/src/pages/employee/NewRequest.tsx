@@ -20,7 +20,7 @@ export default function NewRequest() {
   const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set());
   const [requestType, setRequestType] = useState<"vacation" | "education">("vacation");
   const [continuityType, setContinuityType] = useState<"continuous" | "intermittent">("continuous");
-  const [priority, setPriority] = useState<"routine" | "preferred" | "critical">("routine");
+  const [priority, setPriority] = useState<number>(5);
   const [comment, setComment] = useState("");
 
   // Derive year/month from the first selected date or today for data fetching
@@ -279,52 +279,52 @@ export default function NewRequest() {
 
           {/* ── Request Priority ─────────────────────────────────── */}
           <div className="bg-card border border-border/40 rounded-xl p-4">
-            <Label htmlFor="priority" className="text-sm font-semibold mb-3 block">
-              Request Priority
+            <Label htmlFor="priority" className="text-sm font-semibold mb-1 block">
+              Submission Priority Rank
             </Label>
-            <Select value={priority} onValueChange={(v) => setPriority(v as typeof priority)}>
+            <p className="text-xs text-muted-foreground mb-3">
+              Rank this request 1 (highest) to 9 (lowest). Used by the manager to break ties when multiple requests compete for the same dates.
+            </p>
+            <Select
+              value={String(priority)}
+              onValueChange={(v) => setPriority(Number(v))}
+            >
               <SelectTrigger
                 id="priority"
                 className={`w-full border transition-colors ${
-                  priority === "critical"
-                    ? "border-red-500/50 bg-red-500/8 text-red-400"
-                    : priority === "preferred"
-                    ? "border-amber-500/50 bg-amber-500/8 text-amber-400"
-                    : "border-border/60 text-foreground"
+                  priority <= 3
+                    ? "border-red-500/50 bg-red-500/5 text-red-400"
+                    : priority <= 6
+                    ? "border-amber-500/50 bg-amber-500/5 text-amber-400"
+                    : "border-border/60 text-muted-foreground"
                 }`}
               >
-                <SelectValue placeholder="Select priority" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-card border-border/60">
-                <SelectItem value="routine">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                    <span>Routine</span>
-                    <span className="text-xs text-muted-foreground ml-1">— Standard scheduling request</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="preferred">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-                    <span>Preferred</span>
-                    <span className="text-xs text-muted-foreground ml-1">— Important personal event</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="critical">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-                    <span>Critical</span>
-                    <span className="text-xs text-muted-foreground ml-1">— Urgent / non-negotiable</span>
-                  </div>
-                </SelectItem>
+                {[1,2,3,4,5,6,7,8,9].map(n => (
+                  <SelectItem key={n} value={String(n)}>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                        n <= 3 ? "bg-red-500/20 text-red-400"
+                        : n <= 6 ? "bg-amber-500/20 text-amber-400"
+                        : "bg-border/40 text-muted-foreground"
+                      }`}>{n}</span>
+                      <span className="text-sm">
+                        {n === 1 ? "1 — Highest priority"
+                         : n === 5 ? "5 — Default / neutral"
+                         : n === 9 ? "9 — Lowest priority"
+                         : `${n}`}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-2">
-              {priority === "critical"
-                ? "Manager will be notified of urgency. Use sparingly."
-                : priority === "preferred"
-                ? "Flags this request as higher importance for manager review."
-                : "Default priority — no special flag."}
+              {priority <= 3 ? "High priority — manager will see this flagged."
+               : priority <= 6 ? "Mid-range priority — standard review."
+               : "Low priority — this request yields to higher-ranked submissions."}
             </p>
           </div>
 

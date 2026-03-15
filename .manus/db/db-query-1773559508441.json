@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `requests` MODIFY COLUMN `priority` int NOT NULL DEFAULT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute ALTER TABLE `requests` MODIFY COLUMN `priority` int NOT NULL DEFAULT 5;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 250
+}
