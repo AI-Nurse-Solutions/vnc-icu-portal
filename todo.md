@@ -55,3 +55,11 @@
 - [x] Fixed SMTP env var mismatch (SMTP_PASSWORD vs SMTP_PASS) — OTP emails now deliver via Gmail
 - [x] Updated admin account email to great.ai.nurses@gmail.com for real OTP delivery
 - [x] Disabled MFA/OTP — login now issues session directly after email + password check
+
+## Calendar Component Enhancement
+
+- [x] Build ICUDatePicker component: drag-to-select continuous ranges + click-to-toggle multi-select
+- [x] Add mode toggle (Range / Multi-select) with keyboard shortcut hint
+- [x] Enforce blackout dates and policy limits inside the component
+- [x] Pre-submission summary list showing all selected dates with remove buttons
+- [x] Output clean date array to NewRequest form on submit

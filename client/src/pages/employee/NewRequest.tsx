@@ -4,29 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { format, getDaysInMonth, startOfMonth, getDay } from "date-fns";
-import { ChevronLeft, ChevronRight, Loader2, Send, X, AlertTriangle, Info, Bell } from "lucide-react";
+import { format, differenceInCalendarDays } from "date-fns";
+import { Loader2, Send, X, AlertTriangle, Info, Bell, CalendarDays, List } from "lucide-react";
 import { useEmployee } from "@/hooks/useEmployee";
 import { useLocation } from "wouter";
-
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+import { ICUDatePicker } from "@/components/ICUDatePicker";
 
 export default function NewRequest() {
   const [, navigate] = useLocation();
   const { employee } = useEmployee();
   const utils = trpc.useUtils();
 
-  const today = new Date();
-  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const today = format(new Date(), "yyyy-MM-dd");
   const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set());
   const [requestType, setRequestType] = useState<"vacation" | "education">("vacation");
   const [continuityType, setContinuityType] = useState<"continuous" | "intermittent">("continuous");
   const [comment, setComment] = useState("");
 
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth() + 1;
+  // Derive year/month from the first selected date or today for data fetching
+  const firstSelected = Array.from(selectedDates).sort()[0];
+  const viewYear = firstSelected ? parseInt(firstSelected.slice(0, 4)) : new Date().getFullYear();
+  const viewMonth = firstSelected ? parseInt(firstSelected.slice(5, 7)) : new Date().getMonth() + 1;
 
-  const { data: monthData } = trpc.calendar.getMonthData.useQuery({ year, month });
+  const { data: monthData } = trpc.calendar.getMonthData.useQuery({ year: viewYear, month: viewMonth });
   const { data: blackouts } = trpc.calendar.getBlackoutDates.useQuery();
   const { data: deadlines } = trpc.calendar.getDeadlines.useQuery();
 
@@ -41,18 +41,7 @@ export default function NewRequest() {
     onError: (e) => toast.error(e.message),
   });
 
-  const daysInMonth = getDaysInMonth(new Date(year, month - 1));
-  const firstDayOfWeek = getDay(startOfMonth(new Date(year, month - 1)));
-  const todayStr = format(today, "yyyy-MM-dd");
-
-  const toggleDate = (dateStr: string) => {
-    if (dateStr < todayStr) return;
-    if (blackoutSet.has(dateStr)) return;
-    const next = new Set(selectedDates);
-    if (next.has(dateStr)) next.delete(dateStr);
-    else next.add(dateStr);
-    setSelectedDates(next);
-  };
+  const sortedSelected = useMemo(() => Array.from(selectedDates).sort(), [selectedDates]);
 
   const handleSubmit = () => {
     if (selectedDates.size === 0) {
@@ -62,134 +51,208 @@ export default function NewRequest() {
     submitMutation.mutate({
       requestType,
       continuityType,
-      dates: Array.from(selectedDates).sort(),
+      dates: sortedSelected,
       comment: comment.trim() || undefined,
     });
   };
 
-  // Find applicable deadline
-  const applicableDeadline = deadlines?.find(d => {
-    const dates = Array.from(selectedDates).sort();
-    if (dates.length === 0) return false;
-    const firstDate = dates[0];
-    return firstDate >= d.coverageStart && firstDate <= d.coverageEnd;
-  });
+  const removeDate = (d: string) => {
+    const next = new Set(selectedDates);
+    next.delete(d);
+    setSelectedDates(next);
+  };
+
+  // Find applicable deadline for the first selected date
+  const applicableDeadline = useMemo(() => {
+    if (sortedSelected.length === 0) return null;
+    const first = sortedSelected[0];
+    return deadlines?.find(d => first >= d.coverageStart && first <= d.coverageEnd) ?? null;
+  }, [sortedSelected, deadlines]);
+
+  // Detect contiguous vs. non-contiguous for auto-setting continuity type
+  const isContiguous = useMemo(() => {
+    if (sortedSelected.length <= 1) return true;
+    for (let i = 1; i < sortedSelected.length; i++) {
+      const prev = new Date(sortedSelected[i - 1] + "T12:00:00");
+      const curr = new Date(sortedSelected[i] + "T12:00:00");
+      if (differenceInCalendarDays(curr, prev) !== 1) return false;
+    }
+    return true;
+  }, [sortedSelected]);
+
+  // Group consecutive dates for summary display
+  const dateGroups = useMemo(() => {
+    if (sortedSelected.length === 0) return [];
+    const groups: { start: string; end: string; count: number }[] = [];
+    let groupStart = sortedSelected[0];
+    let groupEnd = sortedSelected[0];
+
+    for (let i = 1; i < sortedSelected.length; i++) {
+      const prev = new Date(sortedSelected[i - 1] + "T12:00:00");
+      const curr = new Date(sortedSelected[i] + "T12:00:00");
+      if (differenceInCalendarDays(curr, prev) === 1) {
+        groupEnd = sortedSelected[i];
+      } else {
+        groups.push({
+          start: groupStart,
+          end: groupEnd,
+          count: differenceInCalendarDays(new Date(groupEnd + "T12:00:00"), new Date(groupStart + "T12:00:00")) + 1,
+        });
+        groupStart = sortedSelected[i];
+        groupEnd = sortedSelected[i];
+      }
+    }
+    groups.push({
+      start: groupStart,
+      end: groupEnd,
+      count: differenceInCalendarDays(new Date(groupEnd + "T12:00:00"), new Date(groupStart + "T12:00:00")) + 1,
+    });
+    return groups;
+  }, [sortedSelected]);
 
   return (
-    <div className="p-4 lg:p-6 max-w-5xl mx-auto animate-fade-in">
+    <div className="p-4 lg:p-6 max-w-6xl mx-auto animate-fade-in">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Bell className="w-5 h-5 text-primary" />
           New Time-Off Request
         </h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Select dates and fill in the details below. Shift: <span className="text-primary font-medium">{employee?.shift}</span>
+          Select dates using drag (range) or click (multi-select). Shift:{" "}
+          <span className="text-primary font-medium">{employee?.shift}</span>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar */}
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* ── Calendar ─────────────────────────────────────────────── */}
+        <div className="xl:col-span-2">
           <div className="bg-card border border-border/40 rounded-xl p-4">
-            {/* Month nav */}
-            <div className="flex items-center justify-between mb-4">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))}>
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-semibold text-foreground">{format(viewDate, "MMMM yyyy")}</span>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-
-            {/* Day headers */}
-            <div className="grid grid-cols-7 mb-1">
-              {DAYS.map(d => (
-                <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1">{d}</div>
-              ))}
-            </div>
-
-            {/* Cells */}
-            <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: firstDayOfWeek }).map((_, i) => <div key={`e-${i}`} />)}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1;
-                const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                const isPast = dateStr < todayStr;
-                const isBlackout = blackoutSet.has(dateStr);
-                const isSelected = selectedDates.has(dateStr);
-                const isToday = dateStr === todayStr;
-                const dayData = monthData?.days[dateStr];
-                const shiftData = employee?.shift ? dayData?.[employee.shift as "AM" | "PM" | "NOC"] : null;
-
-                return (
-                  <button
-                    key={dateStr}
-                    onClick={() => toggleDate(dateStr)}
-                    disabled={isPast || isBlackout}
-                    title={isBlackout ? "Blackout date — requests not allowed" : undefined}
-                    className={`relative rounded-lg border p-1.5 text-left transition-all duration-150 min-h-[64px] ${
-                      isBlackout
-                        ? "opacity-40 cursor-not-allowed bg-destructive/5 border-destructive/20"
-                        : isPast
-                        ? "opacity-30 cursor-not-allowed border-border/20"
-                        : isSelected
-                        ? "border-primary bg-primary/15 shadow-[0_0_0_2px_oklch(0.68_0.15_200/40%)]"
-                        : "border-border/30 hover:border-primary/50 hover:bg-secondary/30 cursor-pointer"
-                    } ${isToday ? "ring-1 ring-primary/40" : ""}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs font-bold ${isToday ? "text-primary" : isPast ? "text-muted-foreground/50" : "text-foreground"}`}>
-                        {day}
-                      </span>
-                      {isBlackout && <AlertTriangle className="w-2.5 h-2.5 text-destructive" />}
-                      {isSelected && <span className="w-2 h-2 rounded-full bg-primary" />}
-                    </div>
-                    {shiftData && !isPast && !isBlackout && (
-                      <div className={`mt-1 text-[9px] font-semibold px-1 py-0.5 rounded-sm ${
-                        shiftData.status === "red" ? "bg-destructive/20 text-destructive" :
-                        shiftData.status === "yellow" ? "bg-[oklch(0.75_0.18_70/20%)] text-[oklch(0.75_0.18_70)]" :
-                        "bg-[oklch(0.65_0.17_160/20%)] text-[oklch(0.65_0.17_160)]"
-                      }`}>
-                        {shiftData.count}/{shiftData.cap}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-              <Info className="w-3 h-3" />
-              Numbers show current requests vs. approval cap for your shift ({employee?.shift})
-            </p>
+            <ICUDatePicker
+              selected={selectedDates}
+              onChange={setSelectedDates}
+              blackoutDates={blackoutSet}
+              shiftData={monthData?.days as any}
+              employeeShift={employee?.shift as "AM" | "PM" | "NOC" | undefined}
+              minDate={today}
+            />
           </div>
         </div>
 
-        {/* Form panel */}
+        {/* ── Right panel ──────────────────────────────────────────── */}
         <div className="space-y-4">
-          {/* Selected dates */}
+
+          {/* ── Date Summary ─────────────────────────────────────── */}
           <div className="bg-card border border-border/40 rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-foreground mb-3">
-              Selected Dates ({selectedDates.size})
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                <List className="w-4 h-4 text-primary" />
+                Selected Dates
+                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                  ({selectedDates.size} day{selectedDates.size !== 1 ? "s" : ""})
+                </span>
+              </h3>
+              {selectedDates.size > 0 && (
+                <button
+                  onClick={() => setSelectedDates(new Set())}
+                  className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
             {selectedDates.size === 0 ? (
-              <p className="text-xs text-muted-foreground">Click dates on the calendar to select them</p>
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <CalendarDays className="w-8 h-8 text-muted-foreground/30 mb-2" />
+                <p className="text-xs text-muted-foreground">
+                  No dates selected yet.
+                  <br />
+                  Use <span className="text-primary font-medium">Drag Range</span> or{" "}
+                  <span className="text-primary font-medium">Multi-Select</span> on the calendar.
+                </p>
+              </div>
             ) : (
-              <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                {Array.from(selectedDates).sort().map(d => (
-                  <span key={d} className="flex items-center gap-1 text-xs bg-primary/15 text-primary border border-primary/30 px-2 py-0.5 rounded-full">
-                    {format(new Date(d + "T12:00:00"), "MMM d")}
-                    <button onClick={() => toggleDate(d)} className="hover:text-destructive ml-0.5">
-                      <X className="w-2.5 h-2.5" />
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {/* Grouped ranges */}
+                {dateGroups.map((group, idx) => (
+                  <div
+                    key={`group-${idx}`}
+                    className="flex items-center justify-between bg-primary/8 border border-primary/20 rounded-lg px-3 py-2"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground">
+                        {group.start === group.end
+                          ? format(new Date(group.start + "T12:00:00"), "EEE, MMM d, yyyy")
+                          : `${format(new Date(group.start + "T12:00:00"), "MMM d")} – ${format(new Date(group.end + "T12:00:00"), "MMM d, yyyy")}`}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {group.count} day{group.count !== 1 ? "s" : ""}
+                        {group.start !== group.end ? " · consecutive" : ""}
+                      </p>
+                    </div>
+                    {/* Remove individual dates in the group */}
+                    <button
+                      onClick={() => {
+                        const next = new Set(selectedDates);
+                        // Remove all dates in this group
+                        const start = new Date(group.start + "T12:00:00");
+                        const end = new Date(group.end + "T12:00:00");
+                        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                          next.delete(format(d, "yyyy-MM-dd"));
+                        }
+                        setSelectedDates(next);
+                      }}
+                      className="ml-2 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                      title="Remove this block"
+                    >
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                  </span>
+                  </div>
                 ))}
+
+                {/* Individual date chips for non-contiguous dates */}
+                {!isContiguous && (
+                  <div className="pt-1 border-t border-border/20">
+                    <p className="text-[10px] text-muted-foreground mb-1.5">All selected dates:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {sortedSelected.map(d => (
+                        <span
+                          key={d}
+                          className="flex items-center gap-1 text-[10px] bg-secondary/40 text-foreground border border-border/40 px-2 py-0.5 rounded-full"
+                        >
+                          {format(new Date(d + "T12:00:00"), "M/d")}
+                          <button
+                            onClick={() => removeDate(d)}
+                            className="hover:text-destructive ml-0.5 transition-colors"
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Summary stats */}
+            {selectedDates.size > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/20 grid grid-cols-2 gap-2">
+                <div className="text-center">
+                  <p className="text-lg font-bold text-primary">{selectedDates.size}</p>
+                  <p className="text-[10px] text-muted-foreground">Total Days</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-foreground">{dateGroups.length}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {dateGroups.length === 1 ? "Block" : "Blocks"}
+                  </p>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Request type */}
+          {/* ── Request Type ─────────────────────────────────────── */}
           <div className="bg-card border border-border/40 rounded-xl p-4">
             <Label className="text-sm font-semibold mb-3 block">Request Type</Label>
             <div className="grid grid-cols-2 gap-2">
@@ -199,7 +262,9 @@ export default function NewRequest() {
                   onClick={() => setRequestType(t)}
                   className={`py-2 px-3 rounded-lg text-sm font-medium border transition-all ${
                     requestType === t
-                      ? t === "vacation" ? "bg-primary/15 text-primary border-primary/40" : "bg-[oklch(0.70_0.15_290/15%)] text-[oklch(0.70_0.15_290)] border-[oklch(0.70_0.15_290/40%)]"
+                      ? t === "vacation"
+                        ? "bg-primary/15 text-primary border-primary/40"
+                        : "bg-[oklch(0.70_0.15_290/15%)] text-[oklch(0.70_0.15_290)] border-[oklch(0.70_0.15_290/40%)]"
                       : "border-border/40 text-muted-foreground hover:text-foreground hover:border-border/70"
                   }`}
                 >
@@ -209,9 +274,20 @@ export default function NewRequest() {
             </div>
           </div>
 
-          {/* Continuity */}
+          {/* ── Date Pattern ─────────────────────────────────────── */}
           <div className="bg-card border border-border/40 rounded-xl p-4">
-            <Label className="text-sm font-semibold mb-3 block">Date Pattern</Label>
+            <div className="flex items-center justify-between mb-3">
+              <Label className="text-sm font-semibold">Date Pattern</Label>
+              {selectedDates.size > 0 && (
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                  isContiguous
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "bg-[oklch(0.70_0.15_290/10%)] text-[oklch(0.70_0.15_290)] border border-[oklch(0.70_0.15_290/20%)]"
+                }`}>
+                  Auto-detected: {isContiguous ? "Continuous" : "Intermittent"}
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {(["continuous", "intermittent"] as const).map(t => (
                 <button
@@ -232,10 +308,11 @@ export default function NewRequest() {
             </p>
           </div>
 
-          {/* Comment */}
+          {/* ── Private Comment ──────────────────────────────────── */}
           <div className="bg-card border border-border/40 rounded-xl p-4">
             <Label htmlFor="comment" className="text-sm font-semibold mb-2 block">
-              Private Comment <span className="text-muted-foreground font-normal">(optional)</span>
+              Private Comment{" "}
+              <span className="text-muted-foreground font-normal">(optional)</span>
             </Label>
             <Textarea
               id="comment"
@@ -248,20 +325,36 @@ export default function NewRequest() {
             <p className="text-xs text-muted-foreground mt-1">{comment.length}/500</p>
           </div>
 
-          {/* Deadline warning */}
+          {/* ── Deadline Warning ─────────────────────────────────── */}
           {applicableDeadline && (
             <div className="bg-[oklch(0.75_0.18_70/10%)] border border-[oklch(0.75_0.18_70/30%)] rounded-xl p-3 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-[oklch(0.75_0.18_70)] shrink-0 mt-0.5" />
               <div className="text-xs">
                 <p className="font-semibold text-[oklch(0.75_0.18_70)]">Submission Deadline</p>
                 <p className="text-muted-foreground mt-0.5">
-                  Deadline for this period: <span className="text-foreground">{format(new Date(applicableDeadline.deadlineDate + "T12:00:00"), "MMM d, yyyy")}</span>
+                  Deadline for this period:{" "}
+                  <span className="text-foreground">
+                    {format(new Date(applicableDeadline.deadlineDate + "T12:00:00"), "MMM d, yyyy")}
+                  </span>
                 </p>
               </div>
             </div>
           )}
 
-          {/* Submit */}
+          {/* ── Data Preview (dev aid) ────────────────────────────── */}
+          {selectedDates.size > 0 && (
+            <div className="bg-secondary/20 border border-border/30 rounded-xl p-3">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                <Info className="w-3 h-3" />
+                Output Array ({selectedDates.size} dates)
+              </p>
+              <code className="text-[10px] text-muted-foreground break-all leading-relaxed">
+                {JSON.stringify(sortedSelected)}
+              </code>
+            </div>
+          )}
+
+          {/* ── Submit ───────────────────────────────────────────── */}
           <Button
             onClick={handleSubmit}
             disabled={submitMutation.isPending || selectedDates.size === 0}
