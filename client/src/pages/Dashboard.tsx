@@ -60,9 +60,14 @@ export default function Dashboard() {
   const location = typeof window !== 'undefined' ? window.location.pathname : '/';
   const { employee, isLoading, isManager, isAdmin } = useEmployee();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const utils = trpc.useUtils();
 
   const logoutMutation = trpc.auth.logout.useMutation({
-    onSuccess: () => { navigate("/login"); },
+    onSuccess: async () => {
+      // Clear the auth cache so the next login shows the correct user
+      await utils.auth.me.invalidate();
+      navigate("/login");
+    },
   });
 
   useEffect(() => {

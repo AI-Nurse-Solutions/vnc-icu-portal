@@ -74,3 +74,8 @@
 - [x] Added pending/approved/denied/withdrawn status checkboxes to CSV export — backend updated to accept statuses array, UI has toggle checkboxes with color coding, filename reflects selected statuses
 - [x] Fixed AdminEmployees form: moved EmployeeForm outside parent component to prevent re-render/focus loss on each keystroke
 - [x] Fixed initial password: inviteEmployee router now accepts password, hashes with bcrypt, sets isActive=true immediately when password is provided
+
+## Role & User Display Fixes
+
+- [x] Hide manager/admin nav items (Review Requests, Export Data, Policy Settings, Employees, CSV Import, Audit Log) from employees
+- [x] Fix logged-in user display — show actual authenticated user's name/role, not hardcoded "admin" (root cause: stale auth.me cache; fixed by invalidating on login and logout)

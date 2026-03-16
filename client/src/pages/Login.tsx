@@ -11,9 +11,12 @@ export default function Login() {
   const [, navigate] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const utils = trpc.useUtils();
 
   const loginMutation = trpc.auth.initiateLogin.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Invalidate the auth.me cache so the newly logged-in user's data loads fresh
+      await utils.auth.me.invalidate();
       toast.success("Login successful. Welcome back.");
       navigate("/dashboard");
     },
