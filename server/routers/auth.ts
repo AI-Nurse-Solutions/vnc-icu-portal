@@ -5,8 +5,10 @@ import { COOKIE_NAME } from "../../shared/const";
 import { getSessionCookieOptions } from "../_core/cookies";
 import { signJwt, verifyJwt } from "../_core/jwt";
 import {
+  createEmployee,
   getEmployeeByEmail,
   getEmployeeById,
+  getEmployeeByEmployeeNumber,
   getEmployeeByInviteToken,
   getEmployeeByResetToken,
   logAudit,
@@ -131,6 +133,76 @@ export const authRouter = router({
       ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 8 * 60 * 60 * 1000 });
 
       await logAudit({ actorId: emp.id, action: "login", targetType: "employee", targetId: String(emp.id), details: { email: emp.email } });
+
+      return {
+        success: true,
+        employee: {
+          id: emp.id,
+          employeeNumber: emp.employeeNumber,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          email: emp.email,
+          shift: emp.shift,
+          role: emp.role,
+          seniorityDate: emp.seniorityDate,
+        },
+      };
+    }),
+
+  // Self-signup: employee creates their own account (no 2FA, immediately active)
+  signup: publicProcedure
+    .input(z.object({
+      firstName: z.string().min(1),
+      lastName: z.string().min(1),
+      email: z.string().email(),
+      employeeNumber: z.string().min(1),
+      shift: z.enum(["AM", "PM", "NOC"]),
+      password: z.string().min(8),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      // Check for duplicate email
+      const existingEmail = await getEmployeeByEmail(input.email.toLowerCase());
+      if (existingEmail) {
+        throw new Error("An account with this email already exists.");
+      }
+
+      // Check for duplicate employee number
+      const existingEmpNum = await getEmployeeByEmployeeNumber(input.employeeNumber);
+      if (existingEmpNum) {
+        throw new Error("An account with this employee number already exists.");
+      }
+
+      const bcrypt = await import("bcryptjs");
+      const passwordHash = await bcrypt.hash(input.password, 12);
+
+      // Use today as seniority date (admin can update later)
+      const seniorityDate = new Date();
+
+      await createEmployee({
+        employeeNumber: input.employeeNumber,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email.toLowerCase(),
+        shift: input.shift,
+        seniorityDate,
+        role: "employee",
+        passwordHash,
+        isActive: true,
+      });
+
+      // Fetch the newly created employee to get their ID for the JWT
+      const emp = await getEmployeeByEmail(input.email.toLowerCase());
+      if (!emp) throw new Error("Account creation failed. Please try again.");
+
+      // Issue JWT session immediately — no 2FA
+      const { signJwt } = await import("../_core/jwt");
+      const { getSessionCookieOptions } = await import("../_core/cookies");
+      const { COOKIE_NAME } = await import("../../shared/const");
+      const token = await signJwt({ employeeId: emp.id, role: emp.role });
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 8 * 60 * 60 * 1000 });
+
+      await logAudit({ actorId: emp.id, action: "signup", targetType: "employee", targetId: String(emp.id), details: { email: emp.email } });
 
       return {
         success: true,

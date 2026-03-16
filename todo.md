@@ -79,3 +79,10 @@
 
 - [x] Hide manager/admin nav items (Review Requests, Export Data, Policy Settings, Employees, CSV Import, Audit Log) from employees
 - [x] Fix logged-in user display — show actual authenticated user's name/role, not hardcoded "admin" (root cause: stale auth.me cache; fixed by invalidating on login and logout)
+
+## Self-Signup Feature
+
+- [x] Add signup tRPC procedure (publicProcedure): accepts firstName, lastName, email, employeeNumber, shift, password — creates employee with role=employee, isActive=true, no OTP/invite
+- [x] Add "Create Account" tab to Login page with signup form (name, email, employee number, shift selector, password + confirm)
+- [x] Validate: email uniqueness, employee number uniqueness, password min 8 chars
+- [x] On successful signup, auto-login (issue JWT cookie) and redirect to /dashboard

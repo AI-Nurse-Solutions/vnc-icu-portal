@@ -58,6 +58,13 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // ─── Employees ────────────────────────────────────────────────────────────────
+export async function getEmployeeByEmployeeNumber(employeeNumber: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(employees).where(eq(employees.employeeNumber, employeeNumber)).limit(1);
+  return result[0];
+}
+
 export async function getEmployeeByEmail(email: string) {
   const db = await getDb();
   if (!db) return undefined;
