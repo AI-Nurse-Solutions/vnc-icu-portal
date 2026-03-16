@@ -72,3 +72,5 @@
 - [x] Changed priority to numeric rank 1-9 dropdown on New Request form (1=highest, 9=lowest, color-coded)
 - [x] Calendar day-click drill-down: shows per-shift applicant list (First Name, Last Initial) with seniority rank and cap cutoff line; mobile panel below calendar
 - [x] Added pending/approved/denied/withdrawn status checkboxes to CSV export — backend updated to accept statuses array, UI has toggle checkboxes with color coding, filename reflects selected statuses
+- [x] Fixed AdminEmployees form: moved EmployeeForm outside parent component to prevent re-render/focus loss on each keystroke
+- [x] Fixed initial password: inviteEmployee router now accepts password, hashes with bcrypt, sets isActive=true immediately when password is provided

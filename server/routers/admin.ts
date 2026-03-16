@@ -55,11 +55,26 @@ export const adminRouter = router({
       seniorityDate: z.string(),
       role: z.enum(["employee", "manager", "admin"]).default("employee"),
       origin: z.string(),
+      password: z.string().min(8).optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const admin = await requireAdmin(ctx);
-      const token = nanoid(48);
-      const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+      const bcrypt = await import("bcryptjs");
+
+      let passwordHash: string | undefined;
+      let isActive = false;
+      let inviteToken: string | undefined;
+      let inviteTokenExpiresAt: Date | undefined;
+
+      if (input.password) {
+        // Password provided — hash it and activate the account immediately
+        passwordHash = await bcrypt.hash(input.password, 12);
+        isActive = true;
+      } else {
+        // No password — send invite email so employee can set their own
+        inviteToken = nanoid(48);
+        inviteTokenExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+      }
 
       await createEmployee({
         employeeNumber: input.employeeNumber,
@@ -69,17 +84,19 @@ export const adminRouter = router({
         shift: input.shift,
         seniorityDate: new Date(input.seniorityDate),
         role: input.role,
-        inviteToken: token,
-        inviteTokenExpiresAt: expiresAt,
-        isActive: false,
+        passwordHash,
+        inviteToken,
+        inviteTokenExpiresAt,
+        isActive,
       });
 
-      const inviteUrl = `${input.origin}/accept-invite?token=${token}`;
-      await sendInviteEmail(input.email, input.firstName, inviteUrl, input.role);
+      if (!input.password && inviteToken) {
+        const inviteUrl = `${input.origin}/accept-invite?token=${inviteToken}`;
+        await sendInviteEmail(input.email, input.firstName, inviteUrl, input.role);
+      }
 
-      await logAudit({ actorId: admin.id, action: "invite_employee", targetType: "employee", targetId: input.email, details: { role: input.role } });
-
-      return { success: true };
+      await logAudit({ actorId: admin.id, action: "invite_employee", targetType: "employee", targetId: input.email, details: { role: input.role, hasPassword: !!input.password } });
+      return { success: true, activated: isActive };
     }),
 
   // Update employee
