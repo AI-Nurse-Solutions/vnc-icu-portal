@@ -86,3 +86,13 @@
 - [x] Add "Create Account" tab to Login page with signup form (name, email, employee number, shift selector, password + confirm)
 - [x] Validate: email uniqueness, employee number uniqueness, password min 8 chars
 - [x] On successful signup, auto-login (issue JWT cookie) and redirect to /dashboard
+
+## Simplified Signup + Unverified Badge
+
+- [x] Remove employeeNumber and seniorityDate from signup form (employees don't enter these)
+- [x] Auto-assign placeholder employee number on signup (e.g. TEMP-{nanoid(6)}) so DB constraint is satisfied
+- [x] Add isVerified boolean column to employees table (false by default on self-signup, true when admin sets official employeeNumber + seniorityDate)
+- [x] Show "Unverified" badge on employee rows in Admin Employees table where isVerified=false
+- [x] Add inline edit in Admin Employees table for employeeNumber and seniorityDate fields (admin/manager only)
+- [x] Mark employee as verified (isVerified=true) when admin saves official employeeNumber + seniorityDate
+- [x] Show "Unverified" indicator in sidebar user profile for the employee themselves so they know their account is pending verification

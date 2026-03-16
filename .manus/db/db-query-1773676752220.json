@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE employees ADD COLUMN is_verified BOOLEAN NOT NULL DEFAULT FALSE;\n-- Mark all existing admin-created employees (those with non-TEMP employee numbers) as verified\nUPDATE employees SET is_verified = TRUE WHERE employee_number NOT LIKE 'TEMP-%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute ALTER TABLE employees ADD COLUMN is_verified BOOLEAN NOT NULL DEFAULT FALSE;\n-- Mark all existing admin-created employees (those with non-TEMP employee numbers) as verified\nUPDATE employees SET is_verified = TRUE WHERE employee_number NOT LIKE 'TEMP-%';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1138
+}

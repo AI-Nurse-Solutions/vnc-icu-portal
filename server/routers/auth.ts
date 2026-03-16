@@ -44,6 +44,7 @@ export const authRouter = router({
         shift: emp.shift,
         role: emp.role,
         seniorityDate: emp.seniorityDate,
+        isVerified: emp.isVerified,
       };
     } catch {
       return null;
@@ -155,7 +156,6 @@ export const authRouter = router({
       firstName: z.string().min(1),
       lastName: z.string().min(1),
       email: z.string().email(),
-      employeeNumber: z.string().min(1),
       shift: z.enum(["AM", "PM", "NOC"]),
       password: z.string().min(8),
     }))
@@ -166,20 +166,18 @@ export const authRouter = router({
         throw new Error("An account with this email already exists.");
       }
 
-      // Check for duplicate employee number
-      const existingEmpNum = await getEmployeeByEmployeeNumber(input.employeeNumber);
-      if (existingEmpNum) {
-        throw new Error("An account with this employee number already exists.");
-      }
-
       const bcrypt = await import("bcryptjs");
+      const { nanoid } = await import("nanoid");
       const passwordHash = await bcrypt.hash(input.password, 12);
 
-      // Use today as seniority date (admin can update later)
+      // Auto-assign a temporary employee number — admin will set the official one
+      const tempEmployeeNumber = `TEMP-${nanoid(6)}`;
+
+      // Use today as placeholder seniority date — admin will set the official one
       const seniorityDate = new Date();
 
       await createEmployee({
-        employeeNumber: input.employeeNumber,
+        employeeNumber: tempEmployeeNumber,
         firstName: input.firstName,
         lastName: input.lastName,
         email: input.email.toLowerCase(),
@@ -188,6 +186,7 @@ export const authRouter = router({
         role: "employee",
         passwordHash,
         isActive: true,
+        isVerified: false,
       });
 
       // Fetch the newly created employee to get their ID for the JWT

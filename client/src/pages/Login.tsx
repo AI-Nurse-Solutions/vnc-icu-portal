@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   Loader2, Mail, Lock, ArrowRight, HeartPulse,
-  User, Hash, ChevronDown
+  User, ChevronDown
 } from "lucide-react";
 
 type Tab = "signin" | "signup";
@@ -46,7 +46,6 @@ export default function Login() {
   const [signupFirstName, setSignupFirstName] = useState("");
   const [signupLastName, setSignupLastName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
-  const [signupEmployeeNumber, setSignupEmployeeNumber] = useState("");
   const [signupShift, setSignupShift] = useState<"AM" | "PM" | "NOC">("AM");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirm, setSignupConfirm] = useState("");
@@ -74,7 +73,6 @@ export default function Login() {
       firstName: signupFirstName.trim(),
       lastName: signupLastName.trim(),
       email: signupEmail.trim(),
-      employeeNumber: signupEmployeeNumber.trim(),
       shift: signupShift,
       password: signupPassword,
     });
@@ -247,39 +245,22 @@ export default function Login() {
                     </div>
                   </div>
 
-                  {/* Employee number + shift row */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="su-empnum" className="text-sm font-medium">Employee #</Label>
-                      <div className="relative">
-                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="su-empnum"
-                          type="text"
-                          value={signupEmployeeNumber}
-                          onChange={e => setSignupEmployeeNumber(e.target.value)}
-                          placeholder="EMP-001"
-                          className="pl-10 bg-input border-border/60 focus:border-primary"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="su-shift" className="text-sm font-medium">Shift</Label>
-                      <div className="relative">
-                        <select
-                          id="su-shift"
-                          value={signupShift}
-                          onChange={e => setSignupShift(e.target.value as "AM" | "PM" | "NOC")}
-                          className="w-full h-10 rounded-md border border-border/60 bg-input px-3 pr-8 text-sm text-foreground appearance-none focus:outline-none focus:border-primary"
-                          required
-                        >
-                          {SHIFTS.map(s => (
-                            <option key={s.value} value={s.value}>{s.label}</option>
-                          ))}
-                        </select>
-                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                      </div>
+                  {/* Shift */}
+                  <div className="space-y-2">
+                    <Label htmlFor="su-shift" className="text-sm font-medium">Shift</Label>
+                    <div className="relative">
+                      <select
+                        id="su-shift"
+                        value={signupShift}
+                        onChange={e => setSignupShift(e.target.value as "AM" | "PM" | "NOC")}
+                        className="w-full h-10 rounded-md border border-border/60 bg-input px-3 pr-8 text-sm text-foreground appearance-none focus:outline-none focus:border-primary"
+                        required
+                      >
+                        {SHIFTS.map(s => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     </div>
                   </div>
 

@@ -31,6 +31,7 @@ export const employees = mysqlTable("employees", {
   inviteToken: varchar("invite_token", { length: 128 }),
   inviteTokenExpiresAt: timestamp("invite_token_expires_at"),
   isActive: boolean("is_active").default(true).notNull(),
+  isVerified: boolean("is_verified").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

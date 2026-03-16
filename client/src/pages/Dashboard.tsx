@@ -168,6 +168,11 @@ export default function Dashboard() {
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-foreground truncate">{employee.firstName} {employee.lastName}</p>
             <p className="text-xs text-muted-foreground truncate capitalize">{employee.role} · {employee.shift}</p>
+            {employee.isVerified === false && (
+              <span className="inline-flex items-center gap-0.5 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                ⚠ Account Pending Verification
+              </span>
+            )}
           </div>
         </div>
         <Button

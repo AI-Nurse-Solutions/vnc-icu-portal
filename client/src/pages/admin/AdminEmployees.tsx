@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Users, Loader2, Plus, Edit2, Trash2, Search } from "lucide-react";
+import { Users, Loader2, Plus, Edit2, Trash2, Search, ShieldCheck, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -21,8 +21,9 @@ type Employee = {
   email: string;
   shift: string;
   role: string;
-  seniorityDate: Date;
+  seniorityDate: string;
   isActive: boolean;
+  isVerified: boolean;
 };
 
 type FormState = {
@@ -42,8 +43,6 @@ const emptyForm: FormState = {
 };
 
 // ─── EmployeeForm is defined OUTSIDE the parent component ────────────────────
-// This prevents it from being recreated on every parent re-render,
-// which would cause inputs to lose focus after each keystroke.
 type EmployeeFormProps = {
   form: FormState;
   setForm: React.Dispatch<React.SetStateAction<FormState>>;
@@ -156,13 +155,92 @@ function EmployeeForm({ form, setForm, onSave, isPending, showPassword }: Employ
   );
 }
 
+// ─── Verify dialog: admin sets official employee number + seniority date ──────
+type VerifyFormState = { employeeNumber: string; seniorityDate: string };
+
+function VerifyEmployeeDialog({
+  employee,
+  onClose,
+}: {
+  employee: Employee;
+  onClose: () => void;
+}) {
+  const utils = trpc.useUtils();
+  const [verifyForm, setVerifyForm] = useState<VerifyFormState>({
+    employeeNumber: employee.employeeNumber.startsWith("TEMP-") ? "" : employee.employeeNumber,
+    seniorityDate: employee.seniorityDate ? employee.seniorityDate.split("T")[0] : "",
+  });
+
+  const verifyMutation = trpc.admin.verifyEmployee.useMutation({
+    onSuccess: () => {
+      toast.success(`${employee.firstName} ${employee.lastName} has been verified.`);
+      utils.admin.listEmployees.invalidate();
+      onClose();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <DialogContent className="bg-card border-border/60">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-primary" />
+          Verify Employee
+        </DialogTitle>
+      </DialogHeader>
+      <div className="space-y-1 mb-4 p-3 bg-secondary/30 rounded-lg">
+        <p className="text-sm font-medium text-foreground">{employee.firstName} {employee.lastName}</p>
+        <p className="text-xs text-muted-foreground">{employee.email}</p>
+      </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Enter the official employee number and seniority date. This will mark the account as verified and replace the temporary placeholder.
+      </p>
+      <div className="space-y-3">
+        <div>
+          <Label className="text-xs mb-1 block">Official Employee Number</Label>
+          <Input
+            value={verifyForm.employeeNumber}
+            onChange={e => setVerifyForm(p => ({ ...p, employeeNumber: e.target.value }))}
+            className="bg-input border-border/60"
+            placeholder="e.g. 10042"
+          />
+        </div>
+        <div>
+          <Label className="text-xs mb-1 block">Official Seniority Date</Label>
+          <Input
+            type="date"
+            value={verifyForm.seniorityDate}
+            onChange={e => setVerifyForm(p => ({ ...p, seniorityDate: e.target.value }))}
+            className="bg-input border-border/60"
+          />
+        </div>
+        <Button
+          onClick={() => verifyMutation.mutate({
+            id: employee.id,
+            employeeNumber: verifyForm.employeeNumber,
+            seniorityDate: verifyForm.seniorityDate,
+          })}
+          disabled={verifyMutation.isPending || !verifyForm.employeeNumber || !verifyForm.seniorityDate}
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          {verifyMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          <ShieldCheck className="w-4 h-4 mr-2" />
+          Verify & Save
+        </Button>
+      </div>
+    </DialogContent>
+  );
+}
+
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function AdminEmployees() {
   const utils = trpc.useUtils();
   const [search, setSearch] = useState("");
   const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
+  const [verifyEmployee, setVerifyEmployee] = useState<Employee | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [filterUnverified, setFilterUnverified] = useState(false);
 
   const { data: employees, isLoading } = trpc.admin.listEmployees.useQuery();
 
@@ -197,11 +275,15 @@ export default function AdminEmployees() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const filtered = employees?.filter(e =>
-    `${e.firstName} ${e.lastName} ${e.email} ${e.employeeNumber}`
+  const unverifiedCount = employees?.filter(e => !e.isVerified).length ?? 0;
+
+  const filtered = (employees ?? []).filter(e => {
+    const matchSearch = `${e.firstName} ${e.lastName} ${e.email} ${e.employeeNumber}`
       .toLowerCase()
-      .includes(search.toLowerCase())
-  ) ?? [];
+      .includes(search.toLowerCase());
+    const matchFilter = filterUnverified ? !e.isVerified : true;
+    return matchSearch && matchFilter;
+  });
 
   return (
     <div className="p-4 lg:p-6 max-w-5xl mx-auto animate-fade-in">
@@ -220,6 +302,24 @@ export default function AdminEmployees() {
           <Plus className="w-4 h-4 mr-2" /> Add Employee
         </Button>
       </div>
+
+      {/* Unverified alert banner */}
+      {unverifiedCount > 0 && (
+        <div
+          className="flex items-center gap-3 mb-4 p-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 cursor-pointer hover:bg-yellow-500/15 transition-colors"
+          onClick={() => setFilterUnverified(v => !v)}
+        >
+          <AlertCircle className="w-4 h-4 text-yellow-400 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-yellow-300">
+              {unverifiedCount} unverified account{unverifiedCount !== 1 ? "s" : ""} need{unverifiedCount === 1 ? "s" : ""} official employee number &amp; seniority date.
+            </span>
+          </div>
+          <span className="text-xs text-yellow-400 shrink-0">
+            {filterUnverified ? "Show all" : "Show only unverified"}
+          </span>
+        </div>
+      )}
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -257,10 +357,28 @@ export default function AdminEmployees() {
                     </td>
                   </tr>
                 ) : filtered.map(emp => (
-                  <tr key={emp.id} className="border-b border-border/20 hover:bg-secondary/20 transition-colors">
+                  <tr key={emp.id} className={`border-b border-border/20 hover:bg-secondary/20 transition-colors ${!emp.isVerified ? "bg-yellow-500/5" : ""}`}>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">{emp.firstName} {emp.lastName}</div>
-                      <div className="text-xs text-muted-foreground">{emp.email} · #{emp.employeeNumber}</div>
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <div className="font-medium text-foreground flex items-center gap-1.5">
+                            {emp.firstName} {emp.lastName}
+                            {!emp.isVerified && (
+                              <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                <AlertCircle className="w-2.5 h-2.5" />
+                                UNVERIFIED
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {emp.email}
+                            {emp.employeeNumber.startsWith("TEMP-")
+                              ? <span className="ml-1 text-yellow-500/70">· Pending Emp #</span>
+                              : <span className="ml-1">· #{emp.employeeNumber}</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
@@ -273,7 +391,10 @@ export default function AdminEmployees() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{emp.role}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {format(new Date(emp.seniorityDate), "MMM yyyy")}
+                      {emp.isVerified
+                        ? format(new Date(emp.seniorityDate), "MMM yyyy")
+                        : <span className="text-yellow-500/70 italic">Pending</span>
+                      }
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
@@ -284,6 +405,17 @@ export default function AdminEmployees() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
+                        {/* Verify button — only shown for unverified employees */}
+                        {!emp.isVerified && (
+                          <Button
+                            variant="ghost" size="icon"
+                            className="h-7 w-7 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                            title="Set official employee number & seniority date"
+                            onClick={() => setVerifyEmployee(emp as any)}
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost" size="icon"
                           className="h-7 w-7 text-muted-foreground hover:text-primary"
@@ -297,7 +429,7 @@ export default function AdminEmployees() {
                               shift: emp.shift as any,
                               role: emp.role as any,
                               employeeNumber: emp.employeeNumber,
-                              seniorityDate: format(new Date(emp.seniorityDate), "yyyy-MM-dd"),
+                              seniorityDate: emp.seniorityDate ? emp.seniorityDate.split("T")[0] : "",
                             });
                           }}
                         >
@@ -348,6 +480,16 @@ export default function AdminEmployees() {
             showPassword={false}
           />
         </DialogContent>
+      </Dialog>
+
+      {/* Verify Employee dialog */}
+      <Dialog open={!!verifyEmployee} onOpenChange={() => setVerifyEmployee(null)}>
+        {verifyEmployee && (
+          <VerifyEmployeeDialog
+            employee={verifyEmployee}
+            onClose={() => setVerifyEmployee(null)}
+          />
+        )}
       </Dialog>
     </div>
   );

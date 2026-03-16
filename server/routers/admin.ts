@@ -8,6 +8,7 @@ import {
   createEmployee,
   getAllEmployees,
   getAuditLog,
+  getEmployeeByEmployeeNumber,
   getEmployeeById,
   logAudit,
   updateEmployee,
@@ -41,6 +42,7 @@ export const adminRouter = router({
       role: e.role,
       seniorityDate: e.seniorityDate instanceof Date ? e.seniorityDate.toISOString().split("T")[0] : String(e.seniorityDate).split("T")[0],
       isActive: e.isActive,
+      isVerified: e.isVerified,
     }));
   }),
 
@@ -117,6 +119,35 @@ export const adminRouter = router({
       if (updates.seniorityDate) updateData.seniorityDate = new Date(updates.seniorityDate);
       await updateEmployee(id, updateData);
       await logAudit({ actorId: admin.id, action: "update_employee", targetType: "employee", targetId: String(id), details: updates });
+      return { success: true };
+    }),
+
+  // Verify employee: admin sets official employee number + seniority date
+  verifyEmployee: publicProcedure
+    .input(z.object({
+      id: z.number(),
+      employeeNumber: z.string().min(1),
+      seniorityDate: z.string().min(1),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      // Check employee number uniqueness (excluding this employee)
+      const existing = await getEmployeeByEmployeeNumber(input.employeeNumber);
+      if (existing && existing.id !== input.id) {
+        throw new TRPCError({ code: "CONFLICT", message: "That employee number is already assigned to another employee." });
+      }
+      await updateEmployee(input.id, {
+        employeeNumber: input.employeeNumber,
+        seniorityDate: new Date(input.seniorityDate),
+        isVerified: true,
+      });
+      await logAudit({
+        actorId: admin.id,
+        action: "verify_employee",
+        targetType: "employee",
+        targetId: String(input.id),
+        details: { employeeNumber: input.employeeNumber, seniorityDate: input.seniorityDate },
+      });
       return { success: true };
     }),
 
