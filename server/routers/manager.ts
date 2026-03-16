@@ -168,13 +168,14 @@ export const managerRouter = router({
       return { success: true };
     }),
 
-  // Export approved requests to CSV data
+  // Export requests to CSV data — supports pending and approved status filters
   exportApproved: publicProcedure
     .input(z.object({
       startDate: z.string(),
       endDate: z.string(),
       shift: z.enum(["AM", "PM", "NOC"]).optional(),
       requestType: z.enum(["vacation", "education"]).optional(),
+      statuses: z.array(z.enum(["pending", "approved", "denied", "withdrawn"])).optional(),
     }))
     .query(async ({ input, ctx }) => {
       await requireManagerOrAdmin(ctx);
@@ -182,7 +183,7 @@ export const managerRouter = router({
 
       const rows = await getApprovedRequestsForExport(
         input.startDate, input.endDate,
-        input.shift, input.requestType
+        input.shift, input.requestType, input.statuses
       );
 
       await logAudit({
@@ -190,7 +191,7 @@ export const managerRouter = router({
         action: "csv_export",
         targetType: "request",
         targetId: "bulk",
-        details: { startDate: input.startDate, endDate: input.endDate, shift: input.shift, requestType: input.requestType, rowCount: rows.length },
+        details: { startDate: input.startDate, endDate: input.endDate, shift: input.shift, requestType: input.requestType, statuses: input.statuses, rowCount: rows.length },
       });
 
       return rows.map(r => ({
@@ -200,7 +201,7 @@ export const managerRouter = router({
         request_type: r.requestType,
         date: r.date instanceof Date ? r.date.toISOString().split("T")[0] : String(r.date).split("T")[0],
         status: r.status,
-        approved_date: r.decidedAt ? (r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt)) : "",
+        decided_date: r.decidedAt ? (r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt)) : "",
       }));
     }),
 });

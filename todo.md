@@ -71,3 +71,4 @@
 - [x] Added request priority dropdown to New Request form (Routine / Preferred / Critical) — DB migration applied, router updated, color-coded dropdown with contextual helper text
 - [x] Changed priority to numeric rank 1-9 dropdown on New Request form (1=highest, 9=lowest, color-coded)
 - [x] Calendar day-click drill-down: shows per-shift applicant list (First Name, Last Initial) with seniority rank and cap cutoff line; mobile panel below calendar
+- [x] Added pending/approved/denied/withdrawn status checkboxes to CSV export — backend updated to accept statuses array, UI has toggle checkboxes with color coding, filename reflects selected statuses

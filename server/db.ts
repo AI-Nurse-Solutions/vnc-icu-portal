@@ -204,14 +204,15 @@ export async function countApprovedVacationDays(employeeId: number, fromDate: st
   return rows[0]?.count ?? 0;
 }
 
-// Get approved requests for CSV export
+// Get requests for CSV export — supports filtering by statuses array
 export async function getApprovedRequestsForExport(
-  startDate: string, endDate: string, shift?: string, requestType?: string
+  startDate: string, endDate: string, shift?: string, requestType?: string, statuses?: string[]
 ) {
   const db = await getDb();
   if (!db) return [];
+  const allowedStatuses = statuses && statuses.length > 0 ? statuses : ["approved"];
   const conditions = [
-    eq(requests.status, "approved"),
+    sql`${requests.status} IN (${sql.join(allowedStatuses.map(s => sql`${s}`), sql`, `)})`,
     sql`${requestDates.date} >= ${startDate}`,
     sql`${requestDates.date} <= ${endDate}`,
   ];
