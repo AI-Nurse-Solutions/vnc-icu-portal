@@ -1,0 +1,37 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "audit_log"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "blackout_dates"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "config"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "employees"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "request_dates"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "requests"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "submission_deadlines"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_8TTpjTbwNRkm8QcJp9ko4t\n__drizzle_migrations\naudit_log\nblackout_dates\nconfig\nemployees\nrequest_dates\nrequests\nsubmission_deadlines\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

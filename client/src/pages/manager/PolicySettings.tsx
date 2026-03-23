@@ -23,7 +23,7 @@ export default function PolicySettings() {
   const [redThreshold, setRedThreshold] = useState("");
 
   const [newBlackout, setNewBlackout] = useState({ date: "", reason: "" });
-  const [newDeadline, setNewDeadline] = useState({ deadlineDate: "", coverageStart: "", coverageEnd: "", year: new Date().getFullYear() });
+  const [newDeadline, setNewDeadline] = useState<{ deadlineDate: string; coverageStart: string; coverageEnd: string; year: number }>({ deadlineDate: "", coverageStart: "", coverageEnd: "", year: new Date().getFullYear() });
 
   useEffect(() => {
     if (configMap.cap_am) setCapAM(configMap.cap_am);
@@ -196,26 +196,53 @@ export default function PolicySettings() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div>
               <Label className="text-xs text-muted-foreground mb-1 block">Deadline Date</Label>
-              <Input type="date" value={newDeadline.deadlineDate} onChange={e => setNewDeadline(p => ({ ...p, deadlineDate: e.target.value }))} className="bg-input border-border/60" />
+              <input
+                type="date"
+                value={newDeadline.deadlineDate}
+                onChange={e => setNewDeadline(p => ({ ...p, deadlineDate: e.target.value }))}
+                className="flex h-9 w-full rounded-md border border-border/60 bg-input px-3 py-1 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1 block">Coverage Start</Label>
-              <Input type="date" value={newDeadline.coverageStart} onChange={e => setNewDeadline(p => ({ ...p, coverageStart: e.target.value }))} className="bg-input border-border/60" />
+              <input
+                type="date"
+                value={newDeadline.coverageStart}
+                onChange={e => setNewDeadline(p => ({ ...p, coverageStart: e.target.value }))}
+                className="flex h-9 w-full rounded-md border border-border/60 bg-input px-3 py-1 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1 block">Coverage End</Label>
-              <Input type="date" value={newDeadline.coverageEnd} onChange={e => setNewDeadline(p => ({ ...p, coverageEnd: e.target.value }))} className="bg-input border-border/60" />
+              <input
+                type="date"
+                value={newDeadline.coverageEnd}
+                onChange={e => setNewDeadline(p => ({ ...p, coverageEnd: e.target.value }))}
+                className="flex h-9 w-full rounded-md border border-border/60 bg-input px-3 py-1 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1 block">Year</Label>
-              <Input type="number" value={newDeadline.year} onChange={e => setNewDeadline(p => ({ ...p, year: parseInt(e.target.value) }))} className="bg-input border-border/60" />
+              <input
+                type="number"
+                value={newDeadline.year}
+                onChange={e => setNewDeadline(p => ({ ...p, year: parseInt(e.target.value) || new Date().getFullYear() }))}
+                className="flex h-9 w-full rounded-md border border-border/60 bg-input px-3 py-1 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
           </div>
+          {/* Debug state display — remove after testing */}
+          <p className="text-xs text-muted-foreground mt-2">
+            Deadline: <strong>{newDeadline.deadlineDate || "(not set)"}</strong> &nbsp;|
+            Start: <strong>{newDeadline.coverageStart || "(not set)"}</strong> &nbsp;|
+            End: <strong>{newDeadline.coverageEnd || "(not set)"}</strong>
+          </p>
           <Button
             className="mt-3 bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25"
             onClick={() => addDeadlineMutation.mutate(newDeadline)}
             disabled={!newDeadline.deadlineDate || !newDeadline.coverageStart || !newDeadline.coverageEnd || addDeadlineMutation.isPending}
           >
+            {addDeadlineMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             <Plus className="w-4 h-4 mr-1" /> Add Deadline
           </Button>
         </div>

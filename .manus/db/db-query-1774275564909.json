@@ -1,0 +1,274 @@
+{
+  "query": "SELECT id, first_name, last_name, email, role, is_active FROM employees ORDER BY role, id LIMIT 50;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute SELECT id, first_name, last_name, email, role, is_active FROM employees ORDER BY role, id LIMIT 50;",
+  "rows": [
+    {
+      "id": "5",
+      "first_name": "Laura",
+      "last_name": "Martinez",
+      "email": "vnc.laura.m@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "6",
+      "first_name": "James",
+      "last_name": "Robinson",
+      "email": "vnc.james.r@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "7",
+      "first_name": "Priya",
+      "last_name": "Sharma",
+      "email": "vnc.priya.s@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "8",
+      "first_name": "Carlos",
+      "last_name": "Nguyen",
+      "email": "vnc.carlos.n@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "9",
+      "first_name": "Aisha",
+      "last_name": "Thompson",
+      "email": "vnc.aisha.t@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "10",
+      "first_name": "Kevin",
+      "last_name": "Park",
+      "email": "vnc.kevin.p@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "11",
+      "first_name": "Maria",
+      "last_name": "Gonzalez",
+      "email": "vnc.maria.g@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "12",
+      "first_name": "Thomas",
+      "last_name": "Williams",
+      "email": "vnc.thomas.w@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "13",
+      "first_name": "Fatima",
+      "last_name": "Hassan",
+      "email": "vnc.fatima.h@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "14",
+      "first_name": "Daniel",
+      "last_name": "Kim",
+      "email": "vnc.daniel.k@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "15",
+      "first_name": "Sofia",
+      "last_name": "Patel",
+      "email": "vnc.sofia.p@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "16",
+      "first_name": "Andre",
+      "last_name": "Jackson",
+      "email": "vnc.andre.j@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "17",
+      "first_name": "Mei",
+      "last_name": "Liu",
+      "email": "vnc.mei.l@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "18",
+      "first_name": "Ryan",
+      "last_name": "O'Brien",
+      "email": "vnc.ryan.o@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "19",
+      "first_name": "Yuki",
+      "last_name": "Tanaka",
+      "email": "vnc.yuki.t@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "20",
+      "first_name": "Grace",
+      "last_name": "Adeyemi",
+      "email": "vnc.grace.a@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "21",
+      "first_name": "Michael",
+      "last_name": "Torres",
+      "email": "vnc.michael.t@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "22",
+      "first_name": "Nadia",
+      "last_name": "Petrov",
+      "email": "vnc.nadia.p@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "23",
+      "first_name": "Samuel",
+      "last_name": "Osei",
+      "email": "vnc.samuel.o@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "24",
+      "first_name": "Lena",
+      "last_name": "Fischer",
+      "email": "vnc.lena.f@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "25",
+      "first_name": "Omar",
+      "last_name": "Khalil",
+      "email": "vnc.omar.k@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "30001",
+      "first_name": "Rob",
+      "last_name": "Doom",
+      "email": "robert@domondon.us",
+      "role": "employee",
+      "is_active": "0"
+    },
+    {
+      "id": "30002",
+      "first_name": "",
+      "last_name": "",
+      "email": "rob@gmail.com",
+      "role": "employee",
+      "is_active": "0"
+    },
+    {
+      "id": "60001",
+      "first_name": "Henry",
+      "last_name": "Domondon",
+      "email": "rob@domondon.us",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "90001",
+      "first_name": "Robert",
+      "last_name": "Diamond",
+      "email": "bob_domondon@yahoo.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "90002",
+      "first_name": "Rob",
+      "last_name": "Deerhunter",
+      "email": "onlytrueluv@gmail.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "120001",
+      "first_name": "top",
+      "last_name": "cat",
+      "email": "jane.doe@tomcat.com",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "150001",
+      "first_name": "O-Jay",
+      "last_name": "Jimenez",
+      "email": "jimeno4@sutterhealth.org",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "180001",
+      "first_name": "Richard",
+      "last_name": "Wardle",
+      "email": "wardler@sutterhealth.org",
+      "role": "employee",
+      "is_active": "1"
+    },
+    {
+      "id": "2",
+      "first_name": "Sandra",
+      "last_name": "Chen",
+      "email": "vnc.sandra.c@gmail.com",
+      "role": "manager",
+      "is_active": "1"
+    },
+    {
+      "id": "3",
+      "first_name": "Marcus",
+      "last_name": "Rivera",
+      "email": "vnc.marcus.r@gmail.com",
+      "role": "manager",
+      "is_active": "1"
+    },
+    {
+      "id": "4",
+      "first_name": "Diane",
+      "last_name": "Okafor",
+      "email": "vnc.diane.o@gmail.com",
+      "role": "manager",
+      "is_active": "1"
+    },
+    {
+      "id": "1",
+      "first_name": "Robert",
+      "last_name": "Domondon",
+      "email": "great.ai.nurses@gmail.com",
+      "role": "admin",
+      "is_active": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfirst_name\tlast_name\temail\trole\tis_active\n5\tLaura\tMartinez\tvnc.laura.m@gmail.com\temployee\t1\n6\tJames\tRobinson\tvnc.james.r@gmail.com\temployee\t1\n7\tPriya\tSharma\tvnc.priya.s@gmail.com\temployee\t1\n8\tCarlos\tNguyen\tvnc.carlos.n@gmail.com\temployee\t1\n9\tAisha\tThompson\tvnc.aisha.t@gmail.com\temployee\t1\n10\tKevin\tPark\tvnc.kevin.p@gmail.com\temployee\t1\n11\tMaria\tGonzalez\tvnc.maria.g@gmail.com\temployee\t1\n12\tThomas\tWilliams\tvnc.thomas.w@gmail.com\temployee\t1\n13\tFatima\tHassan\tvnc.fatima.h@gmail.com\temployee\t1\n14\tDaniel\tKim\tvnc.daniel.k@gmail.com\temployee\t1\n15\tSofia\tPatel\tvnc.sofia.p@gmail.com\temployee\t1\n16\tAndre\tJackson\tvnc.andre.j@gmail.com\temployee\t1\n17\tMei\tLiu\tvnc.mei.l@gmail.com\temployee\t1\n18\tRyan\tO'Brien\tvnc.ryan.o@gmail.com\temployee\t1\n19\tYuki\tTanaka\tvnc.yuki.t@gmail.com\temployee\t1\n20\tGrace\tAdeyemi\tvnc.grace.a@gmail.com\temployee\t1\n21\tMichael\tTorres\tvnc.michael.t@gmail.com\temployee\t1\n22\tNadia\tPetrov\tvnc.nadia.p@gmail.com\temployee\t1\n23\tSamuel\tOsei\tvnc.samuel.o@gmail.com\temployee\t1\n24\tLena\tFischer\tvnc.lena.f@gmail.com\temployee\t1\n25\tOmar\tKhalil\tvnc.omar.k@gmail.com\temployee\t1\n30001\tRob\tDoom\trobert@domondon.us\temployee\t0\n30002\t\t\trob@gmail.com\temployee\t0\n60001\tHenry\tDomondon\trob@domondon.us\temployee\t1\n90001\tRobert\tDiamond\tbob_domondon@yahoo.com\temployee\t1\n90002\tRob\tDeerhunter\tonlytrueluv@gmail.com\temployee\t1\n120001\ttop\tcat\tjane.doe@tomcat.com\temployee\t1\n150001\tO-Jay\tJimenez\tjimeno4@sutterhealth.org\temployee\t1\n180001\tRichard\tWardle\twardler@sutterhealth.org\temployee\t1\n2\tSandra\tChen\tvnc.sandra.c@gmail.com\tmanager\t1\n3\tMarcus\tRivera\tvnc.marcus.r@gmail.com\tmanager\t1\n4\tDiane\tOkafor\tvnc.diane.o@gmail.com\tmanager\t1\n1\tRobert\tDomondon\tgreat.ai.nurses@gmail.com\tadmin\t1\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

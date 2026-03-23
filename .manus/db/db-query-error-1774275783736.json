@@ -1,0 +1,8 @@
+{
+  "query": "\n-- First delete request_dates for requests belonging to employees\nDELETE rd FROM request_dates rd\nINNER JOIN vacation_requests vr ON rd.request_id = vr.id\nINNER JOIN employees e ON vr.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete vacation requests belonging to employees\nDELETE vr FROM vacation_requests vr\nINNER JOIN employees e ON vr.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete audit log entries for employees\nDELETE al FROM audit_log al\nINNER JOIN employees e ON al.actor_id = e.id\nWHERE e.role = 'employee';\n\n-- Finally delete the employee accounts\nDELETE FROM employees WHERE role = 'employee';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \n-- First delete request_dates for requests belonging to employees\nDELETE rd FROM request_dates rd\nINNER JOIN vacation_requests vr ON rd.request_id = vr.id\nINNER JOIN employees e ON vr.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete vacation requests belonging to employees\nDELETE vr FROM vacation_requests vr\nINNER JOIN employees e ON vr.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete audit log entries for employees\nDELETE al FROM audit_log al\nINNER JOIN employees e ON al.actor_id = e.id\nWHERE e.role = 'employee';\n\n-- Finally delete the employee accounts\nDELETE FROM employees WHERE role = 'employee';\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 3: Table '8ttpjtbwnrkm8qcjp9ko4t.vacation_requests' doesn't exist"
+  ]
+}

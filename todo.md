@@ -96,3 +96,8 @@
 - [x] Add inline edit in Admin Employees table for employeeNumber and seniorityDate fields (admin/manager only)
 - [x] Mark employee as verified (isVerified=true) when admin saves official employeeNumber + seniorityDate
 - [x] Show "Unverified" indicator in sidebar user profile for the employee themselves so they know their account is pending verification
+
+## Deadline Fix & Data Cleanup
+
+- [x] Fix submission deadline setting (save/load in Policy Settings) — root cause: shadcn Input type=date not firing onChange; replaced with native input elements
+- [x] Delete all employee-role accounts, preserve admin and managers — 29 employees + their requests/audit logs deleted; 4 accounts remain (1 admin, 3 managers)

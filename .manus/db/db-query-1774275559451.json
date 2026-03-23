@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, deadline_date, coverage_start, coverage_end, year, created_by FROM submission_deadlines ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute SELECT id, deadline_date, coverage_start, coverage_end, year, created_by FROM submission_deadlines ORDER BY id;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 86
+}

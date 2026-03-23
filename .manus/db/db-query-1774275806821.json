@@ -1,0 +1,9 @@
+{
+  "query": "\n-- Delete request_dates for requests belonging to employees\nDELETE rd FROM request_dates rd\nINNER JOIN requests r ON rd.request_id = r.id\nINNER JOIN employees e ON r.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete requests belonging to employees\nDELETE r FROM requests r\nINNER JOIN employees e ON r.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete audit log entries for employees\nDELETE al FROM audit_log al\nINNER JOIN employees e ON al.actor_id = e.id\nWHERE e.role = 'employee';\n\n-- Finally delete the employee accounts\nDELETE FROM employees WHERE role = 'employee';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \n-- Delete request_dates for requests belonging to employees\nDELETE rd FROM request_dates rd\nINNER JOIN requests r ON rd.request_id = r.id\nINNER JOIN employees e ON r.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete requests belonging to employees\nDELETE r FROM requests r\nINNER JOIN employees e ON r.employee_id = e.id\nWHERE e.role = 'employee';\n\n-- Delete audit log entries for employees\nDELETE al FROM audit_log al\nINNER JOIN employees e ON al.actor_id = e.id\nWHERE e.role = 'employee';\n\n-- Finally delete the employee accounts\nDELETE FROM employees WHERE role = 'employee';\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3607
+}
