@@ -174,6 +174,41 @@ export const requestsRouter = router({
     return result;
   }),
 
+  // Resend confirmation email for a request
+  resendConfirmation: publicProcedure
+    .input(z.object({ requestId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const emp = await getAuthEmployee(ctx);
+      if (!emp) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      const req = await getRequestById(input.requestId);
+      if (!req) throw new TRPCError({ code: "NOT_FOUND" });
+      if (req.employeeId !== emp.id) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const dates = await getRequestDates(input.requestId);
+      const formattedDates = dates.map(d => formatDate(d.date));
+
+      if (req.status === "pending") {
+        await sendSubmissionConfirmation(emp.email, emp.firstName, req.requestType, formattedDates, "pending");
+      } else {
+        await sendStatusChangeEmail(
+          emp.email, emp.firstName, req.requestType,
+          formattedDates, req.status,
+          (req as any).decisionNote ?? undefined
+        );
+      }
+
+      await logAudit({
+        actorId: emp.id,
+        action: "resend_confirmation",
+        targetType: "request",
+        targetId: String(input.requestId),
+        details: { status: req.status },
+      });
+
+      return { success: true };
+    }),
+
   // Withdraw a request
   withdraw: publicProcedure
     .input(z.object({ requestId: z.number(), reason: z.string().optional() }))

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   ClipboardList, Loader2, Trash2, AlertCircle,
-  CheckCircle2, Clock, XCircle, Award, CalendarDays
+  CheckCircle2, Clock, XCircle, Award, CalendarDays, Mail
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -37,6 +37,19 @@ export default function MyRequests() {
   const utils = trpc.useUtils();
   const { employee } = useEmployee();
   const [withdrawId, setWithdrawId] = useState<number | null>(null);
+  const [resendingId, setResendingId] = useState<number | null>(null);
+
+  const resendMutation = trpc.requests.resendConfirmation.useMutation({
+    onMutate: (vars) => setResendingId(vars.requestId),
+    onSuccess: () => {
+      toast.success("Confirmation email resent to your inbox.");
+      setResendingId(null);
+    },
+    onError: (e) => {
+      toast.error(e.message);
+      setResendingId(null);
+    },
+  });
 
   const { data: requests, isLoading } = trpc.requests.myRequests.useQuery();
 
@@ -177,17 +190,31 @@ export default function MyRequests() {
                   </div>
                 </div>
 
-                {req.status !== "denied" && (
+                <div className="flex items-center gap-1 shrink-0">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => setWithdrawId(req.id)}
-                    title="Withdraw request"
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+                    onClick={() => resendMutation.mutate({ requestId: req.id })}
+                    disabled={resendingId === req.id}
+                    title="Resend confirmation email"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    {resendingId === req.id
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : <Mail className="w-4 h-4" />}
                   </Button>
-                )}
+                  {req.status !== "denied" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setWithdrawId(req.id)}
+                      title="Withdraw request"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

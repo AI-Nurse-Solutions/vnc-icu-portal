@@ -101,3 +101,16 @@
 
 - [x] Fix submission deadline setting (save/load in Policy Settings) — root cause: shadcn Input type=date not firing onChange; replaced with native input elements
 - [x] Delete all employee-role accounts, preserve admin and managers — 29 employees + their requests/audit logs deleted; 4 accounts remain (1 admin, 3 managers)
+
+## Email Confirmations for Request Events
+
+- [ ] Add sendRequestSubmittedEmail — sent to employee on new request submission
+- [ ] Add sendRequestApprovedEmail — sent to employee when manager approves
+- [ ] Add sendRequestDeniedEmail — sent to employee when manager denies
+- [ ] Add sendRequestCancelledEmail — sent to employee when request is cancelled
+- [ ] Wire all four emails into the request mutation procedures (submit, approve, deny, cancel)
+
+## Resend Confirmation Feature
+
+- [x] Add resendConfirmation tRPC procedure in requests router — fetches request + dates, sends appropriate email based on current status
+- [x] Add "Resend Confirmation" button to each request card on My Requests page
