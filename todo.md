@@ -114,3 +114,11 @@
 
 - [x] Add resendConfirmation tRPC procedure in requests router — fetches request + dates, sends appropriate email based on current status
 - [x] Add "Resend Confirmation" button to each request card on My Requests page
+
+## Priority Editing & Period Day Count
+
+- [x] Add updatePriority tRPC procedure — employee can change priority (1–9) on their own pending requests
+- [x] Remove 21-day hard cap from requests.submit procedure
+- [x] Add periodDayCounts tRPC query — returns total approved+pending vacation days for Period A (Jan–Jun) and Period B (Jul–Dec) of current year
+- [x] Update MyRequests UI: show editable priority field on each active request card
+- [x] Update MyRequests UI: show Period A and Period B day-count summary at top of page

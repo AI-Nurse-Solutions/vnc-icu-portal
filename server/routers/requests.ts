@@ -66,36 +66,6 @@ export const requestsRouter = router({
         throw new TRPCError({ code: "BAD_REQUEST", message: `Cannot request blackout dates: ${blackoutConflicts.join(", ")}` });
       }
 
-      // Validate 21-day vacation rule
-      if (input.requestType === "vacation") {
-        const today = new Date();
-        const sixMonthsAgo = new Date(today);
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-        const sixMonthsAhead = new Date(today);
-        sixMonthsAhead.setMonth(sixMonthsAhead.getMonth() + 6);
-
-        // Check rolling 6-month window for each requested date
-        for (const dateStr of input.dates) {
-          const reqDate = new Date(dateStr);
-          const windowStart = new Date(reqDate);
-          windowStart.setMonth(windowStart.getMonth() - 6);
-          const windowEnd = new Date(reqDate);
-          windowEnd.setMonth(windowEnd.getMonth() + 6);
-
-          const existing = await countApprovedVacationDays(
-            emp.id,
-            windowStart.toISOString().split("T")[0],
-            windowEnd.toISOString().split("T")[0]
-          );
-          if (existing + input.dates.length > 21) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: `This request would exceed the 21-day vacation limit in a rolling 6-month period. You currently have ${existing} days in this window.`,
-            });
-          }
-          break; // Check once is sufficient for the batch
-        }
-      }
 
       const requestId = await createRequest(
         {
@@ -172,6 +142,50 @@ export const requestsRouter = router({
       });
     }
     return result;
+  }),
+
+  // Update priority of a pending request (employee only)
+  updatePriority: publicProcedure
+    .input(z.object({ requestId: z.number(), priority: z.number().int().min(1).max(9) }))
+    .mutation(async ({ input, ctx }) => {
+      const emp = await getAuthEmployee(ctx);
+      if (!emp) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      const req = await getRequestById(input.requestId);
+      if (!req) throw new TRPCError({ code: "NOT_FOUND" });
+      if (req.employeeId !== emp.id) throw new TRPCError({ code: "FORBIDDEN" });
+      if (req.status !== "pending") throw new TRPCError({ code: "BAD_REQUEST", message: "Priority can only be changed on pending requests." });
+
+      await updateRequest(input.requestId, { priority: input.priority });
+
+      await logAudit({
+        actorId: emp.id,
+        action: "update_priority",
+        targetType: "request",
+        targetId: String(input.requestId),
+        details: { priority: input.priority },
+      });
+
+      return { success: true };
+    }),
+
+  // Get vacation day counts for Period A (Jan–Jun) and Period B (Jul–Dec) of the current year
+  periodDayCounts: publicProcedure.query(async ({ ctx }) => {
+    const emp = await getAuthEmployee(ctx);
+    if (!emp) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+    const year = new Date().getFullYear();
+    const periodA_start = `${year}-01-01`;
+    const periodA_end   = `${year}-06-30`;
+    const periodB_start = `${year}-07-01`;
+    const periodB_end   = `${year}-12-31`;
+
+    const [periodA, periodB] = await Promise.all([
+      countApprovedVacationDays(emp.id, periodA_start, periodA_end),
+      countApprovedVacationDays(emp.id, periodB_start, periodB_end),
+    ]);
+
+    return { year, periodA, periodB };
   }),
 
   // Resend confirmation email for a request
