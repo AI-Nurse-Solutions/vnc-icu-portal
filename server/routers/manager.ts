@@ -253,4 +253,18 @@ export const managerRouter = router({
         decided_date: r.decidedAt ? (r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt)) : "",
       }));
     }),
+
+  // Get Period A and Period B vacation day counts for a specific employee
+  getEmployeePeriodCounts: publicProcedure
+    .input(z.object({ employeeId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      await requireManagerOrAdmin(ctx);
+      const { countApprovedVacationDays } = await import("../db");
+      const year = new Date().getFullYear();
+      const [periodA, periodB] = await Promise.all([
+        countApprovedVacationDays(input.employeeId, `${year}-01-01`, `${year}-06-30`),
+        countApprovedVacationDays(input.employeeId, `${year}-07-01`, `${year}-12-31`),
+      ]);
+      return { year, periodA, periodB };
+    }),
 });

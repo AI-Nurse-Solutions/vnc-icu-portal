@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { BarChart3, CheckCircle2, XCircle, Loader2, MessageSquare, Filter, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  BarChart3, CheckCircle2, XCircle, Loader2, MessageSquare,
+  Filter, ChevronDown, ChevronUp, TrendingUp, AlertTriangle
+} from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
@@ -30,6 +32,39 @@ type Request = {
   dates: string[];
 };
 
+const WARNING = 15;
+
+function PeriodPills({ employeeId }: { employeeId: number }) {
+  const { data } = trpc.manager.getEmployeePeriodCounts.useQuery({ employeeId });
+  if (!data) return null;
+
+  const pill = (label: string, days: number) => {
+    const isWarn = days >= WARNING;
+    return (
+      <span
+        key={label}
+        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+          isWarn
+            ? "bg-[oklch(0.75_0.18_70/15%)] text-[oklch(0.75_0.18_70)] border-[oklch(0.75_0.18_70/35%)]"
+            : "bg-secondary/60 text-muted-foreground border-border/40"
+        }`}
+        title={`${label}: ${days} vacation days used (approved + pending)`}
+      >
+        {isWarn && <AlertTriangle className="w-2.5 h-2.5 shrink-0" />}
+        <TrendingUp className="w-2.5 h-2.5 shrink-0" />
+        {label}: {days}d
+      </span>
+    );
+  };
+
+  return (
+    <span className="flex items-center gap-1 flex-wrap">
+      {pill("A", data.periodA)}
+      {pill("B", data.periodB)}
+    </span>
+  );
+}
+
 function RequestCard({ req, onApprove, onDeny }: {
   req: Request;
   onApprove: (id: number) => void;
@@ -41,6 +76,7 @@ function RequestCard({ req, onApprove, onDeny }: {
     <div className="bg-card border border-border/40 rounded-xl p-4 hover:border-border/70 transition-all duration-150">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
+          {/* Name + badges row */}
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="font-semibold text-foreground text-sm">{req.firstName} {req.lastName}</span>
             <span className="text-xs text-muted-foreground">#{req.employeeNumber}</span>
@@ -57,6 +93,7 @@ function RequestCard({ req, onApprove, onDeny }: {
             </span>
           </div>
 
+          {/* Date chips */}
           <div className="flex flex-wrap gap-1 mb-2">
             {req.dates.sort().map(d => (
               <span key={d} className="text-xs bg-secondary/60 text-foreground px-2 py-0.5 rounded-md font-mono">
@@ -65,7 +102,8 @@ function RequestCard({ req, onApprove, onDeny }: {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          {/* Meta row */}
+          <div className="flex items-center gap-3 flex-wrap text-xs text-muted-foreground mb-2">
             <span>Seniority: {format(new Date(req.seniorityDate), "MMM yyyy")}</span>
             <span>·</span>
             <span>Submitted: {format(new Date(req.submittedAt), "MMM d, yyyy")}</span>
@@ -78,9 +116,17 @@ function RequestCard({ req, onApprove, onDeny }: {
             )}
           </div>
 
+          {/* Period counts — only for vacation requests */}
+          {req.requestType === "vacation" && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[10px] text-muted-foreground">{new Date().getFullYear()} days used:</span>
+              <PeriodPills employeeId={req.employeeId} />
+            </div>
+          )}
+
           {expanded && req.comment && (
             <div className="mt-2 p-2 bg-secondary/30 rounded-lg border border-border/30 text-xs text-muted-foreground italic">
-              "{req.comment}"
+              Has comment — hidden for privacy.
             </div>
           )}
         </div>
@@ -160,7 +206,10 @@ export default function ManagerReview() {
           <BarChart3 className="w-5 h-5 text-primary" />
           Review Requests
         </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Approve or deny time-off requests. Seniority-ranked within each shift.</p>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Approve or deny time-off requests. Seniority-ranked within each shift.
+          Vacation day counts (Period A = Jan–Jun, Period B = Jul–Dec) are shown on each card.
+        </p>
       </div>
 
       {/* Filters */}
@@ -168,50 +217,51 @@ export default function ManagerReview() {
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Filter className="w-3.5 h-3.5" /> Filters:
         </div>
-        {/* Status */}
         {(["pending", "approved", "denied", "withdrawn"] as const).map(s => (
           <button
             key={s}
             onClick={() => setStatusFilter(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
             className={`text-xs px-3 py-1 rounded-full border transition-all ${
-              statusFilter.includes(s)
-                ? `badge-${s}`
-                : "border-border/40 text-muted-foreground hover:border-border/70"
+              statusFilter.includes(s) ? `badge-${s}` : "border-border/40 text-muted-foreground hover:border-border/70"
             }`}
           >
             {s.charAt(0).toUpperCase() + s.slice(1)}
           </button>
         ))}
         <div className="w-px bg-border/40 mx-1" />
-        {/* Shift */}
         {(["AM", "PM", "NOC"] as const).map(s => (
           <button
             key={s}
             onClick={() => setShiftFilter(shiftFilter === s ? undefined : s)}
             className={`text-xs px-3 py-1 rounded-full border transition-all ${
-              shiftFilter === s
-                ? "bg-primary/15 text-primary border-primary/40"
-                : "border-border/40 text-muted-foreground hover:border-border/70"
+              shiftFilter === s ? "bg-primary/15 text-primary border-primary/40" : "border-border/40 text-muted-foreground hover:border-border/70"
             }`}
           >
             {s}
           </button>
         ))}
         <div className="w-px bg-border/40 mx-1" />
-        {/* Type */}
         {(["vacation", "education"] as const).map(t => (
           <button
             key={t}
             onClick={() => setTypeFilter(typeFilter === t ? undefined : t)}
             className={`text-xs px-3 py-1 rounded-full border transition-all ${
-              typeFilter === t
-                ? t === "vacation" ? "badge-vacation" : "badge-education"
-                : "border-border/40 text-muted-foreground hover:border-border/70"
+              typeFilter === t ? (t === "vacation" ? "badge-vacation" : "badge-education") : "border-border/40 text-muted-foreground hover:border-border/70"
             }`}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
         ))}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-2 mb-4 text-[10px] text-muted-foreground bg-card/50 border border-border/30 rounded-lg px-3 py-2">
+        <TrendingUp className="w-3 h-3 text-primary shrink-0" />
+        <span>
+          <strong className="text-foreground">A</strong> = Jan–Jun days used &nbsp;·&nbsp;
+          <strong className="text-foreground">B</strong> = Jul–Dec days used &nbsp;·&nbsp;
+          <span className="text-[oklch(0.75_0.18_70)] font-semibold">Amber</span> = 15+ days (soft threshold)
+        </span>
       </div>
 
       {isLoading ? (

@@ -122,3 +122,10 @@
 - [x] Add periodDayCounts tRPC query — returns total approved+pending vacation days for Period A (Jan–Jun) and Period B (Jul–Dec) of current year
 - [x] Update MyRequests UI: show editable priority field on each active request card
 - [x] Update MyRequests UI: show Period A and Period B day-count summary at top of page
+
+## Period Day Count Enhancements
+
+- [x] Show Period A / Period B day counts on New Request form (before submitting)
+- [x] Amber warning at 15+ days on period bars (both New Request form and My Requests)
+- [x] Add per-employee Period A / Period B counts to Manager Review table (tooltip or column)
+- [x] Add getEmployeePeriodCounts tRPC query in manager router for per-employee period counts

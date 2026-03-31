@@ -5,11 +5,72 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format, differenceInCalendarDays } from "date-fns";
-import { Loader2, Send, X, AlertTriangle, Info, Bell, CalendarDays, List, ChevronDown } from "lucide-react";
+import { Loader2, Send, X, AlertTriangle, Info, Bell, CalendarDays, List, ChevronDown, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEmployee } from "@/hooks/useEmployee";
 import { useLocation } from "wouter";
 import { ICUDatePicker } from "@/components/ICUDatePicker";
+
+function PeriodDayCountPanel({ requestType, selectedCount }: { requestType: "vacation" | "education"; selectedCount: number }) {
+  const { data: periods } = trpc.requests.periodDayCounts.useQuery();
+  if (!periods) return null;
+
+  const year = periods.year;
+  const WARNING_THRESHOLD = 15;
+
+  const renderBar = (label: string, sublabel: string, days: number) => {
+    const projectedA = requestType === "vacation" ? days + selectedCount : days;
+    const isWarning = days >= WARNING_THRESHOLD;
+    const isProjectedWarning = projectedA >= WARNING_THRESHOLD && projectedA !== days;
+    const barColor = days >= WARNING_THRESHOLD
+      ? "bg-[oklch(0.75_0.18_70)]"
+      : days >= 10
+      ? "bg-primary"
+      : "bg-primary/70";
+    const pct = Math.min((days / 21) * 100, 100);
+
+    return (
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs font-semibold text-foreground">{label}</span>
+          <span className={`text-xs font-bold tabular-nums ${
+            isWarning ? "text-[oklch(0.75_0.18_70)]" : "text-foreground"
+          }`}>{days} day{days !== 1 ? "s" : ""}</span>
+        </div>
+        <div className="h-2 rounded-full bg-secondary/60 overflow-hidden">
+          <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-0.5">{sublabel}</p>
+        {isWarning && (
+          <p className="text-[10px] text-[oklch(0.75_0.18_70)] mt-0.5 font-medium flex items-center gap-1">
+            <AlertTriangle className="w-2.5 h-2.5" /> Approaching high usage
+          </p>
+        )}
+        {isProjectedWarning && requestType === "vacation" && selectedCount > 0 && (
+          <p className="text-[10px] text-[oklch(0.75_0.18_70)] mt-0.5 font-medium">
+            +{selectedCount} selected → {projectedA} total
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-card border border-border/40 rounded-xl p-4">
+      <p className="text-xs font-semibold text-foreground flex items-center gap-1.5 mb-3">
+        <TrendingUp className="w-3.5 h-3.5 text-primary" />
+        {year} Vacation Days Used
+      </p>
+      <div className="flex gap-4 flex-col">
+        {renderBar("Period A — Jan to Jun", "Jan 1 – Jun 30", periods.periodA)}
+        {renderBar("Period B — Jul to Dec", "Jul 1 – Dec 31", periods.periodB)}
+      </div>
+      {requestType === "education" && (
+        <p className="text-[10px] text-muted-foreground mt-2">Education requests do not count toward vacation day totals.</p>
+      )}
+    </div>
+  );
+}
 
 export default function NewRequest() {
   const [, navigate] = useLocation();
@@ -407,6 +468,9 @@ export default function NewRequest() {
               </code>
             </div>
           )}
+
+          {/* ── Period Day Count Panel ────────────────────────── */}
+          <PeriodDayCountPanel requestType={requestType} selectedCount={selectedDates.size} />
 
           {/* ── Submit ───────────────────────────────────────────── */}
           <Button
