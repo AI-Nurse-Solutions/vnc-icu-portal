@@ -129,3 +129,9 @@
 - [x] Amber warning at 15+ days on period bars (both New Request form and My Requests)
 - [x] Add per-employee Period A / Period B counts to Manager Review table (tooltip or column)
 - [x] Add getEmployeePeriodCounts tRPC query in manager router for per-employee period counts
+
+## Calendar & Education Export Fixes
+
+- [x] Exclude education requests from the 8-per-day tally on the calendar day view
+- [x] Show education requests separately above the vacation list on each calendar day
+- [x] Add education requests export report (date range, shift filter, CSV download) — admin only

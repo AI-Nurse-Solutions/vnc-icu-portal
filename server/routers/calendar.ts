@@ -30,9 +30,10 @@ export const calendarRouter = router({
       const yellowThreshold = parseInt(configMap.color_yellow_threshold ?? "5");
       const redThreshold = parseInt(configMap.color_red_threshold ?? "8");
 
-      // Build day-level demand map
+      // Build day-level demand map — VACATION ONLY (education excluded from tally)
       const demandMap: Record<string, { AM: number; PM: number; NOC: number }> = {};
       for (const row of rows) {
+        if (row.requestType === "education") continue; // education does not count toward cap
         const dateStr = row.date instanceof Date
           ? row.date.toISOString().split("T")[0]
           : String(row.date).split("T")[0];
@@ -104,8 +105,12 @@ export const calendarRouter = router({
       const rows = await getRequestsForDateRange(input.date, input.date);
       const shiftRows = rows.filter(r => r.shift === input.shift);
 
-      // Sort by seniority date (older = higher rank), then by submittedAt
-      shiftRows.sort((a, b) => {
+      // Separate vacation and education requests
+      const vacationRows = shiftRows.filter(r => r.requestType !== "education");
+      const educationRows = shiftRows.filter(r => r.requestType === "education");
+
+      // Sort vacation rows by seniority date (older = higher rank), then by submittedAt
+      vacationRows.sort((a, b) => {
         const sa = a.seniorityDate instanceof Date ? a.seniorityDate : new Date(a.seniorityDate);
         const sb = b.seniorityDate instanceof Date ? b.seniorityDate : new Date(b.seniorityDate);
         if (sa.getTime() !== sb.getTime()) return sa.getTime() - sb.getTime();
@@ -114,11 +119,10 @@ export const calendarRouter = router({
         return ta.getTime() - tb.getTime();
       });
 
-      return shiftRows.map((r, idx) => ({
+      const mapRow = (r: typeof rows[0], idx: number) => ({
         rank: idx + 1,
         requestId: r.requestId,
         employeeId: r.employeeId,
-        // Managers see full names, employees see First Name + Last Initial
         displayName: isManager
           ? `${r.firstName} ${r.lastName}`
           : `${r.firstName} ${r.lastName.charAt(0)}.`,
@@ -126,9 +130,13 @@ export const calendarRouter = router({
         status: r.status,
         seniorityDate: r.seniorityDate,
         submittedAt: r.submittedAt,
-        // Only managers see comments
         comment: isManager ? r.comment : undefined,
-      }));
+      });
+
+      return {
+        vacation: vacationRows.map(mapRow),
+        education: educationRows.map((r, idx) => mapRow(r, idx)),
+      };
     }),
 
   getBlackoutDates: publicProcedure.query(async () => {
