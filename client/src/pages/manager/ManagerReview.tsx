@@ -168,6 +168,13 @@ function RequestCard({ req, onDecisionSubmitted }: {
   const [noteOpen, setNoteOpen] = useState(false);
   const [note, setNote] = useState("");
   const [commentExpanded, setCommentExpanded] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  // Lazy-load leave history when panel is opened
+  const { data: leaveHistory, isLoading: historyLoading } = trpc.manager.getEmployeeLeaveHistory.useQuery(
+    { employeeId: req.employeeId },
+    { enabled: historyOpen }
+  );
 
   // Load dates with IDs from the server
   const { isLoading: datesLoading } = trpc.manager.getAllRequests.useQuery(
@@ -517,6 +524,81 @@ function RequestCard({ req, onDecisionSubmitted }: {
           </div>
         </div>
       )}
+
+      {/* ── Leave History Panel ───────────────────────────────────────── */}
+      <div className="px-5 py-3 border-t border-border/20">
+        <button
+          onClick={() => setHistoryOpen(!historyOpen)}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span className="font-medium">Full Leave History</span>
+          <span className="ml-1 text-[10px] opacity-60">(all requests for this employee)</span>
+          <span className="ml-auto">{historyOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}</span>
+        </button>
+
+        {historyOpen && (
+          <div className="mt-3 space-y-2">
+            {historyLoading && (
+              <div className="space-y-1.5">
+                {[1,2,3].map(i => <div key={i} className="h-10 bg-secondary/30 rounded-lg animate-pulse" />)}
+              </div>
+            )}
+            {!historyLoading && leaveHistory && leaveHistory.length === 0 && (
+              <p className="text-xs text-muted-foreground italic py-2">No previous requests found.</p>
+            )}
+            {!historyLoading && leaveHistory && leaveHistory.length > 0 && (
+              <>
+                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 gap-y-0 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider px-2 pb-1 border-b border-border/20">
+                  <span>Date Range</span>
+                  <span>Type</span>
+                  <span>Days</span>
+                  <span>Status</span>
+                </div>
+                <div className="max-h-56 overflow-y-auto space-y-1 pr-1">
+                  {leaveHistory.map(h => (
+                    <div
+                      key={h.requestId}
+                      className={`grid grid-cols-[1fr_auto_auto_auto] gap-x-3 items-center px-2 py-1.5 rounded-lg text-xs transition-colors ${
+                        h.requestId === req.requestId
+                          ? "bg-primary/10 border border-primary/30"
+                          : "bg-secondary/20 hover:bg-secondary/40"
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <span className="font-mono text-[10px] text-foreground truncate block">{h.dateRange}</span>
+                        <span className="text-[9px] text-muted-foreground">{h.year} · Period {h.period}</span>
+                      </div>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                        h.requestType === "education"
+                          ? "bg-purple-500/15 text-purple-400"
+                          : "bg-primary/15 text-primary"
+                      }`}>
+                        {h.requestType === "education" ? "EDU" : "VAC"}
+                      </span>
+                      <span className="text-[10px] font-semibold text-foreground text-center">{h.totalDays}d</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                        h.status === "approved" ? "bg-[oklch(0.65_0.17_160/15%)] text-[oklch(0.65_0.17_160)]" :
+                        h.status === "denied" ? "bg-destructive/15 text-destructive" :
+                        h.status === "withdrawn" ? "bg-secondary/60 text-muted-foreground" :
+                        "bg-amber-500/15 text-amber-400"
+                      }`}>
+                        {h.status.charAt(0).toUpperCase() + h.status.slice(1)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted-foreground text-right pt-1">
+                  {leaveHistory.length} total request{leaveHistory.length !== 1 ? "s" : ""} on record
+                  {leaveHistory.filter(h => h.status === "approved").length > 0 &&
+                    ` · ${leaveHistory.filter(h => h.status === "approved").reduce((sum, h) => sum + h.totalDays, 0)} approved days total`
+                  }
+                </p>
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Decided state — show outcome */}
       {req.status !== "pending" && (

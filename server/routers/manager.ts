@@ -368,4 +368,43 @@ export const managerRouter = router({
       ]);
       return { year, periodA, periodB };
     }),
+
+  // Full leave history for an employee — all requests with their dates
+  getEmployeeLeaveHistory: publicProcedure
+    .input(z.object({ employeeId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      await requireManagerOrAdmin(ctx);
+      const { getRequestsByEmployee, getRequestDates } = await import("../db");
+      const allRequests = await getRequestsByEmployee(input.employeeId);
+      const result = [];
+      for (const req of allRequests) {
+        const dates = await getRequestDates(req.id);
+        const sortedDates = dates
+          .map(d => (d.date instanceof Date ? d.date.toISOString().split("T")[0] : String(d.date)))
+          .sort();
+        const year = sortedDates[0] ? parseInt(sortedDates[0].split("-")[0]) : new Date().getFullYear();
+        const month = sortedDates[0] ? parseInt(sortedDates[0].split("-")[1]) : 1;
+        const period = month <= 6 ? "A (Jan–Jun)" : "B (Jul–Dec)";
+        result.push({
+          requestId: req.id,
+          requestType: req.requestType,
+          continuityType: req.continuityType,
+          status: req.status,
+          priority: req.priority,
+          submittedAt: req.submittedAt instanceof Date ? req.submittedAt.toISOString() : String(req.submittedAt),
+          decidedAt: req.decidedAt ? (req.decidedAt instanceof Date ? req.decidedAt.toISOString() : String(req.decidedAt)) : null,
+          decisionNote: req.decisionNote ?? null,
+          totalDays: sortedDates.length,
+          dateRange: sortedDates.length > 0
+            ? sortedDates.length === 1
+              ? sortedDates[0]
+              : `${sortedDates[0]} → ${sortedDates[sortedDates.length - 1]}`
+            : "No dates",
+          dates: sortedDates,
+          year,
+          period,
+        });
+      }
+      return result;
+    }),
 });

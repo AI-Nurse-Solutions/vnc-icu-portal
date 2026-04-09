@@ -151,3 +151,9 @@
 ## Note Visibility Fix
 
 - [x] Show full employee note text to admin/manager on Review page (remove privacy mask for privileged roles)
+
+## Employee Leave History on Review Page
+
+- [x] Add getEmployeeLeaveHistory tRPC procedure — returns all past requests for an employee with dates, type, status, period
+- [x] Add collapsible "Leave History" panel to each request card on ManagerReview page (admin only)
+- [x] Show each historical request: type badge, status badge, date range summary, total days, year/period
