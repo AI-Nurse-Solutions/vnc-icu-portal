@@ -356,8 +356,8 @@ function RequestCard({ req, onDecisionSubmitted }: {
               {commentExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
             {commentExpanded && (
-              <div className="mt-2 px-3 py-2 bg-primary/5 border border-primary/20 rounded-lg text-xs text-muted-foreground italic">
-                Has comment — hidden for privacy.
+              <div className="mt-2 px-3 py-2 bg-primary/5 border border-primary/20 rounded-lg text-xs text-foreground">
+                {req.comment}
               </div>
             )}
           </div>

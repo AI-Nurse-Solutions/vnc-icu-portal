@@ -147,3 +147,7 @@
 - [x] Date grid with per-date approve/deny micro-actions (visual pending state)
 - [x] Bulk "Approve Entire Request" and "Deny Entire Request" buttons
 - [x] Admin note textarea (collapsible) with "Submit Decision & Send Email" button
+
+## Note Visibility Fix
+
+- [x] Show full employee note text to admin/manager on Review page (remove privacy mask for privileged roles)
