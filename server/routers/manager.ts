@@ -254,7 +254,108 @@ export const managerRouter = router({
       }));
     }),
 
+  // Submit a granular decision: per-date approve/deny with admin note
+  submitDecision: publicProcedure
+    .input(z.object({
+      requestId: z.number(),
+      // Array of { dateId, date, decision } — decision is 'approved' | 'denied' | 'pending'
+      dateDecisions: z.array(z.object({
+        dateId: z.number(),
+        date: z.string(),
+        decision: z.enum(["approved", "denied", "pending"]),
+      })),
+      note: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const manager = await requireManagerOrAdmin(ctx);
+
+      const req = await getRequestById(input.requestId);
+      if (!req) throw new TRPCError({ code: "NOT_FOUND" });
+      if (req.status !== "pending") throw new TRPCError({ code: "BAD_REQUEST", message: "Request is not pending" });
+
+      const { deleteRequestDate } = await import("../db");
+
+      const approvedDates: string[] = [];
+      const deniedDates: string[] = [];
+      const pendingDates: string[] = [];
+
+      for (const dd of input.dateDecisions) {
+        if (dd.decision === "denied") {
+          await deleteRequestDate(dd.dateId);
+          deniedDates.push(dd.date);
+        } else if (dd.decision === "approved") {
+          approvedDates.push(dd.date);
+        } else {
+          pendingDates.push(dd.date);
+        }
+      }
+
+      // Determine overall request status
+      // If all decided dates are denied and no pending remain → denied
+      // If any approved and no pending remain → approved (partial or full)
+      // If pending remain → still pending (partial decision not final)
+      let newStatus: "approved" | "denied" | "pending" = "pending";
+      if (pendingDates.length === 0) {
+        if (approvedDates.length === 0) {
+          newStatus = "denied";
+        } else {
+          newStatus = "approved";
+        }
+      }
+
+      if (newStatus !== "pending") {
+        const partialNote = deniedDates.length > 0 && approvedDates.length > 0
+          ? `Partial approval: ${approvedDates.length} date(s) approved, ${deniedDates.length} date(s) denied.${input.note ? " " + input.note : ""}`
+          : input.note;
+
+        await updateRequest(input.requestId, {
+          status: newStatus,
+          decidedAt: new Date(),
+          decidedBy: manager.id,
+          decisionNote: partialNote,
+        });
+
+        const emp = await getEmployeeById(req.employeeId);
+        if (emp) {
+          const emailDates = approvedDates.length > 0 ? approvedDates : deniedDates;
+          const emailStatus = newStatus;
+          await sendStatusChangeEmail(
+            emp.email, emp.firstName, req.requestType,
+            emailDates.map(d => formatDate(d)), emailStatus, partialNote
+          );
+        }
+
+        await logAudit({
+          actorId: manager.id,
+          action: `submit_decision_${newStatus}`,
+          targetType: "request",
+          targetId: String(input.requestId),
+          details: { approved: approvedDates, denied: deniedDates, note: input.note },
+        });
+      }
+
+      return { success: true, newStatus, approvedCount: approvedDates.length, deniedCount: deniedDates.length, pendingCount: pendingDates.length };
+    }),
+
   // Get Period A and Period B vacation day counts for a specific employee
+  // Get a single request with its dates (including date IDs) for the review UI
+  getRequestDetail: publicProcedure
+    .input(z.object({ requestId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      await requireManagerOrAdmin(ctx);
+      const { getRequestById, getRequestDates } = await import("../db");
+      const req = await getRequestById(input.requestId);
+      if (!req) throw new TRPCError({ code: "NOT_FOUND" });
+      const dates = await getRequestDates(input.requestId);
+      return {
+        ...req,
+        dates: dates.map(d => ({
+          id: d.id,
+          date: d.date instanceof Date ? d.date.toISOString().split("T")[0] : String(d.date),
+        })),
+      };
+    }),
+
   getEmployeePeriodCounts: publicProcedure
     .input(z.object({ employeeId: z.number() }))
     .query(async ({ input, ctx }) => {

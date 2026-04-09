@@ -135,3 +135,15 @@
 - [x] Exclude education requests from the 8-per-day tally on the calendar day view
 - [x] Show education requests separately above the vacation list on each calendar day
 - [x] Add education requests export report (date range, shift filter, CSV download) — admin only
+
+## Admin Review Dashboard Rebuild
+
+- [x] Add getRequestsForReview procedure: returns requests sorted by priority, with employee period day counts (approved + pending) for Period A and B
+- [x] Add submitDecision procedure: accepts per-date decisions (approve/deny/pending), admin note, sends email confirmation
+- [x] Build new ManagerReview UI: 3-zone card layout (employee info, date grid, decision controls)
+- [x] Priority-sorted request cards (highest priority first)
+- [x] Period A / Period B balance display on each card (days approved + days in this request)
+- [x] Employee note displayed prominently if populated
+- [x] Date grid with per-date approve/deny micro-actions (visual pending state)
+- [x] Bulk "Approve Entire Request" and "Deny Entire Request" buttons
+- [x] Admin note textarea (collapsible) with "Submit Decision & Send Email" button

@@ -259,6 +259,7 @@ export async function getAllRequestsWithEmployees(statusFilter?: string[]) {
       employeeId: requests.employeeId,
       requestType: requests.requestType,
       continuityType: requests.continuityType,
+      priority: requests.priority,
       comment: requests.comment,
       status: requests.status,
       submittedAt: requests.submittedAt,
@@ -335,6 +336,13 @@ export async function setConfig(key: string, value: string, updatedBy?: number) 
   const db = await getDb();
   if (!db) throw new Error("DB not available");
   await db.insert(config).values({ key, value, updatedBy }).onDuplicateKeyUpdate({ set: { value, updatedBy } });
+}
+
+// Delete a specific request date by its ID
+export async function deleteRequestDate(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.delete(requestDates).where(eq(requestDates.id, id));
 }
 
 // ─── Audit Log ────────────────────────────────────────────────────────────────
