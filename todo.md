@@ -157,3 +157,7 @@
 - [x] Add getEmployeeLeaveHistory tRPC procedure — returns all past requests for an employee with dates, type, status, period
 - [x] Add collapsible "Leave History" panel to each request card on ManagerReview page (admin only)
 - [x] Show each historical request: type badge, status badge, date range summary, total days, year/period
+
+## Admin Email Edit Fix
+
+- [x] Allow admin to edit employee email address from the Admin Employees table — root cause: email field missing from updateEmployee Zod schema; added with uniqueness check

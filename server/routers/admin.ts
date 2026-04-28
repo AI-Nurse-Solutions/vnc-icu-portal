@@ -8,6 +8,7 @@ import {
   createEmployee,
   getAllEmployees,
   getAuditLog,
+  getEmployeeByEmail,
   getEmployeeByEmployeeNumber,
   getEmployeeById,
   logAudit,
@@ -107,6 +108,7 @@ export const adminRouter = router({
       id: z.number(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      email: z.string().email().optional(),
       shift: z.enum(["AM", "PM", "NOC"]).optional(),
       role: z.enum(["employee", "manager", "admin"]).optional(),
       seniorityDate: z.string().optional(),
@@ -115,7 +117,15 @@ export const adminRouter = router({
     .mutation(async ({ input, ctx }) => {
       const admin = await requireAdmin(ctx);
       const { id, ...updates } = input;
+      // Check email uniqueness if email is being changed
+      if (updates.email) {
+        const existing = await getEmployeeByEmail(updates.email.toLowerCase());
+        if (existing && existing.id !== id) {
+          throw new TRPCError({ code: "CONFLICT", message: "That email address is already in use by another employee." });
+        }
+      }
       const updateData: any = { ...updates };
+      if (updates.email) updateData.email = updates.email.toLowerCase();
       if (updates.seniorityDate) updateData.seniorityDate = new Date(updates.seniorityDate);
       await updateEmployee(id, updateData);
       await logAudit({ actorId: admin.id, action: "update_employee", targetType: "employee", targetId: String(id), details: updates });
