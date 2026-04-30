@@ -161,3 +161,18 @@
 ## Admin Email Edit Fix
 
 - [x] Allow admin to edit employee email address from the Admin Employees table — root cause: email field missing from updateEmployee Zod schema; added with uniqueness check
+
+## Four New Manager/Admin Tools
+- [ ] Review Dashboard — approval run interface sorted by 3-rule hierarchy (Priority → seniority → 21-day yield), month-by-month processing, hot dates flagged, bulk approve non-oversubscribed days
+- [ ] Hot Dates View — calendar heatmap of oversubscribed days (pending > 8 per shift), color-coded severity, drill-down to seniority-ranked requester list
+- [ ] 21-Day Ceiling Tracker — table of all employees with Period A/B approved+pending totals, flags over-21 employees, shows Priority 2+ removal impact
+- [ ] Audit Log (full rebuild) — searchable, filterable log with actor name lookup, action type filter, date range filter, target type filter, CSV export
+
+## Manager Tools (Added Apr 30, 2026)
+- [x] Review Dashboard — approval run UI with Priority/Seniority/21-day rule legend, hot-date flagging, quick-approve for all-clear requests
+- [x] Hot Dates View — calendar heat map of oversubscribed days, severity 1-5, drill-down seniority ranking per shift with cap line
+- [x] 21-Day Ceiling Tracker — per-employee period A/B totals table, warning/over-ceiling status, P2+ impact toggle, sortable columns
+- [x] Audit Log — full searchable/filterable paginated log with actor names, action badges, CSV export
+- [x] Backend tRPC procedures (tools router) for all 4 tools
+- [x] Vitest tests for managerTools router (7 tests, all passing)
+- [x] Sidebar nav "Manager Tools" section wired in Dashboard.tsx

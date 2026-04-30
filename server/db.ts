@@ -361,3 +361,247 @@ export async function getAuditLog(limit = 100) {
   if (!db) return [];
   return db.select().from(auditLog).orderBy(desc(auditLog.timestamp)).limit(limit);
 }
+
+// ─── Review Dashboard ─────────────────────────────────────────────────────────
+// Get all pending requests with full employee + date info for the approval run
+export async function getPendingRequestsForApprovalRun() {
+  const db = await getDb();
+  if (!db) return [];
+  // Get all pending requests with employee info
+  const rows = await db
+    .select({
+      requestId: requests.id,
+      employeeId: requests.employeeId,
+      requestType: requests.requestType,
+      continuityType: requests.continuityType,
+      priority: requests.priority,
+      comment: requests.comment,
+      status: requests.status,
+      submittedAt: requests.submittedAt,
+      firstName: employees.firstName,
+      lastName: employees.lastName,
+      shift: employees.shift,
+      seniorityDate: employees.seniorityDate,
+      employeeNumber: employees.employeeNumber,
+      isVerified: employees.isVerified,
+    })
+    .from(requests)
+    .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .where(eq(requests.status, "pending"))
+    .orderBy(requests.priority, employees.seniorityDate);
+  return rows;
+}
+
+// ─── Hot Dates View ───────────────────────────────────────────────────────────
+// Get oversubscription data: for each date, count pending vacation requests per shift
+export async function getHotDatesData(startDate: string, endDate: string, cap = 8) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      date: requestDates.date,
+      shift: employees.shift,
+      count: sql<number>`COUNT(DISTINCT ${requests.id})`,
+    })
+    .from(requestDates)
+    .innerJoin(requests, eq(requestDates.requestId, requests.id))
+    .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .where(
+      and(
+        sql`${requestDates.date} >= ${startDate}`,
+        sql`${requestDates.date} <= ${endDate}`,
+        eq(requests.status, "pending"),
+        eq(requests.requestType, "vacation"),
+      )
+    )
+    .groupBy(requestDates.date, employees.shift)
+    .orderBy(requestDates.date, employees.shift);
+  return rows;
+}
+
+// Get ranked requesters for a specific hot date
+export async function getHotDateDrillDown(date: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      requestId: requests.id,
+      employeeId: requests.employeeId,
+      priority: requests.priority,
+      comment: requests.comment,
+      submittedAt: requests.submittedAt,
+      firstName: employees.firstName,
+      lastName: employees.lastName,
+      shift: employees.shift,
+      seniorityDate: employees.seniorityDate,
+      employeeNumber: employees.employeeNumber,
+    })
+    .from(requestDates)
+    .innerJoin(requests, eq(requestDates.requestId, requests.id))
+    .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .where(
+      and(
+        sql`${requestDates.date} = ${date}`,
+        eq(requests.status, "pending"),
+        eq(requests.requestType, "vacation"),
+      )
+    )
+    .orderBy(requests.priority, employees.seniorityDate);
+  return rows;
+}
+
+// ─── 21-Day Ceiling Tracker ───────────────────────────────────────────────────
+// Get all employees with their Period A and Period B vacation day totals (approved + pending)
+export async function getAllEmployeePeriodTotals(year: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const periodAStart = `${year}-01-01`;
+  const periodAEnd = `${year}-06-30`;
+  const periodBStart = `${year}-07-01`;
+  const periodBEnd = `${year}-12-31`;
+
+  // Get all employees
+  const allEmps = await db.select({
+    id: employees.id,
+    firstName: employees.firstName,
+    lastName: employees.lastName,
+    shift: employees.shift,
+    seniorityDate: employees.seniorityDate,
+    employeeNumber: employees.employeeNumber,
+    isVerified: employees.isVerified,
+    isActive: employees.isActive,
+  }).from(employees).where(eq(employees.isActive, true)).orderBy(employees.shift, employees.seniorityDate);
+
+  // Get all approved+pending vacation date counts grouped by employee and period
+  const periodARows = await db
+    .select({
+      employeeId: requests.employeeId,
+      approvedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'approved' THEN 1 ELSE 0 END)`,
+      pendingCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'pending' THEN 1 ELSE 0 END)`,
+      p1Count: sql<number>`SUM(CASE WHEN ${requests.priority} = 1 AND ${requests.status} IN ('approved','pending') THEN 1 ELSE 0 END)`,
+    })
+    .from(requestDates)
+    .innerJoin(requests, eq(requestDates.requestId, requests.id))
+    .where(
+      and(
+        eq(requests.requestType, "vacation"),
+        sql`${requests.status} IN ('approved', 'pending')`,
+        sql`${requestDates.date} >= ${periodAStart}`,
+        sql`${requestDates.date} <= ${periodAEnd}`,
+      )
+    )
+    .groupBy(requests.employeeId);
+
+  const periodBRows = await db
+    .select({
+      employeeId: requests.employeeId,
+      approvedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'approved' THEN 1 ELSE 0 END)`,
+      pendingCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'pending' THEN 1 ELSE 0 END)`,
+      p1Count: sql<number>`SUM(CASE WHEN ${requests.priority} = 1 AND ${requests.status} IN ('approved','pending') THEN 1 ELSE 0 END)`,
+    })
+    .from(requestDates)
+    .innerJoin(requests, eq(requestDates.requestId, requests.id))
+    .where(
+      and(
+        eq(requests.requestType, "vacation"),
+        sql`${requests.status} IN ('approved', 'pending')`,
+        sql`${requestDates.date} >= ${periodBStart}`,
+        sql`${requestDates.date} <= ${periodBEnd}`,
+      )
+    )
+    .groupBy(requests.employeeId);
+
+  const aMap = new Map(periodARows.map(r => [r.employeeId, r]));
+  const bMap = new Map(periodBRows.map(r => [r.employeeId, r]));
+
+  return allEmps.map(emp => {
+    const a = aMap.get(emp.id);
+    const b = bMap.get(emp.id);
+    const aTotal = (Number(a?.approvedCount ?? 0)) + (Number(a?.pendingCount ?? 0));
+    const bTotal = (Number(b?.approvedCount ?? 0)) + (Number(b?.pendingCount ?? 0));
+    const aP1Only = Number(a?.p1Count ?? 0);
+    const bP1Only = Number(b?.p1Count ?? 0);
+    return {
+      ...emp,
+      periodA: {
+        approved: Number(a?.approvedCount ?? 0),
+        pending: Number(a?.pendingCount ?? 0),
+        total: aTotal,
+        p1Only: aP1Only,
+        overCeiling: aTotal > 21,
+        atWarning: aTotal >= 15 && aTotal <= 21,
+      },
+      periodB: {
+        approved: Number(b?.approvedCount ?? 0),
+        pending: Number(b?.pendingCount ?? 0),
+        total: bTotal,
+        p1Only: bP1Only,
+        overCeiling: bTotal > 21,
+        atWarning: bTotal >= 15 && bTotal <= 21,
+      },
+    };
+  });
+}
+
+// ─── Enhanced Audit Log ───────────────────────────────────────────────────────
+// Get audit log with actor name lookup and optional filters
+export async function getAuditLogWithActors(opts: {
+  limit?: number;
+  offset?: number;
+  action?: string;
+  targetType?: string;
+  actorId?: number;
+  fromDate?: string;
+  toDate?: string;
+}) {
+  const db = await getDb();
+  if (!db) return { rows: [], total: 0 };
+
+  const conditions: any[] = [];
+  if (opts.action) conditions.push(sql`${auditLog.action} LIKE ${`%${opts.action}%`}`);
+  if (opts.targetType) conditions.push(eq(auditLog.targetType, opts.targetType));
+  if (opts.actorId) conditions.push(eq(auditLog.actorId, opts.actorId));
+  if (opts.fromDate) conditions.push(sql`${auditLog.timestamp} >= ${opts.fromDate}`);
+  if (opts.toDate) conditions.push(sql`${auditLog.timestamp} <= ${opts.toDate + " 23:59:59"}`);
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [rows, countRows] = await Promise.all([
+    db.select({
+      id: auditLog.id,
+      actorId: auditLog.actorId,
+      action: auditLog.action,
+      targetType: auditLog.targetType,
+      targetId: auditLog.targetId,
+      details: auditLog.details,
+      timestamp: auditLog.timestamp,
+    })
+      .from(auditLog)
+      .where(whereClause)
+      .orderBy(desc(auditLog.timestamp))
+      .limit(opts.limit ?? 100)
+      .offset(opts.offset ?? 0),
+    db.select({ count: sql<number>`COUNT(*)` })
+      .from(auditLog)
+      .where(whereClause),
+  ]);
+
+  // Enrich with actor names
+  const actorIds = Array.from(new Set(rows.map(r => r.actorId).filter(Boolean))) as number[];
+  let actorMap: Record<number, string> = {};
+  if (actorIds.length > 0) {
+    const actors = await db.select({ id: employees.id, firstName: employees.firstName, lastName: employees.lastName })
+      .from(employees)
+      .where(inArray(employees.id, actorIds));
+    actorMap = Object.fromEntries(actors.map(a => [a.id, `${a.firstName} ${a.lastName}`]));
+  }
+
+  return {
+    rows: rows.map(r => ({
+      ...r,
+      actorName: r.actorId ? (actorMap[r.actorId] ?? `#${r.actorId}`) : "System",
+      timestamp: r.timestamp instanceof Date ? r.timestamp.toISOString() : String(r.timestamp),
+    })),
+    total: Number(countRows[0]?.count ?? 0),
+  };
+}

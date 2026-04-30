@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Calendar, ClipboardList, Settings, Users, FileDown,
-  LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell
+  LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
+  LayoutDashboard, Flame, TrendingUp
 } from "lucide-react";
 import { useState } from "react";
 import MyRequests from "./employee/MyRequests";
@@ -15,9 +16,13 @@ import CalendarView from "./employee/CalendarView";
 import ManagerReview from "./manager/ManagerReview";
 import PolicySettings from "./manager/PolicySettings";
 import ExportData from "./manager/ExportData";
+import ReviewDashboard from "./manager/ReviewDashboard";
+import HotDatesView from "./manager/HotDatesView";
+import CeilingTracker from "./manager/CeilingTracker";
 import AdminEmployees from "./admin/AdminEmployees";
 import AdminAuditLog from "./admin/AdminAuditLog";
 import AdminImport from "./admin/AdminImport";
+import AuditLog from "./admin/AuditLog";
 
 /** Guard component — shows "Access Denied" if the user lacks the required role */
 function RoleGuard({ allowed, children }: { allowed: boolean; children: React.ReactNode }) {
@@ -101,10 +106,27 @@ export default function Dashboard() {
     { href: "/dashboard/manager/policy", label: "Policy Settings", icon: Settings },
   ];
 
+  // ─── New Tools section (manager + admin) ───────────────────────────────────
+  const toolsNav = [
+    { href: "/dashboard/tools/review-dashboard", label: "Review Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/tools/hot-dates", label: "Hot Dates View", icon: Flame },
+    { href: "/dashboard/tools/ceiling-tracker", label: "21-Day Tracker", icon: TrendingUp },
+    { href: "/dashboard/tools/audit-log", label: "Audit Log", icon: Shield },
+  ];
+
   const adminNav = [
     { href: "/dashboard/admin/employees", label: "Employees", icon: Users },
     { href: "/dashboard/admin/import", label: "CSV Import", icon: FileDown },
-    { href: "/dashboard/admin/audit", label: "Audit Log", icon: Shield },
+    { href: "/dashboard/admin/audit", label: "Audit Log (Legacy)", icon: Shield },
+  ];
+
+  // All known routes for "not found" fallback
+  const allRoutes = [
+    "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
+    "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
+    "/dashboard/tools/review-dashboard", "/dashboard/tools/hot-dates",
+    "/dashboard/tools/ceiling-tracker", "/dashboard/tools/audit-log",
+    "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit",
   ];
 
   const Sidebar = ({ onClose }: { onClose?: () => void }) => (
@@ -141,6 +163,19 @@ export default function Dashboard() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Management</p>
             <div className="space-y-1">
               {managerNav.map(n => (
+                <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isManager && (
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+              Manager Tools
+            </p>
+            <div className="space-y-1">
+              {toolsNav.map(n => (
                 <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
               ))}
             </div>
@@ -233,6 +268,20 @@ export default function Dashboard() {
           {location === "/dashboard/manager/policy" && (
             <RoleGuard allowed={isManager}><PolicySettings /></RoleGuard>
           )}
+          {/* ─── New Manager Tools ─────────────────────────────────────────── */}
+          {location === "/dashboard/tools/review-dashboard" && (
+            <RoleGuard allowed={isManager}><ReviewDashboard /></RoleGuard>
+          )}
+          {location === "/dashboard/tools/hot-dates" && (
+            <RoleGuard allowed={isManager}><HotDatesView /></RoleGuard>
+          )}
+          {location === "/dashboard/tools/ceiling-tracker" && (
+            <RoleGuard allowed={isManager}><CeilingTracker /></RoleGuard>
+          )}
+          {location === "/dashboard/tools/audit-log" && (
+            <RoleGuard allowed={isManager}><AuditLog /></RoleGuard>
+          )}
+          {/* ─── Admin ─────────────────────────────────────────────────────── */}
           {location === "/dashboard/admin/employees" && (
             <RoleGuard allowed={isAdmin}><AdminEmployees /></RoleGuard>
           )}
@@ -242,11 +291,7 @@ export default function Dashboard() {
           {location === "/dashboard/admin/audit" && (
             <RoleGuard allowed={isAdmin}><AdminAuditLog /></RoleGuard>
           )}
-          {![
-            "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
-            "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
-            "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit"
-          ].includes(location) && (
+          {!allRoutes.includes(location) && (
             <div className="flex items-center justify-center h-full min-h-64">
               <p className="text-muted-foreground">Page not found</p>
             </div>
