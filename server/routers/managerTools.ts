@@ -19,7 +19,7 @@ async function requireManagerOrAdmin(ctx: any) {
   const payload = await verifyJwt(token);
   if (!payload?.employeeId) throw new TRPCError({ code: "UNAUTHORIZED" });
   const emp = await getEmployeeById(payload.employeeId as number);
-  if (!emp || (emp.role !== "manager" && emp.role !== "admin")) {
+  if (!emp || (emp.role !== "manager" && emp.role !== "admin" && emp.role !== "super_admin")) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Manager or admin access required" });
   }
   return emp;
@@ -31,7 +31,7 @@ async function requireAdmin(ctx: any) {
   const payload = await verifyJwt(token);
   if (!payload?.employeeId) throw new TRPCError({ code: "UNAUTHORIZED" });
   const emp = await getEmployeeById(payload.employeeId as number);
-  if (!emp || emp.role !== "admin") {
+  if (!emp || (emp.role !== "admin" && emp.role !== "super_admin")) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
   }
   return emp;

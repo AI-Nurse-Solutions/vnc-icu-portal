@@ -97,7 +97,7 @@ export const calendarRouter = router({
           const payload = await verifyJwt(token);
           if (payload?.employeeId) {
             const emp = await getEmployeeById(payload.employeeId as number);
-            isManager = emp?.role === "manager" || emp?.role === "admin";
+            isManager = emp?.role === "manager" || emp?.role === "admin" || emp?.role === "super_admin";
           }
         } catch {}
       }
