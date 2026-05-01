@@ -42,18 +42,23 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ── Shared / invariant tokens ─────────────────────────────────────────────── */
 :root {
-  /* Night-shift dark theme — always dark */
-  --primary: oklch(0.68 0.15 200);
-  --primary-foreground: oklch(0.14 0.02 240);
-  --sidebar-primary: oklch(0.68 0.15 200);
-  --sidebar-primary-foreground: oklch(0.14 0.02 240);
+  --radius: 0.65rem;
   --chart-1: oklch(0.68 0.15 200);
   --chart-2: oklch(0.65 0.17 160);
   --chart-3: oklch(0.75 0.18 70);
   --chart-4: oklch(0.62 0.22 25);
   --chart-5: oklch(0.70 0.15 290);
-  --radius: 0.65rem;
+}
+
+/* ── Dark theme (default — night-shift) ────────────────────────────────────── */
+:root,
+.dark {
+  --primary: oklch(0.68 0.15 200);
+  --primary-foreground: oklch(0.14 0.02 240);
+  --sidebar-primary: oklch(0.68 0.15 200);
+  --sidebar-primary-foreground: oklch(0.14 0.02 240);
   --background: oklch(0.14 0.02 240);
   --foreground: oklch(0.94 0.01 220);
   --card: oklch(0.18 0.02 240);
@@ -77,16 +82,43 @@
   --sidebar-accent-foreground: oklch(0.94 0.01 220);
   --sidebar-border: oklch(0.30 0.02 240 / 30%);
   --sidebar-ring: oklch(0.68 0.15 200);
-  /* Custom semantic colors */
   --success: oklch(0.65 0.17 160);
   --warning: oklch(0.75 0.18 70);
   --education: oklch(0.70 0.15 290);
 }
 
-/* Dark class mirrors root since this is always dark */
-.dark {
-  --background: oklch(0.14 0.02 240);
-  --foreground: oklch(0.94 0.01 220);
+/* ── Light theme (applied when .light is on <html>) ────────────────────────── */
+.light {
+  --primary: oklch(0.48 0.14 200);
+  --primary-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.48 0.14 200);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --background: oklch(0.97 0.005 220);
+  --foreground: oklch(0.16 0.02 240);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.16 0.02 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0.02 240);
+  --secondary: oklch(0.92 0.01 220);
+  --secondary-foreground: oklch(0.22 0.02 240);
+  --muted: oklch(0.92 0.01 220);
+  --muted-foreground: oklch(0.48 0.02 240);
+  --accent: oklch(0.92 0.01 220);
+  --accent-foreground: oklch(0.16 0.02 240);
+  --destructive: oklch(0.56 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.80 0.01 240 / 70%);
+  --input: oklch(0.92 0.01 220);
+  --ring: oklch(0.48 0.14 200);
+  --sidebar: oklch(0.94 0.008 220);
+  --sidebar-foreground: oklch(0.16 0.02 240);
+  --sidebar-accent: oklch(0.88 0.01 220);
+  --sidebar-accent-foreground: oklch(0.16 0.02 240);
+  --sidebar-border: oklch(0.80 0.01 240 / 50%);
+  --sidebar-ring: oklch(0.48 0.14 200);
+  --success: oklch(0.50 0.17 160);
+  --warning: oklch(0.55 0.18 70);
+  --education: oklch(0.50 0.15 290);
 }
 
 @layer base {
@@ -151,18 +183,19 @@
     }
   }
 }
+
 /* ── Demand status colors ────────────────────────────────────────────────────── */
-.demand-green { background: oklch(0.65 0.17 160 / 15%); color: oklch(0.65 0.17 160); border: 1px solid oklch(0.65 0.17 160 / 30%); }
-.demand-yellow { background: oklch(0.75 0.18 70 / 15%); color: oklch(0.75 0.18 70); border: 1px solid oklch(0.75 0.18 70 / 30%); }
-.demand-red { background: oklch(0.62 0.22 25 / 15%); color: oklch(0.62 0.22 25); border: 1px solid oklch(0.62 0.22 25 / 30%); }
+.demand-green { background: oklch(0.65 0.17 160 / 15%); color: oklch(0.55 0.17 160); border: 1px solid oklch(0.65 0.17 160 / 30%); }
+.demand-yellow { background: oklch(0.75 0.18 70 / 15%); color: oklch(0.60 0.18 70); border: 1px solid oklch(0.75 0.18 70 / 30%); }
+.demand-red { background: oklch(0.62 0.22 25 / 15%); color: oklch(0.56 0.22 25); border: 1px solid oklch(0.62 0.22 25 / 30%); }
 
 /* ── Status badges ───────────────────────────────────────────────────────────── */
-.badge-pending { background: oklch(0.75 0.18 70 / 15%); color: oklch(0.75 0.18 70); border: 1px solid oklch(0.75 0.18 70 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
-.badge-approved { background: oklch(0.65 0.17 160 / 15%); color: oklch(0.65 0.17 160); border: 1px solid oklch(0.65 0.17 160 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
-.badge-denied { background: oklch(0.62 0.22 25 / 15%); color: oklch(0.62 0.22 25); border: 1px solid oklch(0.62 0.22 25 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
-.badge-withdrawn { background: oklch(0.24 0.02 240); color: oklch(0.62 0.02 240); border: 1px solid oklch(0.30 0.02 240 / 40%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
-.badge-vacation { background: oklch(0.68 0.15 200 / 15%); color: oklch(0.68 0.15 200); border: 1px solid oklch(0.68 0.15 200 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
-.badge-education { background: oklch(0.70 0.15 290 / 15%); color: oklch(0.70 0.15 290); border: 1px solid oklch(0.70 0.15 290 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
+.badge-pending { background: oklch(0.75 0.18 70 / 15%); color: oklch(0.60 0.18 70); border: 1px solid oklch(0.75 0.18 70 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
+.badge-approved { background: oklch(0.65 0.17 160 / 15%); color: oklch(0.50 0.17 160); border: 1px solid oklch(0.65 0.17 160 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
+.badge-denied { background: oklch(0.62 0.22 25 / 15%); color: oklch(0.56 0.22 25); border: 1px solid oklch(0.62 0.22 25 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
+.badge-withdrawn { background: oklch(0.24 0.02 240 / 30%); color: oklch(0.50 0.02 240); border: 1px solid oklch(0.30 0.02 240 / 40%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
+.badge-vacation { background: oklch(0.68 0.15 200 / 15%); color: oklch(0.48 0.14 200); border: 1px solid oklch(0.68 0.15 200 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
+.badge-education { background: oklch(0.70 0.15 290 / 15%); color: oklch(0.50 0.15 290); border: 1px solid oklch(0.70 0.15 290 / 30%); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
 
 /* ── Animations ──────────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
@@ -191,8 +224,8 @@
   top: -0.75rem;
   left: 0;
   font-size: 0.7rem;
-  color: oklch(0.75 0.18 70);
-  background: oklch(0.14 0.02 240);
+  color: oklch(0.60 0.18 70);
+  background: var(--background);
   padding: 0 8px;
   font-weight: 600;
 }
@@ -200,5 +233,5 @@
 /* ── Custom scrollbar ────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: oklch(0.35 0.02 240); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.45 0.02 240); }
+::-webkit-scrollbar-thumb { background: oklch(0.50 0.02 240 / 50%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.50 0.02 240 / 80%); }

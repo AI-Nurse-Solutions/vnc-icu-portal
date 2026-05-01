@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useEmployee } from "@/hooks/useEmployee";
+import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Calendar, ClipboardList, Settings, Users, FileDown,
   LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
-  LayoutDashboard, Flame, TrendingUp, Star
+  LayoutDashboard, Flame, TrendingUp, Star, Sun, Moon
 } from "lucide-react";
 import { useState } from "react";
 import MyRequests from "./employee/MyRequests";
@@ -65,6 +66,7 @@ export default function Dashboard() {
   // Use window.location.pathname for reliable full-path matching in nested wouter routes
   const location = typeof window !== 'undefined' ? window.location.pathname : '/';
   const { employee, isLoading, isManager, isAdmin, isSuperAdmin } = useEmployee();
+  const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const utils = trpc.useUtils();
 
@@ -229,6 +231,18 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground hover:bg-secondary/60 mb-1"
+          onClick={toggleTheme}
+        >
+          {theme === "dark" ? (
+            <><Sun className="w-4 h-4" /> Light Mode</>
+          ) : (
+            <><Moon className="w-4 h-4" /> Dark Mode</>
+          )}
+        </Button>
         <Button
           variant="ghost"
           size="sm"
