@@ -176,3 +176,23 @@
 - [x] Backend tRPC procedures (tools router) for all 4 tools
 - [x] Vitest tests for managerTools router (7 tests, all passing)
 - [x] Sidebar nav "Manager Tools" section wired in Dashboard.tsx
+
+## Feature Set 3 — Super Admin, Ancillary, Per-Date Decision Grid
+
+- [x] super_admin role added to DB schema (migration applied)
+- [x] ancillary category column added to employees table
+- [x] great.ai.nurses@gmail.com seeded as super_admin
+- [x] superAdmin tRPC router: addDatesOnBehalf, listEmployeesForSuperAdmin, listSuperAdminRequests
+- [x] Email notification to employee when super admin adds dates on their behalf
+- [x] Ancillary employees excluded from all tally/count queries (5 query functions updated)
+- [x] AdminEmployees: category field in create/edit forms and table badge
+- [x] admin router: category field in listEmployees, inviteEmployee, updateEmployee
+- [x] SuperAdminDates page: employee picker, date multi-select, request type, priority, submit
+- [x] useEmployee hook: isSuperAdmin, isAdmin/isManager now include super_admin
+- [x] Dashboard.tsx: Super Admin nav section + route guard for /dashboard/superadmin/add-dates
+- [x] managerTools.ts: per-date seniority rank map (dateRankMap) computed per approval run
+- [x] ReviewDashboard: per-date inline decision grid with ✓/✗ buttons per date row
+- [x] ReviewDashboard: amber rank badge + text for non-#1 ranked dates
+- [x] ReviewDashboard: "Verify P1 approved first" hint on non-first ranked dates
+- [x] ReviewDashboard: Submit Decisions button (enabled only when all dates decided)
+- [x] ReviewDashboard: optional decision note field (in expanded section)

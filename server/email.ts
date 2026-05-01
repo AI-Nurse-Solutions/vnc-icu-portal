@@ -217,3 +217,37 @@ export async function sendDeadlineReminder(
     `)
   );
 }
+
+export async function sendDatesAddedOnBehalfEmail(
+  to: string,
+  name: string,
+  dates: string[],
+  addedBy: string,
+  note?: string
+): Promise<boolean> {
+  const dateList = dates
+    .map(d => {
+      const dt = new Date(d + "T00:00:00");
+      return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    })
+    .map(d => `<li style="padding: 4px 0; color: #06B6D4; font-weight: 600;">${d}</li>`)
+    .join("");
+
+  const html = wrapEmail(`
+    <h2 style="color: #F1F5F9; margin: 0 0 8px;">Vacation Dates Added to Your Account</h2>
+    <p style="${mutedStyle}">Hi ${name},</p>
+    <p style="color: #CBD5E1; line-height: 1.6;">
+      The following vacation dates have been added to your account by <span style="${accentStyle}">${addedBy}</span> (Super Admin):
+    </p>
+    <ul style="list-style: none; padding: 0; margin: 16px 0; background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 12px 16px;">
+      ${dateList}
+    </ul>
+    ${note ? `<p style="color: #94A3B8; font-size: 13px; background: rgba(255,255,255,0.04); border-radius: 8px; padding: 12px 16px; border-left: 3px solid rgba(6,182,212,0.4);"><strong style="color: #CBD5E1;">Note:</strong> ${note}</p>` : ""}
+    <p style="${mutedStyle}">
+      These dates are now pending in the system and will be reviewed during the standard approval process.
+      If you believe this was added in error, please contact your manager immediately.
+    </p>
+    <p style="${mutedStyle}">— VNC ICU Portal</p>
+  `);
+  return sendEmail(to, "Vacation Dates Added to Your Account — VNC ICU Portal", html);
+}

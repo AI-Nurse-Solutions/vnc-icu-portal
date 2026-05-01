@@ -10,8 +10,9 @@ export function useEmployee() {
     employee: employee ?? null,
     isLoading,
     isAuthenticated: !!employee,
-    isManager: employee?.role === "manager" || employee?.role === "admin",
-    isAdmin: employee?.role === "admin",
+    isManager: employee?.role === "manager" || employee?.role === "admin" || employee?.role === "super_admin",
+    isAdmin: employee?.role === "admin" || employee?.role === "super_admin",
+    isSuperAdmin: employee?.role === "super_admin",
     refetch,
   };
 }

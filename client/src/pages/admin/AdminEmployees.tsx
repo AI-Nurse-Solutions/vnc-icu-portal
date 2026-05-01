@@ -21,6 +21,7 @@ type Employee = {
   email: string;
   shift: string;
   role: string;
+  category: string;
   seniorityDate: string;
   isActive: boolean;
   isVerified: boolean;
@@ -33,13 +34,14 @@ type FormState = {
   email: string;
   shift: "AM" | "PM" | "NOC";
   role: "employee" | "manager" | "admin";
+  category: "icu" | "ancillary";
   seniorityDate: string;
   password: string;
 };
 
 const emptyForm: FormState = {
   employeeNumber: "", firstName: "", lastName: "", email: "",
-  shift: "AM", role: "employee", seniorityDate: "", password: "",
+  shift: "AM", role: "employee", category: "icu", seniorityDate: "", password: "",
 };
 
 // ─── EmployeeForm is defined OUTSIDE the parent component ────────────────────
@@ -104,7 +106,7 @@ function EmployeeForm({ form, setForm, onSave, isPending, showPassword }: Employ
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs mb-1 block">Shift</Label>
           <Select value={form.shift} onValueChange={v => setForm(p => ({ ...p, shift: v as any }))}>
@@ -127,6 +129,17 @@ function EmployeeForm({ form, setForm, onSave, isPending, showPassword }: Employ
             </SelectContent>
           </Select>
         </div>
+      </div>
+      <div>
+        <Label className="text-xs mb-1 block">Category</Label>
+        <Select value={form.category} onValueChange={v => setForm(p => ({ ...p, category: v as any }))}>
+          <SelectTrigger className="bg-input border-border/60"><SelectValue /></SelectTrigger>
+          <SelectContent className="bg-popover border-border/60">
+            <SelectItem value="icu">ICU (counted in tallies)</SelectItem>
+            <SelectItem value="ancillary">Ancillary (excluded from tallies)</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-[11px] text-muted-foreground mt-1">Ancillary employees can submit requests but are not counted in daily caps or hot-date tallies.</p>
       </div>
       {showPassword && (
         <div>
@@ -389,7 +402,14 @@ export default function AdminEmployees() {
                           : "bg-[oklch(0.65_0.17_160/15%)] text-[oklch(0.65_0.17_160)] border-[oklch(0.65_0.17_160/30%)]"
                       }`}>{emp.shift}</span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground capitalize">{emp.role}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-muted-foreground capitalize text-sm">{emp.role}</span>
+                        {(emp as any).category === "ancillary" && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 w-fit">Ancillary</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
                       {emp.isVerified
                         ? format(new Date(emp.seniorityDate), "MMM yyyy")
@@ -428,6 +448,7 @@ export default function AdminEmployees() {
                               email: emp.email,
                               shift: emp.shift as any,
                               role: emp.role as any,
+                              category: ((emp as any).category ?? "icu") as any,
                               employeeNumber: emp.employeeNumber,
                               seniorityDate: emp.seniorityDate ? emp.seniorityDate.split("T")[0] : "",
                             });
@@ -461,7 +482,7 @@ export default function AdminEmployees() {
           <EmployeeForm
             form={form}
             setForm={setForm}
-            onSave={(data) => createMutation.mutate({ ...data, origin: window.location.origin })}
+            onSave={(data) => createMutation.mutate({ ...data, category: data.category, origin: window.location.origin })}
             isPending={createMutation.isPending}
             showPassword={true}
           />

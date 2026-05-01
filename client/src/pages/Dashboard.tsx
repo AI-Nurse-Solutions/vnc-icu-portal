@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   Calendar, ClipboardList, Settings, Users, FileDown,
   LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
-  LayoutDashboard, Flame, TrendingUp
+  LayoutDashboard, Flame, TrendingUp, Star
 } from "lucide-react";
 import { useState } from "react";
 import MyRequests from "./employee/MyRequests";
@@ -23,6 +23,7 @@ import AdminEmployees from "./admin/AdminEmployees";
 import AdminAuditLog from "./admin/AdminAuditLog";
 import AdminImport from "./admin/AdminImport";
 import AuditLog from "./admin/AuditLog";
+import SuperAdminDates from "./superadmin/SuperAdminDates";
 
 /** Guard component — shows "Access Denied" if the user lacks the required role */
 function RoleGuard({ allowed, children }: { allowed: boolean; children: React.ReactNode }) {
@@ -63,7 +64,7 @@ export default function Dashboard() {
   const [, navigate] = useLocation();
   // Use window.location.pathname for reliable full-path matching in nested wouter routes
   const location = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const { employee, isLoading, isManager, isAdmin } = useEmployee();
+  const { employee, isLoading, isManager, isAdmin, isSuperAdmin } = useEmployee();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const utils = trpc.useUtils();
 
@@ -120,6 +121,10 @@ export default function Dashboard() {
     { href: "/dashboard/admin/audit", label: "Audit Log (Legacy)", icon: Shield },
   ];
 
+  const superAdminNav = [
+    { href: "/dashboard/superadmin/add-dates", label: "Add Dates on Behalf", icon: Star },
+  ];
+
   // All known routes for "not found" fallback
   const allRoutes = [
     "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
@@ -127,6 +132,7 @@ export default function Dashboard() {
     "/dashboard/tools/review-dashboard", "/dashboard/tools/hot-dates",
     "/dashboard/tools/ceiling-tracker", "/dashboard/tools/audit-log",
     "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit",
+    "/dashboard/superadmin/add-dates",
   ];
 
   const Sidebar = ({ onClose }: { onClose?: () => void }) => (
@@ -187,6 +193,19 @@ export default function Dashboard() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Administration</p>
             <div className="space-y-1">
               {adminNav.map(n => (
+                <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isSuperAdmin && (
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2 flex items-center gap-1.5">
+              <Star className="w-3 h-3 text-yellow-400" /> Super Admin
+            </p>
+            <div className="space-y-1">
+              {superAdminNav.map(n => (
                 <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
               ))}
             </div>
@@ -290,6 +309,10 @@ export default function Dashboard() {
           )}
           {location === "/dashboard/admin/audit" && (
             <RoleGuard allowed={isAdmin}><AdminAuditLog /></RoleGuard>
+          )}
+          {/* ─── Super Admin ─────────────────────────────────────────────── */}
+          {location === "/dashboard/superadmin/add-dates" && (
+            <RoleGuard allowed={isSuperAdmin ?? false}><SuperAdminDates /></RoleGuard>
           )}
           {!allRoutes.includes(location) && (
             <div className="flex items-center justify-center h-full min-h-64">

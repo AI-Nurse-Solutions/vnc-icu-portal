@@ -41,6 +41,7 @@ export const adminRouter = router({
       email: e.email,
       shift: e.shift,
       role: e.role,
+      category: (e as any).category ?? "icu",
       seniorityDate: e.seniorityDate instanceof Date ? e.seniorityDate.toISOString().split("T")[0] : String(e.seniorityDate).split("T")[0],
       isActive: e.isActive,
       isVerified: e.isVerified,
@@ -57,6 +58,7 @@ export const adminRouter = router({
       shift: z.enum(["AM", "PM", "NOC"]),
       seniorityDate: z.string(),
       role: z.enum(["employee", "manager", "admin"]).default("employee"),
+      category: z.enum(["icu", "ancillary"]).default("icu"),
       origin: z.string(),
       password: z.string().min(8).optional(),
     }))
@@ -87,6 +89,7 @@ export const adminRouter = router({
         shift: input.shift,
         seniorityDate: new Date(input.seniorityDate),
         role: input.role,
+        category: input.category as any,
         passwordHash,
         inviteToken,
         inviteTokenExpiresAt,
@@ -111,6 +114,7 @@ export const adminRouter = router({
       email: z.string().email().optional(),
       shift: z.enum(["AM", "PM", "NOC"]).optional(),
       role: z.enum(["employee", "manager", "admin"]).optional(),
+      category: z.enum(["icu", "ancillary"]).optional(),
       seniorityDate: z.string().optional(),
       isActive: z.boolean().optional(),
     }))

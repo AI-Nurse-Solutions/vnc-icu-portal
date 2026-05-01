@@ -103,6 +103,23 @@ export const managerToolsRouter = router({
       }
       const availableMonths = Array.from(monthSet).sort();
 
+      // Build per-date seniority rank map:
+      // For each date, sort all pending vacation requests by priority asc then seniorityDate asc
+      // and record the 1-based rank for each requestId on that date
+      const dateRankMap: Record<string, Record<number, number>> = {};
+      for (const date of Object.keys(dateCountMap)) {
+        const reqsOnDate = requestsWithDates.filter(
+          r => r.requestType === "vacation" && r.dates.includes(date)
+        );
+        const sorted = [...reqsOnDate].sort((a, b) => {
+          if (a.priority !== b.priority) return a.priority - b.priority;
+          const aMs = a.seniorityDate instanceof Date ? a.seniorityDate.getTime() : new Date(String(a.seniorityDate)).getTime();
+          const bMs = b.seniorityDate instanceof Date ? b.seniorityDate.getTime() : new Date(String(b.seniorityDate)).getTime();
+          return aMs - bMs;
+        });
+        dateRankMap[date] = {};
+        sorted.forEach((r, idx) => { dateRankMap[date][r.requestId] = idx + 1; });
+      }
       // For each request, flag which of its dates are hot
       const enriched = filtered.map(req => ({
         requestId: req.requestId,
@@ -123,6 +140,10 @@ export const managerToolsRouter = router({
         hotDates: req.dates.filter(d => hotDates.has(d)),
         hasHotDates: req.dates.some(d => hotDates.has(d)),
         isAllClear: req.requestType === "vacation" && !req.dates.some(d => hotDates.has(d)),
+        // Per-date seniority rank for this request (only for vacation requests)
+        dateRanks: req.requestType === "vacation"
+          ? Object.fromEntries(req.dates.map(d => [d, dateRankMap[d]?.[req.requestId] ?? 99]))
+          : {},
       }));
 
       return {

@@ -185,7 +185,8 @@ export async function getRequestsForDateRange(startDate: string, endDate: string
       and(
         sql`${requestDates.date} >= ${startDate}`,
         sql`${requestDates.date} <= ${endDate}`,
-        sql`${requests.status} != 'withdrawn'`
+        sql`${requests.status} != 'withdrawn'`,
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
       )
     );
   return rows;
@@ -387,7 +388,10 @@ export async function getPendingRequestsForApprovalRun() {
     })
     .from(requests)
     .innerJoin(employees, eq(requests.employeeId, employees.id))
-    .where(eq(requests.status, "pending"))
+    .where(and(
+      eq(requests.status, "pending"),
+      sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
+    ))
     .orderBy(requests.priority, employees.seniorityDate);
   return rows;
 }
@@ -412,6 +416,7 @@ export async function getHotDatesData(startDate: string, endDate: string, cap = 
         sql`${requestDates.date} <= ${endDate}`,
         eq(requests.status, "pending"),
         eq(requests.requestType, "vacation"),
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
       )
     )
     .groupBy(requestDates.date, employees.shift)
@@ -444,6 +449,7 @@ export async function getHotDateDrillDown(date: string) {
         sql`${requestDates.date} = ${date}`,
         eq(requests.status, "pending"),
         eq(requests.requestType, "vacation"),
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
       )
     )
     .orderBy(requests.priority, employees.seniorityDate);
@@ -470,7 +476,10 @@ export async function getAllEmployeePeriodTotals(year: number) {
     employeeNumber: employees.employeeNumber,
     isVerified: employees.isVerified,
     isActive: employees.isActive,
-  }).from(employees).where(eq(employees.isActive, true)).orderBy(employees.shift, employees.seniorityDate);
+  }).from(employees).where(and(
+    eq(employees.isActive, true),
+    sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
+  )).orderBy(employees.shift, employees.seniorityDate);
 
   // Get all approved+pending vacation date counts grouped by employee and period
   const periodARows = await db
