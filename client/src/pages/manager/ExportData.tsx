@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { FileDown, Loader2, Download, CheckSquare, Square, BookOpen } from "lucide-react";
+import { FileDown, Loader2, Download, CheckSquare, Square, BookOpen, Users } from "lucide-react";
 import { format } from "date-fns";
 
 type RequestStatus = "pending" | "approved" | "denied" | "withdrawn";
@@ -38,6 +38,157 @@ const STATUS_OPTIONS: { value: RequestStatus; label: string; color: string }[] =
   { value: "denied",    label: "Denied",    color: "text-red-400 border-red-400/40 bg-red-400/10" },
   { value: "withdrawn", label: "Withdrawn", color: "text-muted-foreground border-border/40 bg-secondary/30" },
 ];
+
+// ── Employee Export Panel ────────────────────────────────────────────────────
+function EmployeeExportPanel() {
+  const [shift, setShift] = useState<"AM" | "PM" | "NOC" | undefined>();
+  const [category, setCategory] = useState<"icu" | "ancillary" | undefined>();
+  const [activeOnly, setActiveOnly] = useState(true);
+  const [preview, setPreview] = useState<any[] | null>(null);
+
+  const { refetch, isFetching } = trpc.manager.exportEmployees.useQuery(
+    { shift, category, activeOnly },
+    { enabled: false }
+  );
+
+  const handleFetch = async () => {
+    const result = await refetch();
+    if (result.data) {
+      setPreview(result.data);
+      if (result.data.length === 0) toast.info("No employees match the selected filters.");
+      else toast.success(`Found ${result.data.length} employee${result.data.length !== 1 ? "s" : ""}.`);
+    }
+  };
+
+  const handleExport = () => {
+    if (!preview || preview.length === 0) { toast.error("No data to export. Click Preview Roster first."); return; }
+    const tag = [shift, category, activeOnly ? "active" : "all"].filter(Boolean).join("-") || "all";
+    const csv = toCSV(preview);
+    const filename = `vnc-icu-employees-${tag}-${new Date().toISOString().split("T")[0]}.csv`;
+    downloadCSV(csv, filename);
+    toast.success(`Exported ${preview.length} employees to ${filename}`);
+  };
+
+  return (
+    <div className="bg-card border border-[oklch(0.65_0.18_160/40%)] rounded-xl p-5 space-y-4">
+      <div className="flex items-center gap-2 mb-1">
+        <Users className="w-4 h-4 text-emerald-400" />
+        <h2 className="text-sm font-bold text-foreground">Employee Database Export</h2>
+        <span className="text-[10px] text-muted-foreground bg-secondary/60 px-2 py-0.5 rounded-full border border-border/40">
+          Sorted by seniority rank
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground -mt-2">
+        Export the full employee roster. Ancillary staff are included but flagged in the category column.
+      </p>
+      <div className="space-y-3">
+        {/* Shift filter */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-muted-foreground font-semibold w-20">Shift:</span>
+          <button onClick={() => { setShift(undefined); setPreview(null); }}
+            className={`text-xs px-3 py-1 rounded-full border transition-all ${
+              !shift ? "bg-primary/15 text-primary border-primary/40" : "border-border/40 text-muted-foreground hover:border-border/70"
+            }`}>All</button>
+          {(["AM", "PM", "NOC"] as const).map(s => (
+            <button key={s} onClick={() => { setShift(shift === s ? undefined : s); setPreview(null); }}
+              className={`text-xs px-3 py-1 rounded-full border transition-all ${
+                shift === s ? "bg-primary/15 text-primary border-primary/40" : "border-border/40 text-muted-foreground hover:border-border/70"
+              }`}>{s}</button>
+          ))}
+        </div>
+        {/* Category filter */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-muted-foreground font-semibold w-20">Category:</span>
+          <button onClick={() => { setCategory(undefined); setPreview(null); }}
+            className={`text-xs px-3 py-1 rounded-full border transition-all ${
+              !category ? "bg-primary/15 text-primary border-primary/40" : "border-border/40 text-muted-foreground hover:border-border/70"
+            }`}>All</button>
+          {(["icu", "ancillary"] as const).map(c => (
+            <button key={c} onClick={() => { setCategory(category === c ? undefined : c); setPreview(null); }}
+              className={`text-xs px-3 py-1 rounded-full border transition-all capitalize ${
+                category === c ? "bg-primary/15 text-primary border-primary/40" : "border-border/40 text-muted-foreground hover:border-border/70"
+              }`}>{c}</button>
+          ))}
+        </div>
+        {/* Active only toggle */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-muted-foreground font-semibold w-20">Status:</span>
+          <button onClick={() => { setActiveOnly(true); setPreview(null); }}
+            className={`text-xs px-3 py-1 rounded-full border transition-all ${
+              activeOnly ? "bg-emerald-500/15 text-emerald-400 border-emerald-400/40" : "border-border/40 text-muted-foreground hover:border-border/70"
+            }`}>Active Only</button>
+          <button onClick={() => { setActiveOnly(false); setPreview(null); }}
+            className={`text-xs px-3 py-1 rounded-full border transition-all ${
+              !activeOnly ? "bg-primary/15 text-primary border-primary/40" : "border-border/40 text-muted-foreground hover:border-border/70"
+            }`}>All (incl. inactive)</button>
+        </div>
+        {/* Actions */}
+        <div className="flex gap-3 pt-1">
+          <Button onClick={handleFetch} disabled={isFetching}
+            className="bg-secondary border border-border/60 text-foreground hover:bg-secondary/80">
+            {isFetching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            Preview Roster
+          </Button>
+          <Button onClick={handleExport} disabled={!preview || preview.length === 0}
+            className="bg-emerald-600 text-white hover:bg-emerald-500">
+            <Download className="w-4 h-4 mr-2" />
+            Download Employee CSV
+          </Button>
+        </div>
+      </div>
+      {/* Preview table */}
+      {preview !== null && (
+        <div className="bg-card border border-border/40 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-border/40 flex items-center justify-between">
+            <span className="text-sm font-semibold text-foreground">
+              {preview.length} employee{preview.length !== 1 ? "s" : ""}
+            </span>
+            {preview.length === 0 && (
+              <span className="text-xs text-muted-foreground">No employees match the selected filters</span>
+            )}
+          </div>
+          {preview.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-border/40 bg-secondary/30">
+                    {Object.keys(preview[0]).map(h => (
+                      <th key={h} className="text-left px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        {h.replace(/_/g, " ")}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.slice(0, 50).map((row, i) => (
+                    <tr key={i} className="border-b border-border/20 hover:bg-secondary/20">
+                      {Object.entries(row).map(([key, v]: any, j) => (
+                        <td key={j} className={`px-3 py-2 whitespace-nowrap ${
+                          key === "is_active" ? (v === "yes" ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold")
+                          : key === "is_verified" ? (v === "yes" ? "text-emerald-400" : "text-amber-400")
+                          : key === "category" && v === "ancillary" ? "text-violet-400 font-semibold"
+                          : key === "seniority_rank" ? "text-primary font-bold"
+                          : "text-foreground"
+                        }`}>
+                          {String(v ?? "")}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {preview.length > 50 && (
+                <p className="text-xs text-muted-foreground text-center py-2">
+                  Showing first 50 of {preview.length} employees. Download CSV for full roster.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Education Report Panel ────────────────────────────────────────────────────
 function EducationReportPanel() {
@@ -408,8 +559,9 @@ export default function ExportData() {
           </div>
         )}
       </div>
-
-      {/* ── Education Report ─────────────────────────────────────────── */}
+      {/* ── Employee Database Export ────────────────────────────────────────────── */}
+      <EmployeeExportPanel />
+      {/* ── Education Report ───────────────────────────────────────────────────── */}
       <EducationReportPanel />
     </div>
   );

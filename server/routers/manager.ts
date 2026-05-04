@@ -407,4 +407,41 @@ export const managerRouter = router({
       }
       return result;
     }),
+
+  // Export all employees as CSV-ready rows
+  exportEmployees: publicProcedure
+    .input(z.object({
+      shift: z.enum(["AM", "PM", "NOC"]).optional(),
+      role: z.enum(["employee", "manager", "admin", "super_admin"]).optional(),
+      category: z.enum(["icu", "ancillary"]).optional(),
+      activeOnly: z.boolean().default(true),
+    }))
+    .query(async ({ input, ctx }) => {
+      await requireManagerOrAdmin(ctx);
+      const emps = await getAllEmployees();
+      let filtered = emps;
+      if (input.activeOnly) filtered = filtered.filter(e => e.isActive);
+      if (input.shift) filtered = filtered.filter(e => e.shift === input.shift);
+      if (input.role) filtered = filtered.filter(e => e.role === input.role);
+      if (input.category) filtered = filtered.filter(e => (e as any).category === input.category);
+      // Sort by seniority date ascending (most senior first)
+      filtered.sort((a, b) => {
+        const sa = a.seniorityDate instanceof Date ? a.seniorityDate : new Date(a.seniorityDate);
+        const sb = b.seniorityDate instanceof Date ? b.seniorityDate : new Date(b.seniorityDate);
+        return sa.getTime() - sb.getTime();
+      });
+      return filtered.map((e, idx) => ({
+        seniority_rank: idx + 1,
+        employee_number: e.employeeNumber ?? "",
+        first_name: e.firstName,
+        last_name: e.lastName,
+        email: e.email,
+        shift: e.shift,
+        role: e.role,
+        category: (e as any).category ?? "icu",
+        seniority_date: e.seniorityDate instanceof Date ? e.seniorityDate.toISOString().split("T")[0] : String(e.seniorityDate).split("T")[0],
+        is_active: e.isActive ? "yes" : "no",
+        is_verified: e.isVerified ? "yes" : "no",
+      }));
+    }),
 });
