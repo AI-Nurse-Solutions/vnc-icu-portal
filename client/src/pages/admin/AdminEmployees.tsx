@@ -33,7 +33,7 @@ type FormState = {
   lastName: string;
   email: string;
   shift: "AM" | "PM" | "NOC";
-  role: "employee" | "manager" | "admin";
+  role: "employee" | "manager" | "admin" | "super_admin";
   category: "icu" | "ancillary";
   seniorityDate: string;
   password: string;
@@ -126,6 +126,7 @@ function EmployeeForm({ form, setForm, onSave, isPending, showPassword }: Employ
               <SelectItem value="employee">Employee</SelectItem>
               <SelectItem value="manager">Manager</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="super_admin">Super Admin</SelectItem>
             </SelectContent>
           </Select>
         </div>

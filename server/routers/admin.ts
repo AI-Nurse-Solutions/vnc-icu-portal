@@ -57,7 +57,7 @@ export const adminRouter = router({
       email: z.string().email(),
       shift: z.enum(["AM", "PM", "NOC"]),
       seniorityDate: z.string(),
-      role: z.enum(["employee", "manager", "admin"]).default("employee"),
+      role: z.enum(["employee", "manager", "admin", "super_admin"]).default("employee"),
       category: z.enum(["icu", "ancillary"]).default("icu"),
       origin: z.string(),
       password: z.string().min(8).optional(),
@@ -113,9 +113,10 @@ export const adminRouter = router({
       lastName: z.string().optional(),
       email: z.string().email().optional(),
       shift: z.enum(["AM", "PM", "NOC"]).optional(),
-      role: z.enum(["employee", "manager", "admin"]).optional(),
+      role: z.enum(["employee", "manager", "admin", "super_admin"]).optional(),
       category: z.enum(["icu", "ancillary"]).optional(),
       seniorityDate: z.string().optional(),
+      employeeNumber: z.string().optional(),
       isActive: z.boolean().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
@@ -126,6 +127,13 @@ export const adminRouter = router({
         const existing = await getEmployeeByEmail(updates.email.toLowerCase());
         if (existing && existing.id !== id) {
           throw new TRPCError({ code: "CONFLICT", message: "That email address is already in use by another employee." });
+        }
+      }
+      // Check employee number uniqueness if being changed
+      if (updates.employeeNumber) {
+        const existingByNum = await getEmployeeByEmployeeNumber(updates.employeeNumber);
+        if (existingByNum && existingByNum.id !== id) {
+          throw new TRPCError({ code: "CONFLICT", message: "That employee number is already assigned to another employee." });
         }
       }
       const updateData: any = { ...updates };
@@ -185,7 +193,7 @@ export const adminRouter = router({
         seniority_date: z.string(),
         shift: z.enum(["AM", "PM", "NOC"]),
         email: z.string().email(),
-        role: z.enum(["employee", "manager", "admin"]).default("employee"),
+        role: z.enum(["employee", "manager", "admin", "super_admin"]).default("employee"),
       })),
       origin: z.string(),
     }))
