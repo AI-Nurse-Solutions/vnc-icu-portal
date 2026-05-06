@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Users, Loader2, Plus, Edit2, Trash2, Search, ShieldCheck, AlertCircle } from "lucide-react";
+import { Users, Loader2, Plus, Edit2, Trash2, Search, ShieldCheck, AlertCircle, Archive } from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -33,7 +33,7 @@ type FormState = {
   lastName: string;
   email: string;
   shift: "AM" | "PM" | "NOC";
-  role: "employee" | "manager" | "admin" | "super_admin";
+  role: "employee" | "manager" | "admin" | "super_admin" | "ancillary";
   category: "icu" | "ancillary";
   seniorityDate: string;
   password: string;
@@ -127,6 +127,7 @@ function EmployeeForm({ form, setForm, onSave, isPending, showPassword }: Employ
               <SelectItem value="manager">Manager</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="super_admin">Super Admin</SelectItem>
+              <SelectItem value="ancillary">Ancillary</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -298,6 +299,8 @@ export default function AdminEmployees() {
     const matchFilter = filterUnverified ? !e.isVerified : true;
     return matchSearch && matchFilter;
   });
+  const activeFiltered = filtered.filter(e => e.isActive);
+  const archivedFiltered = filtered.filter(e => !e.isActive);
 
   return (
     <div className="p-4 lg:p-6 max-w-5xl mx-auto animate-fade-in">
@@ -364,13 +367,13 @@ export default function AdminEmployees() {
                 </tr>
               </thead>
               <tbody className="animate-stagger">
-                {filtered.length === 0 ? (
+                {activeFiltered.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground text-sm">
-                      No employees found.
+                      No active employees found.
                     </td>
                   </tr>
-                ) : filtered.map(emp => (
+                ) : activeFiltered.map(emp => (
                   <tr key={emp.id} className={`border-b border-border/20 hover:bg-secondary/20 transition-colors ${!emp.isVerified ? "bg-yellow-500/5" : ""}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -405,8 +408,8 @@ export default function AdminEmployees() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-muted-foreground capitalize text-sm">{emp.role}</span>
-                        {(emp as any).category === "ancillary" && (
+                        <span className="text-sm text-muted-foreground capitalize">{emp.role === 'ancillary' ? 'Ancillary' : emp.role}</span>
+                        {(emp.role === 'ancillary' || (emp as any).category === 'ancillary') && (
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 w-fit">Ancillary</span>
                         )}
                       </div>
@@ -472,6 +475,69 @@ export default function AdminEmployees() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Archived / Inactive employees */}
+      {archivedFiltered.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-3">
+            <Archive className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Archived / Inactive ({archivedFiltered.length})</h2>
+          </div>
+          <div className="bg-card border border-border/30 rounded-xl overflow-hidden opacity-70">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/30 bg-secondary/20">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Employee</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Shift</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Role</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Seniority</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {archivedFiltered.map(emp => (
+                    <tr key={emp.id} className="border-b border-border/20 hover:bg-secondary/10 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="font-medium text-muted-foreground line-through">{emp.firstName} {emp.lastName}</div>
+                            <div className="text-xs text-muted-foreground/60">{emp.email} · #{emp.employeeNumber}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full border border-border/40 text-muted-foreground">{emp.shift}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-muted-foreground/60 capitalize">{emp.role}</span>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground/60 text-xs">
+                        {emp.seniorityDate ? format(new Date(emp.seniorityDate), "MMM yyyy") : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full badge-withdrawn">Archived</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1 justify-end">
+                          <Button
+                            variant="ghost" size="sm"
+                            className="h-7 text-xs text-muted-foreground hover:text-primary"
+                            onClick={() => updateMutation.mutate({ id: emp.id, isActive: true })}
+                          >
+                            Restore
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

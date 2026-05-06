@@ -19,7 +19,7 @@ export const employees = mysqlTable("employees", {
   seniorityDate: date("seniority_date").notNull(),
   shift: mysqlEnum("shift", ["AM", "PM", "NOC"]).notNull(),
   email: varchar("email", { length: 320 }).notNull().unique(),
-  role: mysqlEnum("role", ["employee", "manager", "admin", "super_admin"]).notNull().default("employee"),
+  role: mysqlEnum("role", ["employee", "manager", "admin", "super_admin", "ancillary"]).notNull().default("employee"),
   category: mysqlEnum("category", ["icu", "ancillary"]).notNull().default("icu"),
   authProviderId: varchar("auth_provider_id", { length: 128 }),
   passwordHash: varchar("password_hash", { length: 256 }),

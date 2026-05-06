@@ -186,7 +186,9 @@ export async function getRequestsForDateRange(startDate: string, endDate: string
         sql`${requestDates.date} >= ${startDate}`,
         sql`${requestDates.date} <= ${endDate}`,
         sql`${requests.status} != 'withdrawn'`,
-        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
+        eq(employees.isActive, true),
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+        sql`${employees.role} != 'ancillary'`
       )
     );
   return rows;
@@ -390,7 +392,9 @@ export async function getPendingRequestsForApprovalRun() {
     .innerJoin(employees, eq(requests.employeeId, employees.id))
     .where(and(
       eq(requests.status, "pending"),
-      sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
+      eq(employees.isActive, true),
+      sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+      sql`${employees.role} != 'ancillary'`
     ))
     .orderBy(requests.priority, employees.seniorityDate);
   return rows;
@@ -416,7 +420,9 @@ export async function getHotDatesData(startDate: string, endDate: string, cap = 
         sql`${requestDates.date} <= ${endDate}`,
         eq(requests.status, "pending"),
         eq(requests.requestType, "vacation"),
-        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
+        eq(employees.isActive, true),
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+        sql`${employees.role} != 'ancillary'`
       )
     )
     .groupBy(requestDates.date, employees.shift)
@@ -449,7 +455,9 @@ export async function getHotDateDrillDown(date: string) {
         sql`${requestDates.date} = ${date}`,
         eq(requests.status, "pending"),
         eq(requests.requestType, "vacation"),
-        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
+        eq(employees.isActive, true),
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+        sql`${employees.role} != 'ancillary'`
       )
     )
     .orderBy(requests.priority, employees.seniorityDate);
@@ -478,7 +486,8 @@ export async function getAllEmployeePeriodTotals(year: number) {
     isActive: employees.isActive,
   }).from(employees).where(and(
     eq(employees.isActive, true),
-    sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`
+    sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+    sql`${employees.role} != 'ancillary'`
   )).orderBy(employees.shift, employees.seniorityDate);
 
   // Get all approved+pending vacation date counts grouped by employee and period
