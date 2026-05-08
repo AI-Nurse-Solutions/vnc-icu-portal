@@ -127,6 +127,7 @@ export const calendarRouter = router({
           ? `${r.firstName} ${r.lastName}`
           : `${r.firstName} ${r.lastName.charAt(0)}.`,
         requestType: r.requestType,
+        priority: r.priority,
         status: r.status,
         seniorityDate: r.seniorityDate,
         submittedAt: r.submittedAt,

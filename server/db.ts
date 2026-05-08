@@ -169,6 +169,7 @@ export async function getRequestsForDateRange(startDate: string, endDate: string
       requestId: requests.id,
       employeeId: requests.employeeId,
       requestType: requests.requestType,
+      priority: requests.priority,
       status: requests.status,
       submittedAt: requests.submittedAt,
       date: requestDates.date,

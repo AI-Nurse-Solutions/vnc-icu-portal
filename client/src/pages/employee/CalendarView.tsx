@@ -23,6 +23,7 @@ type DrillRow = {
   employeeId: number;
   displayName: string;
   requestType: string;
+  priority?: number | null;
   status: string;
   seniorityDate: Date;
   submittedAt: Date;
@@ -124,6 +125,7 @@ function DrillDownPanel({
               <div className="space-y-1 animate-stagger">
                 {vacation.map((r, idx) => {
                   const isAboveCap = idx === cap;
+                  const isNonFirstPriority = r.priority != null && r.priority > 1;
                   return (
                     <div key={r.requestId}>
                       {isAboveCap && (
@@ -132,12 +134,27 @@ function DrillDownPanel({
                       <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs ${
                         idx < cap ? "bg-secondary/30" : "bg-destructive/5 opacity-70"
                       }`}>
+                        {/* Seniority rank bubble */}
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                           idx < cap ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                         }`}>
                           {r.rank}
                         </span>
-                        <span className="font-medium text-foreground flex-1 truncate">{r.displayName}</span>
+                        {/* Name — amber if non-first-priority */}
+                        <span className={`font-medium flex-1 truncate ${
+                          isNonFirstPriority ? "text-amber-400" : "text-foreground"
+                        }`}>
+                          {r.displayName}
+                        </span>
+                        {/* Priority badge — only shown for non-P1 */}
+                        {isNonFirstPriority && (
+                          <span
+                            className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0"
+                            title={`This is their P${r.priority} request — not their first choice`}
+                          >
+                            P{r.priority}
+                          </span>
+                        )}
                         <span className={`badge-${r.status}`}>{r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>
                       </div>
                     </div>
