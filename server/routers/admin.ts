@@ -251,6 +251,23 @@ export const adminRouter = router({
       return results;
     }),
 
+  // Get all requests for a specific employee (admin view)
+  getEmployeeRequests: publicProcedure
+    .input(z.object({ employeeId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      await requireAdmin(ctx);
+      const { getRequestsByEmployee, getRequestDates } = await import("../db");
+      const reqs = await getRequestsByEmployee(input.employeeId);
+      // Attach dates to each request
+      const withDates = await Promise.all(
+        reqs.map(async (r) => {
+          const dates = await getRequestDates(r.id);
+          return { ...r, dates: dates.map((d: any) => d.date) };
+        })
+      );
+      return withDates;
+    }),
+
   // Get audit log
   getAuditLog: publicProcedure
     .input(z.object({ limit: z.number().min(1).max(500).default(100) }))
