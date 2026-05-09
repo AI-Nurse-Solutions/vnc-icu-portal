@@ -132,7 +132,10 @@ export async function createRequest(data: InsertRequest, dates: string[]) {
   const result = await db.insert(requests).values(data);
   const requestId = (result as any)[0].insertId as number;
   if (dates.length > 0) {
-    const dateRows = dates.map((d) => ({ requestId, date: new Date(d) }));
+    // Store dates as plain "YYYY-MM-DD" strings via sql`` to avoid
+    // mysql2 converting JS Date objects through the server's local timezone
+    // (America/New_York), which shifts UTC midnight dates by +1 day in storage.
+    const dateRows = dates.map((d) => ({ requestId, date: sql`${d}` }));
     await db.insert(requestDates).values(dateRows);
   }
   return requestId;
