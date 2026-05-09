@@ -533,18 +533,33 @@ export default function ExportData() {
                   <tbody>
                     {preview.slice(0, 50).map((row, i) => (
                       <tr key={i} className="border-b border-border/20 hover:bg-secondary/20">
-                        {Object.entries(row).map(([key, v]: any, j) => (
-                          <td key={j} className={`px-3 py-2 whitespace-nowrap ${
-                            key === "status"
-                              ? v === "approved" ? "text-emerald-400 font-semibold"
+                        {Object.entries(row).map(([key, v]: any, j) => {
+                          let cellClass = "text-foreground";
+                          let cellContent = String(v ?? "");
+                          if (key === "status") {
+                            cellClass = v === "approved" ? "text-emerald-400 font-semibold"
                               : v === "pending" ? "text-amber-400 font-semibold"
                               : v === "denied" ? "text-red-400 font-semibold"
-                              : "text-muted-foreground"
-                              : "text-foreground"
-                          }`}>
-                            {String(v ?? "")}
-                          </td>
-                        ))}
+                              : "text-muted-foreground";
+                          } else if (key === "priority") {
+                            const p = Number(v);
+                            cellClass = p > 1
+                              ? "text-amber-400 font-bold"
+                              : "text-emerald-400 font-semibold";
+                            cellContent = `P${p}`;
+                          } else if (key === "seniority_rank_on_date") {
+                            const rk = Number(v);
+                            cellClass = rk === 1 ? "text-primary font-bold"
+                              : rk <= 3 ? "text-foreground font-semibold"
+                              : "text-muted-foreground";
+                            cellContent = `#${v}`;
+                          }
+                          return (
+                            <td key={j} className={`px-3 py-2 whitespace-nowrap ${cellClass}`}>
+                              {cellContent}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>

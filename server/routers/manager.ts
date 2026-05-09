@@ -243,15 +243,52 @@ export const managerRouter = router({
         details: { startDate: input.startDate, endDate: input.endDate, shift: input.shift, requestType: input.requestType, statuses: input.statuses, rowCount: rows.length },
       });
 
-      return rows.map(r => ({
-        employee_number: r.employeeNumber,
-        employee_name: `${r.firstName} ${r.lastName}`,
-        shift: r.shift,
-        request_type: r.requestType,
-        date: r.date instanceof Date ? r.date.toISOString().split("T")[0] : String(r.date).split("T")[0],
-        status: r.status,
-        decided_date: r.decidedAt ? (r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt)) : "",
-      }));
+      // Compute per-date seniority rank within each shift
+      // Group rows by date+shift, sort by seniorityDate ascending, assign rank
+      const dateShiftGroups: Record<string, typeof rows> = {};
+      for (const r of rows) {
+        const dateStr = r.date instanceof Date ? r.date.toISOString().split("T")[0] : String(r.date).split("T")[0];
+        const key = `${dateStr}|${r.shift}`;
+        if (!dateShiftGroups[key]) dateShiftGroups[key] = [];
+        dateShiftGroups[key].push(r);
+      }
+      // Sort each group by seniority date ascending (most senior = rank 1)
+      for (const key of Object.keys(dateShiftGroups)) {
+        dateShiftGroups[key].sort((a, b) => {
+          const sa = a.seniorityDate instanceof Date ? a.seniorityDate : new Date(a.seniorityDate ?? 0);
+          const sb = b.seniorityDate instanceof Date ? b.seniorityDate : new Date(b.seniorityDate ?? 0);
+          return sa.getTime() - sb.getTime();
+        });
+      }
+      // Build rank lookup: employeeNumber+date+shift -> rank
+      const rankMap: Record<string, number> = {};
+      for (const [, group] of Object.entries(dateShiftGroups)) {
+        group.forEach((r, idx) => {
+          const dateStr = r.date instanceof Date ? r.date.toISOString().split("T")[0] : String(r.date).split("T")[0];
+          const rankKey = `${r.employeeNumber}|${dateStr}|${r.shift}`;
+          rankMap[rankKey] = idx + 1;
+        });
+      }
+      return rows.map(r => {
+        const dateStr = r.date instanceof Date ? r.date.toISOString().split("T")[0] : String(r.date).split("T")[0];
+        const rankKey = `${r.employeeNumber}|${dateStr}|${r.shift}`;
+        return {
+          employee_number: r.employeeNumber,
+          employee_name: `${r.firstName} ${r.lastName}`,
+          shift: r.shift,
+          seniority_date: r.seniorityDate instanceof Date
+            ? r.seniorityDate.toISOString().split("T")[0]
+            : String(r.seniorityDate ?? "").split("T")[0],
+          request_type: r.requestType,
+          priority: r.priority ?? 1,
+          date: dateStr,
+          seniority_rank_on_date: rankMap[rankKey] ?? "",
+          status: r.status,
+          decided_date: r.decidedAt
+            ? (r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt))
+            : "",
+        };
+      });
     }),
 
   // Submit a granular decision: per-date approve/deny with admin note

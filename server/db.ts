@@ -236,7 +236,9 @@ export async function getApprovedRequestsForExport(
       firstName: employees.firstName,
       lastName: employees.lastName,
       shift: employees.shift,
+      seniorityDate: employees.seniorityDate,
       requestType: requests.requestType,
+      priority: requests.priority,
       date: requestDates.date,
       status: requests.status,
       decidedAt: requests.decidedAt,
@@ -246,7 +248,7 @@ export async function getApprovedRequestsForExport(
     .innerJoin(requests, eq(requestDates.requestId, requests.id))
     .innerJoin(employees, eq(requests.employeeId, employees.id))
     .where(and(...conditions))
-    .orderBy(requestDates.date, employees.shift);
+    .orderBy(requestDates.date, employees.shift, employees.seniorityDate);
 }
 
 // Get all requests with full info for manager review
