@@ -97,6 +97,45 @@ export default function Dashboard() {
 
   if (!employee) return null;
 
+  // ── Employee lockout ─────────────────────────────────────────────────────────
+  // Only employee and ancillary roles are blocked. Managers, admins, and
+  // super_admins continue to have full access.
+  if (employee.role === "employee" || employee.role === "ancillary") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="max-w-xl w-full text-center space-y-8">
+          {/* Icon */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <HeartPulse className="w-10 h-10 text-primary" />
+            </div>
+          </div>
+
+          {/* Portal name */}
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">VNC ICU Vacation Request Portal</h1>
+            <p className="text-sm text-muted-foreground mt-1">Van Ness Campus &middot; Critical Care Unit</p>
+          </div>
+
+          {/* Lockout message */}
+          <div className="rounded-xl border border-primary/40 bg-primary/5 px-8 py-8 shadow-sm">
+            <p className="text-xl font-bold text-foreground leading-relaxed">
+              Review and deliberation of all requests are on-going, Validation of everyone&apos;s seniority dates are being done first. Thank you for your patience.
+            </p>
+          </div>
+
+          {/* Sign out */}
+          <button
+            onClick={() => logoutMutation.mutate()}
+            className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const employeeNav = [
     { href: "/dashboard", label: "Calendar View", icon: Calendar },
     { href: "/dashboard/my-requests", label: "My Requests", icon: ClipboardList },
