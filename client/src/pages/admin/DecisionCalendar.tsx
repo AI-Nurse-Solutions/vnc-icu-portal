@@ -44,6 +44,7 @@ type DayRequest = {
   submittedAt: string;
   comment: string | null;
   workingPriority: number | null;
+  summerShutout: boolean;
   seniorityRank: number;
   overCap: boolean;
 };
@@ -230,13 +231,19 @@ function DayDrillDown({
             </div>
           ) : (
             shiftsToShow.map(shift => {
-              const shiftReqs = (byShift[shift] ?? []).sort((a, b) => {
-                if (a.priority !== b.priority) return a.priority - b.priority;
+              // Sort by WP ascending (null last), then seniority date ascending (most senior first)
+              // Summer shut-out rows are sorted to the bottom
+              const shiftReqs = (byShift[shift] ?? []).slice().sort((a, b) => {
+                if (a.summerShutout !== b.summerShutout) return a.summerShutout ? 1 : -1;
+                const wpA = a.workingPriority ?? 9999;
+                const wpB = b.workingPriority ?? 9999;
+                if (wpA !== wpB) return wpA - wpB;
                 return a.seniorityDate.localeCompare(b.seniorityDate);
               });
               if (shiftReqs.length === 0) return null;
               const sc = SHIFT_COLORS[shift];
               const cap = data.cap;
+              const shutoutCount = shiftReqs.filter(r => r.summerShutout).length;
 
               return (
                 <div key={shift}>
@@ -254,29 +261,62 @@ function DayDrillDown({
                     )}
                   </div>
 
+                  {/* Summer cap summary banner */}
+                  {shutoutCount > 0 && (
+                    <div className="mb-3 flex items-start gap-2 rounded-lg border border-orange-500/30 bg-orange-500/8 px-3 py-2">
+                      <span className="mt-0.5 text-orange-400">☀</span>
+                      <div>
+                        <p className="text-xs font-semibold text-orange-300">Summer 14-Day Cap Applied</p>
+                        <p className="text-[11px] text-orange-400/80 mt-0.5">
+                          {shutoutCount} request{shutoutCount !== 1 ? "s" : ""} on this date exceed the 14-consecutive-day limit for July/August and are shut out. These rows are listed at the bottom and excluded from the 8-person cap count.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Request rows */}
                   <div className="space-y-2">
                     {shiftReqs.map((req, idx) => {
-                      const isOverCap = idx >= cap;
+                      const isOverCap = req.overCap;
+                      const isSummerShutout = req.summerShutout;
                       const isPending = req.status === "pending";
                       const isApproved = req.status === "approved";
                       const isDenied = req.status === "denied";
 
                       return (
                         <div key={req.requestId}>
-                          {/* Cap line indicator */}
-                          {idx === cap && (
-                            <div className="flex items-center gap-2 my-2">
-                              <div className="flex-1 h-px bg-red-500/50" />
-                              <span className="text-[10px] text-red-400 font-semibold px-2 py-0.5 rounded bg-red-500/10 border border-red-500/30">
-                                ── 8-PERSON CAP ──
-                              </span>
-                              <div className="flex-1 h-px bg-red-500/50" />
-                            </div>
-                          )}
+                          {/* Cap line indicator — show before first over-cap non-shutout row */}
+                          {!isSummerShutout && isOverCap && (() => {
+                            const prevReq = shiftReqs[idx - 1];
+                            return prevReq && !prevReq.overCap ? (
+                              <div className="flex items-center gap-2 my-2">
+                                <div className="flex-1 h-px bg-red-500/50" />
+                                <span className="text-[10px] text-red-400 font-semibold px-2 py-0.5 rounded bg-red-500/10 border border-red-500/30">
+                                  ── 8-PERSON CAP ──
+                                </span>
+                                <div className="flex-1 h-px bg-red-500/50" />
+                              </div>
+                            ) : null;
+                          })()
+                          }
+                          {/* Summer shut-out divider — show before first shut-out row */}
+                          {isSummerShutout && (() => {
+                            const prevReq = shiftReqs[idx - 1];
+                            return prevReq && !prevReq.summerShutout ? (
+                              <div className="flex items-center gap-2 my-2">
+                                <div className="flex-1 h-px bg-orange-500/40" />
+                                <span className="text-[10px] text-orange-400 font-semibold px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/30">
+                                  ☀ SUMMER 14-DAY CAP — SHUT OUT BELOW
+                                </span>
+                                <div className="flex-1 h-px bg-orange-500/40" />
+                              </div>
+                            ) : null;
+                          })()}
 
                           <div className={`rounded-lg border px-4 py-3 transition-all ${
-                            isOverCap
+                            isSummerShutout
+                              ? "border-orange-500/30 bg-orange-500/5 opacity-70"
+                              : isOverCap
                               ? "border-red-500/20 bg-red-500/5 opacity-75"
                               : isApproved
                               ? "border-emerald-500/30 bg-emerald-500/5"
@@ -287,11 +327,13 @@ function DayDrillDown({
                             <div className="flex items-center gap-3 flex-wrap">
                               {/* Rank */}
                               <span className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                                isOverCap
+                                isSummerShutout
+                                  ? "bg-orange-500/20 text-orange-400"
+                                  : isOverCap
                                   ? "bg-red-500/20 text-red-400"
                                   : "bg-teal-500/20 text-teal-300"
                               }`}>
-                                {idx + 1}
+                                {isSummerShutout ? "☀" : idx + 1}
                               </span>
 
                               {/* Name */}
@@ -305,6 +347,11 @@ function DayDrillDown({
                                   )}
                                   <PriorityBadge priority={req.priority} />
                                   <WorkingPriorityBadge wp={req.workingPriority} />
+                                  {isSummerShutout && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-orange-500/40 bg-orange-500/10 text-orange-300">
+                                      ☀ Summer Cap — Shut Out
+                                    </span>
+                                  )}
                                   <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs border ${STATUS_STYLES[req.status] ?? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30"}`}>
                                     {req.status}
                                   </span>

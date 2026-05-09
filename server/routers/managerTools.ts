@@ -333,6 +333,7 @@ export const managerToolsRouter = router({
         submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : String(r.submittedAt),
         comment: r.comment ?? null,
         workingPriority: r.workingPriority ?? null,
+        summerShutout: r.summerShutout ?? false,
         // Seniority rank on this date (1 = most senior)
         seniorityRank: idx + 1,
         // Over cap flag
@@ -356,9 +357,17 @@ export const managerToolsRouter = router({
           if (wpA !== wpB) return wpA - wpB;
           return a.seniorityDate.localeCompare(b.seniorityDate);
         });
+        // Assign ranks and cap flags.
+        // Summer shut-out rows are always excluded from the cap count and ranked last.
+        let capSlot = 0;
         shiftRows.forEach((r, i) => {
           r.seniorityRank = i + 1;
-          r.overCap = i >= cap;
+          if (r.summerShutout) {
+            r.overCap = true; // shut-out rows are always over cap
+          } else {
+            r.overCap = capSlot >= cap;
+            capSlot++;
+          }
         });
       }
 

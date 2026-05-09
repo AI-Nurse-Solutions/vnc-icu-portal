@@ -1,0 +1,1 @@
+ALTER TABLE `request_dates` ADD `summer_shutout` boolean DEFAULT false;

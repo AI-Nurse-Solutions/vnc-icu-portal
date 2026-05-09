@@ -672,6 +672,7 @@ export async function getDecisionCalendarDay(date: string, shift?: string) {
       submittedAt: requests.submittedAt,
       comment: requests.comment,
       workingPriority: requests.workingPriority,
+      summerShutout: requestDates.summerShutout,
     })
     .from(requestDates)
     .innerJoin(requests, eq(requestDates.requestId, requests.id))

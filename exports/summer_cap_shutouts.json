@@ -1,0 +1,642 @@
+[
+  {
+    "request_id": "1890001",
+    "employee_number": "sb1",
+    "last_name": "Barbera",
+    "first_name": "Shereyah",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 6,
+    "allowed_dates": 1,
+    "shutout_count": 5,
+    "first_shutout_date": "2026-07-24",
+    "last_shutout_date": "2026-07-28",
+    "shutout_dates": [
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-28"
+    ],
+    "allowed_date_range": "2026-07-22 \u2192 2026-07-22"
+  },
+  {
+    "request_id": "240010",
+    "employee_number": "27400872",
+    "last_name": "Blanchard",
+    "first_name": "Mary",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 6,
+    "allowed_dates": 4,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-07-20",
+    "last_shutout_date": "2026-07-21",
+    "shutout_dates": [
+      "2026-07-20",
+      "2026-07-21"
+    ],
+    "allowed_date_range": "2026-07-13 \u2192 2026-07-16"
+  },
+  {
+    "request_id": "750001",
+    "employee_number": "27414068",
+    "last_name": "Caillier",
+    "first_name": "Lindsey",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 10,
+    "allowed_dates": 5,
+    "shutout_count": 5,
+    "first_shutout_date": "2026-07-20",
+    "last_shutout_date": "2026-07-24",
+    "shutout_dates": [
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23",
+      "2026-07-24"
+    ],
+    "allowed_date_range": "2026-07-13 \u2192 2026-07-17"
+  },
+  {
+    "request_id": "5190001",
+    "employee_number": "27422804",
+    "last_name": "Colvin",
+    "first_name": "Matt",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 16,
+    "allowed_dates": 14,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-06",
+    "last_shutout_date": "2026-08-07",
+    "shutout_dates": [
+      "2026-08-06",
+      "2026-08-07"
+    ],
+    "allowed_date_range": "2026-07-23 \u2192 2026-08-05"
+  },
+  {
+    "request_id": "4380001",
+    "employee_number": "jul2024as",
+    "last_name": "Constantinesco",
+    "first_name": "Catherine",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 15,
+    "allowed_dates": 14,
+    "shutout_count": 1,
+    "first_shutout_date": "2026-08-12",
+    "last_shutout_date": "2026-08-12",
+    "shutout_dates": [
+      "2026-08-12"
+    ],
+    "allowed_date_range": "2026-07-29 \u2192 2026-08-11"
+  },
+  {
+    "request_id": "7470003",
+    "employee_number": "98602704",
+    "last_name": "Davis",
+    "first_name": "Adam",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 16,
+    "allowed_dates": 14,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-08",
+    "last_shutout_date": "2026-08-09",
+    "shutout_dates": [
+      "2026-08-08",
+      "2026-08-09"
+    ],
+    "allowed_date_range": "2026-07-25 \u2192 2026-08-07"
+  },
+  {
+    "request_id": "2100001",
+    "employee_number": "elizabm",
+    "last_name": "DeMare",
+    "first_name": "Elizabeth",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 6,
+    "allowed_dates": 2,
+    "shutout_count": 4,
+    "first_shutout_date": "2026-07-25",
+    "last_shutout_date": "2026-07-28",
+    "shutout_dates": [
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-28"
+    ],
+    "allowed_date_range": "2026-07-21 \u2192 2026-07-22"
+  },
+  {
+    "request_id": "6090001",
+    "employee_number": "27413386",
+    "last_name": "Esteban",
+    "first_name": "Claudine",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 9,
+    "allowed_dates": 6,
+    "shutout_count": 3,
+    "first_shutout_date": "2026-07-19",
+    "last_shutout_date": "2026-07-21",
+    "shutout_dates": [
+      "2026-07-19",
+      "2026-07-20",
+      "2026-07-21"
+    ],
+    "allowed_date_range": "2026-07-09 \u2192 2026-07-14"
+  },
+  {
+    "request_id": "420001",
+    "employee_number": "florog",
+    "last_name": "Floro",
+    "first_name": "Gregorio Jr",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 21,
+    "allowed_dates": 14,
+    "shutout_count": 7,
+    "first_shutout_date": "2026-07-19",
+    "last_shutout_date": "2026-07-25",
+    "shutout_dates": [
+      "2026-07-19",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-25"
+    ],
+    "allowed_date_range": "2026-07-05 \u2192 2026-07-18"
+  },
+  {
+    "request_id": "4950001",
+    "employee_number": "27424993",
+    "last_name": "Gamboa",
+    "first_name": "Nicholas",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 12,
+    "allowed_dates": 2,
+    "shutout_count": 10,
+    "first_shutout_date": "2026-07-09",
+    "last_shutout_date": "2026-07-28",
+    "shutout_dates": [
+      "2026-07-09",
+      "2026-07-10",
+      "2026-07-13",
+      "2026-07-14",
+      "2026-07-18",
+      "2026-07-19",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-27",
+      "2026-07-28"
+    ],
+    "allowed_date_range": "2026-07-04 \u2192 2026-07-05"
+  },
+  {
+    "request_id": "7050003",
+    "employee_number": "22123",
+    "last_name": "Geertsema",
+    "first_name": "Jacquelyn",
+    "shift": "AM",
+    "working_priority": "3",
+    "total_summer_dates": 4,
+    "allowed_dates": 2,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-07-06",
+    "last_shutout_date": "2026-07-07",
+    "shutout_dates": [
+      "2026-07-06",
+      "2026-07-07"
+    ],
+    "allowed_date_range": "2026-07-02 \u2192 2026-07-03"
+  },
+  {
+    "request_id": "1770002",
+    "employee_number": "98601780",
+    "last_name": "Gill",
+    "first_name": "Sarbmann",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 16,
+    "allowed_dates": 14,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-30",
+    "last_shutout_date": "2026-08-31",
+    "shutout_dates": [
+      "2026-08-30",
+      "2026-08-31"
+    ],
+    "allowed_date_range": "2026-08-16 \u2192 2026-08-29"
+  },
+  {
+    "request_id": "2580006",
+    "employee_number": "27411683",
+    "last_name": "Huang",
+    "first_name": "Harriet",
+    "shift": "AM",
+    "working_priority": "3",
+    "total_summer_dates": 2,
+    "allowed_dates": 1,
+    "shutout_count": 1,
+    "first_shutout_date": "2026-08-12",
+    "last_shutout_date": "2026-08-12",
+    "shutout_dates": [
+      "2026-08-12"
+    ],
+    "allowed_date_range": "2026-08-10 \u2192 2026-08-10"
+  },
+  {
+    "request_id": "1050002",
+    "employee_number": "27424763",
+    "last_name": "Kwong",
+    "first_name": "Timothy",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 5,
+    "allowed_dates": 1,
+    "shutout_count": 4,
+    "first_shutout_date": "2026-07-23",
+    "last_shutout_date": "2026-07-26",
+    "shutout_dates": [
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26"
+    ],
+    "allowed_date_range": "2026-07-14 \u2192 2026-07-14"
+  },
+  {
+    "request_id": "3660002",
+    "employee_number": "27408772",
+    "last_name": "Lazo",
+    "first_name": "Ana Lisa",
+    "shift": "AM",
+    "working_priority": "3",
+    "total_summer_dates": 3,
+    "allowed_dates": 1,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-27",
+    "last_shutout_date": "2026-08-28",
+    "shutout_dates": [
+      "2026-08-27",
+      "2026-08-28"
+    ],
+    "allowed_date_range": "2026-08-21 \u2192 2026-08-21"
+  },
+  {
+    "request_id": "6180002",
+    "employee_number": "27424577",
+    "last_name": "Lee",
+    "first_name": "Timothy",
+    "shift": "NOC",
+    "working_priority": "4",
+    "total_summer_dates": 8,
+    "allowed_dates": 6,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-03",
+    "last_shutout_date": "2026-08-04",
+    "shutout_dates": [
+      "2026-08-03",
+      "2026-08-04"
+    ],
+    "allowed_date_range": "2026-07-26 \u2192 2026-07-31"
+  },
+  {
+    "request_id": "990004",
+    "employee_number": "27421490",
+    "last_name": "Lee",
+    "first_name": "Wei-Han",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 4,
+    "allowed_dates": 2,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-07-25",
+    "last_shutout_date": "2026-07-26",
+    "shutout_dates": [
+      "2026-07-25",
+      "2026-07-26"
+    ],
+    "allowed_date_range": "2026-07-21 \u2192 2026-07-22"
+  },
+  {
+    "request_id": "5910001",
+    "employee_number": "27416485",
+    "last_name": "Maregmen",
+    "first_name": "Joman",
+    "shift": "AM",
+    "working_priority": "2",
+    "total_summer_dates": 3,
+    "allowed_dates": 2,
+    "shutout_count": 1,
+    "first_shutout_date": "2026-07-11",
+    "last_shutout_date": "2026-07-11",
+    "shutout_dates": [
+      "2026-07-11"
+    ],
+    "allowed_date_range": "2026-07-06 \u2192 2026-07-07"
+  },
+  {
+    "request_id": "7410004",
+    "employee_number": "27416485",
+    "last_name": "Maregmen",
+    "first_name": "Joman",
+    "shift": "AM",
+    "working_priority": "3",
+    "total_summer_dates": 4,
+    "allowed_dates": 2,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-22",
+    "last_shutout_date": "2026-08-23",
+    "shutout_dates": [
+      "2026-08-22",
+      "2026-08-23"
+    ],
+    "allowed_date_range": "2026-08-17 \u2192 2026-08-18"
+  },
+  {
+    "request_id": "240003",
+    "employee_number": "27418414",
+    "last_name": "Motley",
+    "first_name": "Anna",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 6,
+    "allowed_dates": 2,
+    "shutout_count": 4,
+    "first_shutout_date": "2026-07-25",
+    "last_shutout_date": "2026-07-31",
+    "shutout_dates": [
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-30",
+      "2026-07-31"
+    ],
+    "allowed_date_range": "2026-07-20 \u2192 2026-07-21"
+  },
+  {
+    "request_id": "7920001",
+    "employee_number": "panganj",
+    "last_name": "Pangan",
+    "first_name": "Jo",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 6,
+    "allowed_dates": 1,
+    "shutout_count": 5,
+    "first_shutout_date": "2026-07-19",
+    "last_shutout_date": "2026-07-23",
+    "shutout_dates": [
+      "2026-07-19",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23"
+    ],
+    "allowed_date_range": "2026-07-17 \u2192 2026-07-17"
+  },
+  {
+    "request_id": "3540001",
+    "employee_number": "Mar252024",
+    "last_name": "Papa",
+    "first_name": "Ma Carmela",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 3,
+    "allowed_dates": 1,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-07-15",
+    "last_shutout_date": "2026-07-18",
+    "shutout_dates": [
+      "2026-07-15",
+      "2026-07-18"
+    ],
+    "allowed_date_range": "2026-07-12 \u2192 2026-07-12"
+  },
+  {
+    "request_id": "3960001",
+    "employee_number": "27401054",
+    "last_name": "Penaflorida",
+    "first_name": "Carlos",
+    "shift": "PM",
+    "working_priority": "1",
+    "total_summer_dates": 24,
+    "allowed_dates": 14,
+    "shutout_count": 10,
+    "first_shutout_date": "2026-07-20",
+    "last_shutout_date": "2026-07-29",
+    "shutout_dates": [
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29"
+    ],
+    "allowed_date_range": "2026-07-06 \u2192 2026-07-19"
+  },
+  {
+    "request_id": "1680001",
+    "employee_number": "27403355",
+    "last_name": "Reda",
+    "first_name": "Ruth",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 4,
+    "allowed_dates": 2,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-07-27",
+    "last_shutout_date": "2026-07-28",
+    "shutout_dates": [
+      "2026-07-27",
+      "2026-07-28"
+    ],
+    "allowed_date_range": "2026-07-23 \u2192 2026-07-24"
+  },
+  {
+    "request_id": "5190002",
+    "employee_number": "27418834",
+    "last_name": "Santos",
+    "first_name": "Vilma",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 7,
+    "allowed_dates": 1,
+    "shutout_count": 6,
+    "first_shutout_date": "2026-08-05",
+    "last_shutout_date": "2026-08-16",
+    "shutout_dates": [
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-13",
+      "2026-08-14",
+      "2026-08-15",
+      "2026-08-16"
+    ],
+    "allowed_date_range": "2026-08-03 \u2192 2026-08-03"
+  },
+  {
+    "request_id": "450001",
+    "employee_number": "evonnes",
+    "last_name": "Seisa",
+    "first_name": "Evonne",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 3,
+    "allowed_dates": 2,
+    "shutout_count": 1,
+    "first_shutout_date": "2026-07-08",
+    "last_shutout_date": "2026-07-08",
+    "shutout_dates": [
+      "2026-07-08"
+    ],
+    "allowed_date_range": "2026-07-04 \u2192 2026-07-05"
+  },
+  {
+    "request_id": "5970001",
+    "employee_number": "tempgagan",
+    "last_name": "Singh",
+    "first_name": "Gaganjyot",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 5,
+    "allowed_dates": 3,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-07-22",
+    "last_shutout_date": "2026-07-29",
+    "shutout_dates": [
+      "2026-07-22",
+      "2026-07-29"
+    ],
+    "allowed_date_range": "2026-07-18 \u2192 2026-07-20"
+  },
+  {
+    "request_id": "1770004",
+    "employee_number": "masons",
+    "last_name": "Stewart",
+    "first_name": "Mason",
+    "shift": "NOC",
+    "working_priority": "2",
+    "total_summer_dates": 6,
+    "allowed_dates": 4,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-29",
+    "last_shutout_date": "2026-08-30",
+    "shutout_dates": [
+      "2026-08-29",
+      "2026-08-30"
+    ],
+    "allowed_date_range": "2026-08-13 \u2192 2026-08-16"
+  },
+  {
+    "request_id": "630004",
+    "employee_number": "cassT",
+    "last_name": "Topor",
+    "first_name": "Cassandra",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 9,
+    "allowed_dates": 1,
+    "shutout_count": 8,
+    "first_shutout_date": "2026-07-21",
+    "last_shutout_date": "2026-08-04",
+    "shutout_dates": [
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-08-03",
+      "2026-08-04"
+    ],
+    "allowed_date_range": "2026-07-14 \u2192 2026-07-14"
+  },
+  {
+    "request_id": "1830001",
+    "employee_number": "98603823",
+    "last_name": "Villanueva",
+    "first_name": "Nicolas",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 6,
+    "allowed_dates": 2,
+    "shutout_count": 4,
+    "first_shutout_date": "2026-07-23",
+    "last_shutout_date": "2026-07-26",
+    "shutout_dates": [
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26"
+    ],
+    "allowed_date_range": "2026-07-15 \u2192 2026-07-16"
+  },
+  {
+    "request_id": "5460001",
+    "employee_number": "27410271",
+    "last_name": "Weber-Stover",
+    "first_name": "Justin",
+    "shift": "AM",
+    "working_priority": "1",
+    "total_summer_dates": 16,
+    "allowed_dates": 14,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-22",
+    "last_shutout_date": "2026-08-23",
+    "shutout_dates": [
+      "2026-08-22",
+      "2026-08-23"
+    ],
+    "allowed_date_range": "2026-08-08 \u2192 2026-08-21"
+  },
+  {
+    "request_id": "2220001",
+    "employee_number": "27410884",
+    "last_name": "burkhina",
+    "first_name": "olga",
+    "shift": "NOC",
+    "working_priority": "3",
+    "total_summer_dates": 4,
+    "allowed_dates": 1,
+    "shutout_count": 3,
+    "first_shutout_date": "2026-07-09",
+    "last_shutout_date": "2026-07-12",
+    "shutout_dates": [
+      "2026-07-09",
+      "2026-07-11",
+      "2026-07-12"
+    ],
+    "allowed_date_range": "2026-07-05 \u2192 2026-07-05"
+  },
+  {
+    "request_id": "2220003",
+    "employee_number": "27410884",
+    "last_name": "burkhina",
+    "first_name": "olga",
+    "shift": "NOC",
+    "working_priority": "1",
+    "total_summer_dates": 4,
+    "allowed_dates": 2,
+    "shutout_count": 2,
+    "first_shutout_date": "2026-08-20",
+    "last_shutout_date": "2026-08-21",
+    "shutout_dates": [
+      "2026-08-20",
+      "2026-08-21"
+    ],
+    "allowed_date_range": "2026-08-10 \u2192 2026-08-11"
+  }
+]

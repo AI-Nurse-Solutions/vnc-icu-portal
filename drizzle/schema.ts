@@ -68,6 +68,7 @@ export const requestDates = mysqlTable("request_dates", {
   id: int("id").autoincrement().primaryKey(),
   requestId: int("request_id").notNull(),
   date: date("date").notNull(),
+  summerShutout: boolean("summer_shutout").default(false), // true = beyond 14-day consecutive cap in Jul/Aug
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

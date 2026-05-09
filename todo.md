@@ -219,3 +219,12 @@
 - [x] Add WorkingPriorityBadge component (teal WP1, sky WP2, indigo WP3-4, zinc WP5+) to DecisionCalendar
 - [x] Show WP badge on every row next to P badge in drill-down panel
 - [x] Update legend text to explain P# vs WP# distinction
+
+## Decision Calendar Rules Update (May 9, 2026)
+- [x] Fix sort order: WP ascending first, then seniority date ascending (most senior wins ties)
+- [x] Add summer_14day_shutout boolean column to request_dates table
+- [x] Compute and persist shut-out flags: July/August dates beyond day 14 of consecutive run
+- [x] Build analysis script to identify all affected employees and their shut-out dates
+- [x] Update getDecisionCalendarDay backend to mark shut-out rows and exclude them from cap count
+- [x] Update Decision Calendar UI: show "Summer 14-Day Cap — Shut Out" notation on affected rows
+- [x] Add summer cap banner and orange divider line in the drill-down
