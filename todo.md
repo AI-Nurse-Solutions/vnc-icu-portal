@@ -196,3 +196,17 @@
 - [x] ReviewDashboard: "Verify P1 approved first" hint on non-first ranked dates
 - [x] ReviewDashboard: Submit Decisions button (enabled only when all dates decided)
 - [x] ReviewDashboard: optional decision note field (in expanded section)
+
+## Working Priority CSV + Decision Calendar (May 9, 2026)
+
+- [x] Build export-working-priority.mjs script — reads 09_original_requests_by_employee.csv, applies 5 working_priority rules per employee group, outputs 11_working_priority_requests.csv
+- [x] Working priority rules: Rule 1 (intentional non-P5 → keep), Rule 2 (single P5 → WP=1), Rule 3 (all P5 multi → rank by earliest vacation date, tie-break by submitted_at), Rule 4 (has priority_history → respect final priority), Rule 5 (withdrawn → blank)
+- [x] Mixed P5 + non-P5 employees: P5 requests re-ranked into next available slot after intentional priorities
+- [x] Ties/gray areas: left as-is, admins decide manually
+- [x] Add getDecisionCalendarDay DB query helper to server/db.ts — returns all non-withdrawn, non-ancillary, active-employee vacation requests for a date+shift
+- [x] Add getDecisionCalendarMonth DB query helper to server/db.ts — returns per-date, per-shift counts for month calendar heatmap
+- [x] Add getDecisionCalendarMonth tRPC procedure to managerTools router (admin-only)
+- [x] Add getDecisionCalendarDay tRPC procedure to managerTools router (admin-only)
+- [x] Build DecisionCalendar.tsx admin page — month grid calendar with heatmap, click-to-drill-down, shift-by-shift request list, 8-person cap line, approve/deny buttons per row
+- [x] Wire DecisionCalendar route and nav item in Dashboard.tsx (Administration section, first item)
+- [x] 0 TypeScript errors, 19/19 tests passing

@@ -6,7 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
-  Calendar, ClipboardList, Settings, Users, FileDown,
+  Calendar, CalendarDays, ClipboardList, Settings, Users, FileDown,
   LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
   LayoutDashboard, Flame, TrendingUp, Star, Sun, Moon
 } from "lucide-react";
@@ -25,6 +25,7 @@ import AdminAuditLog from "./admin/AdminAuditLog";
 import AdminImport from "./admin/AdminImport";
 import AuditLog from "./admin/AuditLog";
 import SuperAdminDates from "./superadmin/SuperAdminDates";
+import DecisionCalendar from "./admin/DecisionCalendar";
 
 /** Guard component — shows "Access Denied" if the user lacks the required role */
 function RoleGuard({ allowed, children }: { allowed: boolean; children: React.ReactNode }) {
@@ -157,6 +158,7 @@ export default function Dashboard() {
   ];
 
   const adminNav = [
+    { href: "/dashboard/admin/decision-calendar", label: "Decision Calendar", icon: CalendarDays },
     { href: "/dashboard/admin/employees", label: "Employees", icon: Users },
     { href: "/dashboard/admin/import", label: "CSV Import", icon: FileDown },
     { href: "/dashboard/admin/audit", label: "Audit Log (Legacy)", icon: Shield },
@@ -172,6 +174,7 @@ export default function Dashboard() {
     "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
     "/dashboard/tools/review-dashboard", "/dashboard/tools/hot-dates",
     "/dashboard/tools/ceiling-tracker", "/dashboard/tools/audit-log",
+    "/dashboard/admin/decision-calendar",
     "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit",
     "/dashboard/superadmin/add-dates",
   ];
@@ -353,7 +356,10 @@ export default function Dashboard() {
           {location === "/dashboard/tools/audit-log" && (
             <RoleGuard allowed={isManager}><AuditLog /></RoleGuard>
           )}
-          {/* ─── Admin ─────────────────────────────────────────────────────── */}
+           {/* ─── Admin ────────────────────────────────────────────────────── */}
+          {location === "/dashboard/admin/decision-calendar" && (
+            <RoleGuard allowed={isAdmin}><DecisionCalendar /></RoleGuard>
+          )}
           {location === "/dashboard/admin/employees" && (
             <RoleGuard allowed={isAdmin}><AdminEmployees /></RoleGuard>
           )}

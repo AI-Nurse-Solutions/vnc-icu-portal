@@ -634,3 +634,95 @@ export async function getAuditLogWithActors(opts: {
     total: Number(countRows[0]?.count ?? 0),
   };
 }
+
+// ─── Decision Calendar ────────────────────────────────────────────────────────
+// Get all non-withdrawn, non-ancillary, active-employee requests for a given date.
+// Returns one row per request (not per date), with employee info.
+// Shift filter is optional — if omitted, returns all shifts.
+export async function getDecisionCalendarDay(date: string, shift?: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const whereConditions = [
+    sql`${requestDates.date} = ${date}`,
+    sql`${requests.status} != 'withdrawn'`,
+    eq(requests.requestType, "vacation"),
+    eq(employees.isActive, true),
+    sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+    sql`${employees.role} != 'ancillary'`,
+  ];
+  if (shift) {
+    whereConditions.push(sql`${employees.shift} = ${shift}`);
+  }
+
+  const rows = await db
+    .select({
+      requestId: requests.id,
+      employeeId: requests.employeeId,
+      employeeNumber: employees.employeeNumber,
+      firstName: employees.firstName,
+      lastName: employees.lastName,
+      shift: employees.shift,
+      seniorityDate: employees.seniorityDate,
+      isVerified: employees.isVerified,
+      requestType: requests.requestType,
+      continuityType: requests.continuityType,
+      priority: requests.priority,
+      status: requests.status,
+      submittedAt: requests.submittedAt,
+      comment: requests.comment,
+    })
+    .from(requestDates)
+    .innerJoin(requests, eq(requestDates.requestId, requests.id))
+    .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .where(and(...whereConditions))
+    .orderBy(requests.priority, employees.seniorityDate);
+
+  // Deduplicate: a request may span multiple dates; we only want it once per date
+  const seen = new Set<number>();
+  return rows.filter(r => {
+    if (seen.has(r.requestId)) return false;
+    seen.add(r.requestId);
+    return true;
+  });
+}
+
+// Get all dates that have at least one non-withdrawn vacation request in a month.
+// Returns { date, shift, count } rows for building the month calendar heatmap.
+export async function getDecisionCalendarMonth(year: number, month: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+  // Last day of month
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+  const rows = await db
+    .select({
+      date: requestDates.date,
+      shift: employees.shift,
+      count: sql<number>`COUNT(DISTINCT ${requests.id})`,
+      approvedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'approved' THEN 1 ELSE 0 END)`,
+      pendingCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'pending' THEN 1 ELSE 0 END)`,
+      deniedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'denied' THEN 1 ELSE 0 END)`,
+    })
+    .from(requestDates)
+    .innerJoin(requests, eq(requestDates.requestId, requests.id))
+    .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .where(
+      and(
+        sql`${requestDates.date} >= ${startDate}`,
+        sql`${requestDates.date} <= ${endDate}`,
+        sql`${requests.status} != 'withdrawn'`,
+        eq(requests.requestType, "vacation"),
+        eq(employees.isActive, true),
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+        sql`${employees.role} != 'ancillary'`
+      )
+    )
+    .groupBy(requestDates.date, employees.shift)
+    .orderBy(requestDates.date, employees.shift);
+
+  return rows;
+}
