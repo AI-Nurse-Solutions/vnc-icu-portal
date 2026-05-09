@@ -33,6 +33,11 @@ export async function getDb() {
         queueLimit: 0,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
+        // Force DATE/DATETIME columns to be returned as strings (YYYY-MM-DD)
+        // This prevents mysql2 from converting DATE values to JS Date objects
+        // using the server's local timezone (America/New_York), which causes
+        // dates stored as UTC midnight to shift back by one day.
+        dateStrings: ["DATE"],
       });
       _db = drizzle(_pool);
     } catch (error) {
