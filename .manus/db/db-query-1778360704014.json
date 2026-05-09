@@ -1,0 +1,40 @@
+{
+  "query": "\n-- For each shift, compute: total cap slots available vs total pending requests\n-- Cap = 8 per shift per day. Count days with any requests.\nWITH shift_day AS (\n  SELECT \n    e.shift,\n    rd.date,\n    COUNT(DISTINCT r.id) AS requests\n  FROM request_dates rd\n  JOIN requests r ON rd.request_id = r.id\n  JOIN employees e ON r.employee_id = e.id\n  WHERE r.request_type = 'vacation' AND r.status = 'pending'\n    AND (e.category != 'ancillary' OR e.category IS NULL)\n    AND e.is_active = 1\n  GROUP BY e.shift, rd.date\n)\nSELECT \n  shift,\n  COUNT(*) AS days_with_requests,\n  SUM(requests) AS total_requests,\n  SUM(LEAST(requests, 8)) AS requests_within_cap,\n  SUM(GREATEST(requests - 8, 0)) AS requests_over_cap,\n  ROUND(100.0 * SUM(LEAST(requests, 8)) / (COUNT(*) * 8), 1) AS cap_utilization_pct,\n  COUNT(CASE WHEN requests > 8 THEN 1 END) AS oversubscribed_days,\n  ROUND(100.0 * COUNT(CASE WHEN requests > 8 THEN 1 END) / COUNT(*), 1) AS pct_days_oversubscribed\nFROM shift_day\nGROUP BY shift\nORDER BY shift;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \n-- For each shift, compute: total cap slots available vs total pending requests\n-- Cap = 8 per shift per day. Count days with any requests.\nWITH shift_day AS (\n  SELECT \n    e.shift,\n    rd.date,\n    COUNT(DISTINCT r.id) AS requests\n  FROM request_dates rd\n  JOIN requests r ON rd.request_id = r.id\n  JOIN employees e ON r.employee_id = e.id\n  WHERE r.request_type = 'vacation' AND r.status = 'pending'\n    AND (e.category != 'ancillary' OR e.category IS NULL)\n    AND e.is_active = 1\n  GROUP BY e.shift, rd.date\n)\nSELECT \n  shift,\n  COUNT(*) AS days_with_requests,\n  SUM(requests) AS total_requests,\n  SUM(LEAST(requests, 8)) AS requests_within_cap,\n  SUM(GREATEST(requests - 8, 0)) AS requests_over_cap,\n  ROUND(100.0 * SUM(LEAST(requests, 8)) / (COUNT(*) * 8), 1) AS cap_utilization_pct,\n  COUNT(CASE WHEN requests > 8 THEN 1 END) AS oversubscribed_days,\n  ROUND(100.0 * COUNT(CASE WHEN requests > 8 THEN 1 END) / COUNT(*), 1) AS pct_days_oversubscribed\nFROM shift_day\nGROUP BY shift\nORDER BY shift;\n",
+  "rows": [
+    {
+      "shift": "AM",
+      "days_with_requests": "216",
+      "total_requests": "1415",
+      "requests_within_cap": "1244",
+      "requests_over_cap": "171",
+      "cap_utilization_pct": "72.0",
+      "oversubscribed_days": "73",
+      "pct_days_oversubscribed": "33.8"
+    },
+    {
+      "shift": "PM",
+      "days_with_requests": "121",
+      "total_requests": "166",
+      "requests_within_cap": "166",
+      "requests_over_cap": "0",
+      "cap_utilization_pct": "17.1",
+      "oversubscribed_days": "0",
+      "pct_days_oversubscribed": "0.0"
+    },
+    {
+      "shift": "NOC",
+      "days_with_requests": "243",
+      "total_requests": "1075",
+      "requests_within_cap": "1033",
+      "requests_over_cap": "42",
+      "cap_utilization_pct": "53.1",
+      "oversubscribed_days": "21",
+      "pct_days_oversubscribed": "8.6"
+    }
+  ],
+  "messages": [],
+  "stdout": "shift\tdays_with_requests\ttotal_requests\trequests_within_cap\trequests_over_cap\tcap_utilization_pct\toversubscribed_days\tpct_days_oversubscribed\nAM\t216\t1415\t1244\t171\t72.0\t73\t33.8\nPM\t121\t166\t166\t0\t17.1\t0\t0.0\nNOC\t243\t1075\t1033\t42\t53.1\t21\t8.6\n",
+  "stderr": "",
+  "execution_time_ms": 272
+}

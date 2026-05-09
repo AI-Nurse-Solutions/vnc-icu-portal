@@ -210,3 +210,12 @@
 - [x] Build DecisionCalendar.tsx admin page — month grid calendar with heatmap, click-to-drill-down, shift-by-shift request list, 8-person cap line, approve/deny buttons per row
 - [x] Wire DecisionCalendar route and nav item in Dashboard.tsx (Administration section, first item)
 - [x] 0 TypeScript errors, 19/19 tests passing
+
+## Working Priority in Decision Calendar (May 9, 2026)
+- [x] Add working_priority column to requests table (schema + migration applied)
+- [x] Import 2,721 working_priority values from 11_working_priority_requests.csv into DB
+- [x] Update getDecisionCalendarDay DB query to select and sort by working_priority
+- [x] Update managerTools router to include workingPriority in enriched row and sort by WP then seniority
+- [x] Add WorkingPriorityBadge component (teal WP1, sky WP2, indigo WP3-4, zinc WP5+) to DecisionCalendar
+- [x] Show WP badge on every row next to P badge in drill-down panel
+- [x] Update legend text to explain P# vs WP# distinction

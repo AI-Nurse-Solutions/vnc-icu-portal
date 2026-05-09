@@ -1,0 +1,55 @@
+{
+  "query": "\n-- Total date-slots requested\nSELECT COUNT(*) AS total_date_slots FROM request_dates rd\nJOIN requests r ON rd.request_id = r.id\nWHERE r.status = 'pending';\n\n-- Period A vs B for vacation\nSELECT \n  CASE WHEN MONTH(rd.date) BETWEEN 1 AND 6 THEN 'Period A (Jan-Jun)' ELSE 'Period B (Jul-Dec)' END AS period,\n  COUNT(DISTINCT r.id) AS requests,\n  COUNT(*) AS date_slots\nFROM request_dates rd\nJOIN requests r ON rd.request_id = r.id\nWHERE r.request_type = 'vacation' AND r.status = 'pending'\nGROUP BY period;\n\n-- Top 10 most requested dates\nSELECT \n  DATE_FORMAT(rd.date, '%Y-%m-%d') AS date,\n  e.shift,\n  COUNT(DISTINCT r.id) AS request_count\nFROM request_dates rd\nJOIN requests r ON rd.request_id = r.id\nJOIN employees e ON r.employee_id = e.id\nWHERE r.request_type = 'vacation' AND r.status = 'pending'\nGROUP BY rd.date, e.shift\nORDER BY request_count DESC\nLIMIT 10;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \n-- Total date-slots requested\nSELECT COUNT(*) AS total_date_slots FROM request_dates rd\nJOIN requests r ON rd.request_id = r.id\nWHERE r.status = 'pending';\n\n-- Period A vs B for vacation\nSELECT \n  CASE WHEN MONTH(rd.date) BETWEEN 1 AND 6 THEN 'Period A (Jan-Jun)' ELSE 'Period B (Jul-Dec)' END AS period,\n  COUNT(DISTINCT r.id) AS requests,\n  COUNT(*) AS date_slots\nFROM request_dates rd\nJOIN requests r ON rd.request_id = r.id\nWHERE r.request_type = 'vacation' AND r.status = 'pending'\nGROUP BY period;\n\n-- Top 10 most requested dates\nSELECT \n  DATE_FORMAT(rd.date, '%Y-%m-%d') AS date,\n  e.shift,\n  COUNT(DISTINCT r.id) AS request_count\nFROM request_dates rd\nJOIN requests r ON rd.request_id = r.id\nJOIN employees e ON r.employee_id = e.id\nWHERE r.request_type = 'vacation' AND r.status = 'pending'\nGROUP BY rd.date, e.shift\nORDER BY request_count DESC\nLIMIT 10;\n",
+  "rows": [
+    {
+      "total_date_slots": "2750"
+    },
+    {
+      "total_date_slots": "period\trequests\tdate_slots"
+    },
+    {
+      "total_date_slots": "Period B (Jul-Dec)\t402\t2580"
+    },
+    {
+      "total_date_slots": "Period A (Jan-Jun)\t22\t98"
+    },
+    {
+      "total_date_slots": "date\tshift\trequest_count"
+    },
+    {
+      "total_date_slots": "2026-09-26\tAM\t15"
+    },
+    {
+      "total_date_slots": "2026-08-08\tAM\t14"
+    },
+    {
+      "total_date_slots": "2026-09-27\tAM\t13"
+    },
+    {
+      "total_date_slots": "2026-08-09\tAM\t13"
+    },
+    {
+      "total_date_slots": "2026-07-25\tAM\t13"
+    },
+    {
+      "total_date_slots": "2026-09-07\tAM\t13"
+    },
+    {
+      "total_date_slots": "2026-08-07\tAM\t13"
+    },
+    {
+      "total_date_slots": "2026-09-24\tAM\t13"
+    },
+    {
+      "total_date_slots": "2026-09-06\tAM\t13"
+    },
+    {
+      "total_date_slots": "2026-07-26\tAM\t13"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_date_slots\n2750\nperiod\trequests\tdate_slots\nPeriod B (Jul-Dec)\t402\t2580\nPeriod A (Jan-Jun)\t22\t98\ndate\tshift\trequest_count\n2026-09-26\tAM\t15\n2026-08-08\tAM\t14\n2026-09-27\tAM\t13\n2026-08-09\tAM\t13\n2026-07-25\tAM\t13\n2026-09-07\tAM\t13\n2026-08-07\tAM\t13\n2026-09-24\tAM\t13\n2026-09-06\tAM\t13\n2026-07-26\tAM\t13\n",
+  "stderr": "",
+  "execution_time_ms": 286
+}

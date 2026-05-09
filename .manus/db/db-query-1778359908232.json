@@ -1,0 +1,80 @@
+{
+  "query": "\nWITH shift_day_counts AS (\n  SELECT \n    DATE_FORMAT(rd.date, '%Y-%m') AS yr_month,\n    MONTH(rd.date) AS month_num,\n    YEAR(rd.date) AS year_num,\n    e.shift,\n    rd.date,\n    COUNT(DISTINCT r.id) AS request_count\n  FROM request_dates rd\n  JOIN requests r ON rd.request_id = r.id\n  JOIN employees e ON r.employee_id = e.id\n  WHERE r.request_type = 'vacation'\n    AND r.status = 'pending'\n    AND (e.category != 'ancillary' OR e.category IS NULL)\n    AND e.is_active = 1\n  GROUP BY yr_month, month_num, year_num, e.shift, rd.date\n)\nSELECT \n  yr_month,\n  shift,\n  COUNT(*) AS oversubscribed_days,\n  MAX(request_count) AS peak_count,\n  ROUND(AVG(request_count), 1) AS avg_count\nFROM shift_day_counts\nWHERE request_count > 8\nGROUP BY yr_month, shift\nORDER BY yr_month, shift;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nWITH shift_day_counts AS (\n  SELECT \n    DATE_FORMAT(rd.date, '%Y-%m') AS yr_month,\n    MONTH(rd.date) AS month_num,\n    YEAR(rd.date) AS year_num,\n    e.shift,\n    rd.date,\n    COUNT(DISTINCT r.id) AS request_count\n  FROM request_dates rd\n  JOIN requests r ON rd.request_id = r.id\n  JOIN employees e ON r.employee_id = e.id\n  WHERE r.request_type = 'vacation'\n    AND r.status = 'pending'\n    AND (e.category != 'ancillary' OR e.category IS NULL)\n    AND e.is_active = 1\n  GROUP BY yr_month, month_num, year_num, e.shift, rd.date\n)\nSELECT \n  yr_month,\n  shift,\n  COUNT(*) AS oversubscribed_days,\n  MAX(request_count) AS peak_count,\n  ROUND(AVG(request_count), 1) AS avg_count\nFROM shift_day_counts\nWHERE request_count > 8\nGROUP BY yr_month, shift\nORDER BY yr_month, shift;\n",
+  "rows": [
+    {
+      "yr_month": "2026-07",
+      "shift": "AM",
+      "oversubscribed_days": "17",
+      "peak_count": "13",
+      "avg_count": "9.8"
+    },
+    {
+      "yr_month": "2026-07",
+      "shift": "NOC",
+      "oversubscribed_days": "4",
+      "peak_count": "10",
+      "avg_count": "9.5"
+    },
+    {
+      "yr_month": "2026-08",
+      "shift": "AM",
+      "oversubscribed_days": "10",
+      "peak_count": "14",
+      "avg_count": "11.0"
+    },
+    {
+      "yr_month": "2026-09",
+      "shift": "AM",
+      "oversubscribed_days": "17",
+      "peak_count": "15",
+      "avg_count": "11.2"
+    },
+    {
+      "yr_month": "2026-09",
+      "shift": "NOC",
+      "oversubscribed_days": "8",
+      "peak_count": "13",
+      "avg_count": "10.4"
+    },
+    {
+      "yr_month": "2026-10",
+      "shift": "AM",
+      "oversubscribed_days": "21",
+      "peak_count": "13",
+      "avg_count": "10.0"
+    },
+    {
+      "yr_month": "2026-10",
+      "shift": "NOC",
+      "oversubscribed_days": "8",
+      "peak_count": "11",
+      "avg_count": "10.0"
+    },
+    {
+      "yr_month": "2026-11",
+      "shift": "AM",
+      "oversubscribed_days": "4",
+      "peak_count": "10",
+      "avg_count": "9.3"
+    },
+    {
+      "yr_month": "2026-11",
+      "shift": "NOC",
+      "oversubscribed_days": "1",
+      "peak_count": "9",
+      "avg_count": "9.0"
+    },
+    {
+      "yr_month": "2026-12",
+      "shift": "AM",
+      "oversubscribed_days": "4",
+      "peak_count": "12",
+      "avg_count": "10.0"
+    }
+  ],
+  "messages": [],
+  "stdout": "yr_month\tshift\toversubscribed_days\tpeak_count\tavg_count\n2026-07\tAM\t17\t13\t9.8\n2026-07\tNOC\t4\t10\t9.5\n2026-08\tAM\t10\t14\t11.0\n2026-09\tAM\t17\t15\t11.2\n2026-09\tNOC\t8\t13\t10.4\n2026-10\tAM\t21\t13\t10.0\n2026-10\tNOC\t8\t11\t10.0\n2026-11\tAM\t4\t10\t9.3\n2026-11\tNOC\t1\t9\t9.0\n2026-12\tAM\t4\t12\t10.0\n",
+  "stderr": "",
+  "execution_time_ms": 375
+}

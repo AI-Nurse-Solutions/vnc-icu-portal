@@ -332,6 +332,7 @@ export const managerToolsRouter = router({
         status: r.status,
         submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : String(r.submittedAt),
         comment: r.comment ?? null,
+        workingPriority: r.workingPriority ?? null,
         // Seniority rank on this date (1 = most senior)
         seniorityRank: idx + 1,
         // Over cap flag
@@ -349,7 +350,10 @@ export const managerToolsRouter = router({
       for (const shiftRows of Object.values(byShift)) {
         // Sort by priority ASC then seniorityDate ASC
         shiftRows.sort((a, b) => {
-          if (a.priority !== b.priority) return a.priority - b.priority;
+          // Sort by working_priority first (null = last), then seniority date
+          const wpA = a.workingPriority ?? 9999;
+          const wpB = b.workingPriority ?? 9999;
+          if (wpA !== wpB) return wpA - wpB;
           return a.seniorityDate.localeCompare(b.seniorityDate);
         });
         shiftRows.forEach((r, i) => {

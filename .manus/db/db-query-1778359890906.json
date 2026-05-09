@@ -1,0 +1,22 @@
+{
+  "query": "\nSELECT \n  COUNT(DISTINCT e.id) AS total_employees,\n  COUNT(DISTINCT CASE WHEN e.is_active = 1 THEN e.id END) AS active_employees,\n  COUNT(DISTINCT CASE WHEN e.is_active = 0 THEN e.id END) AS inactive_employees,\n  COUNT(DISTINCT CASE WHEN e.shift = 'AM' THEN e.id END) AS am_shift,\n  COUNT(DISTINCT CASE WHEN e.shift = 'PM' THEN e.id END) AS pm_shift,\n  COUNT(DISTINCT CASE WHEN e.shift = 'NOC' THEN e.id END) AS noc_shift,\n  COUNT(DISTINCT CASE WHEN e.category = 'ancillary' THEN e.id END) AS ancillary,\n  COUNT(DISTINCT CASE WHEN e.category != 'ancillary' OR e.category IS NULL THEN e.id END) AS non_ancillary,\n  COUNT(DISTINCT CASE WHEN e.is_verified = 1 THEN e.id END) AS verified,\n  COUNT(DISTINCT CASE WHEN e.is_verified = 0 OR e.is_verified IS NULL THEN e.id END) AS unverified\nFROM employees e\nWHERE e.id IN (SELECT DISTINCT employee_id FROM requests);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT \n  COUNT(DISTINCT e.id) AS total_employees,\n  COUNT(DISTINCT CASE WHEN e.is_active = 1 THEN e.id END) AS active_employees,\n  COUNT(DISTINCT CASE WHEN e.is_active = 0 THEN e.id END) AS inactive_employees,\n  COUNT(DISTINCT CASE WHEN e.shift = 'AM' THEN e.id END) AS am_shift,\n  COUNT(DISTINCT CASE WHEN e.shift = 'PM' THEN e.id END) AS pm_shift,\n  COUNT(DISTINCT CASE WHEN e.shift = 'NOC' THEN e.id END) AS noc_shift,\n  COUNT(DISTINCT CASE WHEN e.category = 'ancillary' THEN e.id END) AS ancillary,\n  COUNT(DISTINCT CASE WHEN e.category != 'ancillary' OR e.category IS NULL THEN e.id END) AS non_ancillary,\n  COUNT(DISTINCT CASE WHEN e.is_verified = 1 THEN e.id END) AS verified,\n  COUNT(DISTINCT CASE WHEN e.is_verified = 0 OR e.is_verified IS NULL THEN e.id END) AS unverified\nFROM employees e\nWHERE e.id IN (SELECT DISTINCT employee_id FROM requests);\n",
+  "rows": [
+    {
+      "total_employees": "162",
+      "active_employees": "158",
+      "inactive_employees": "4",
+      "am_shift": "81",
+      "pm_shift": "9",
+      "noc_shift": "72",
+      "ancillary": "0",
+      "non_ancillary": "162",
+      "verified": "157",
+      "unverified": "5"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_employees\tactive_employees\tinactive_employees\tam_shift\tpm_shift\tnoc_shift\tancillary\tnon_ancillary\tverified\tunverified\n162\t158\t4\t81\t9\t72\t0\t162\t157\t5\n",
+  "stderr": "",
+  "execution_time_ms": 1060
+}

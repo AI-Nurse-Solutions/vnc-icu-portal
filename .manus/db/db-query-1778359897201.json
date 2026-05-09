@@ -1,0 +1,58 @@
+{
+  "query": "\nSELECT \n  priority,\n  COUNT(*) AS total,\n  SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,\n  SUM(CASE WHEN status = 'withdrawn' THEN 1 ELSE 0 END) AS withdrawn\nFROM requests\nWHERE request_type = 'vacation'\nGROUP BY priority\nORDER BY priority;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT \n  priority,\n  COUNT(*) AS total,\n  SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,\n  SUM(CASE WHEN status = 'withdrawn' THEN 1 ELSE 0 END) AS withdrawn\nFROM requests\nWHERE request_type = 'vacation'\nGROUP BY priority\nORDER BY priority;\n",
+  "rows": [
+    {
+      "priority": "1",
+      "total": "201",
+      "pending": "158",
+      "withdrawn": "43"
+    },
+    {
+      "priority": "2",
+      "total": "101",
+      "pending": "86",
+      "withdrawn": "15"
+    },
+    {
+      "priority": "3",
+      "total": "73",
+      "pending": "63",
+      "withdrawn": "10"
+    },
+    {
+      "priority": "4",
+      "total": "38",
+      "pending": "32",
+      "withdrawn": "6"
+    },
+    {
+      "priority": "5",
+      "total": "100",
+      "pending": "71",
+      "withdrawn": "29"
+    },
+    {
+      "priority": "6",
+      "total": "6",
+      "pending": "4",
+      "withdrawn": "2"
+    },
+    {
+      "priority": "7",
+      "total": "3",
+      "pending": "2",
+      "withdrawn": "1"
+    },
+    {
+      "priority": "8",
+      "total": "1",
+      "pending": "1",
+      "withdrawn": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "priority\ttotal\tpending\twithdrawn\n1\t201\t158\t43\n2\t101\t86\t15\n3\t73\t63\t10\n4\t38\t32\t6\n5\t100\t71\t29\n6\t6\t4\t2\n7\t3\t2\t1\n8\t1\t1\t0\n",
+  "stderr": "",
+  "execution_time_ms": 266
+}

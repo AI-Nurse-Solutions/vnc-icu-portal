@@ -671,12 +671,13 @@ export async function getDecisionCalendarDay(date: string, shift?: string) {
       status: requests.status,
       submittedAt: requests.submittedAt,
       comment: requests.comment,
+      workingPriority: requests.workingPriority,
     })
     .from(requestDates)
     .innerJoin(requests, eq(requestDates.requestId, requests.id))
     .innerJoin(employees, eq(requests.employeeId, employees.id))
     .where(and(...whereConditions))
-    .orderBy(requests.priority, employees.seniorityDate);
+    .orderBy(requests.workingPriority, employees.seniorityDate);
 
   // Deduplicate: a request may span multiple dates; we only want it once per date
   const seen = new Set<number>();

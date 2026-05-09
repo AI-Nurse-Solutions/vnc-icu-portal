@@ -1,0 +1,13 @@
+{
+  "query": "\nWITH date_ranks AS (\n  SELECT \n    rd.date,\n    r.id AS request_id,\n    r.employee_id,\n    e.shift,\n    r.priority,\n    r.status,\n    ROW_NUMBER() OVER (\n      PARTITION BY rd.date, e.shift \n      ORDER BY r.priority ASC, e.seniority_date ASC\n    ) AS rank_in_shift\n  FROM request_dates rd\n  JOIN requests r ON rd.request_id = r.id\n  JOIN employees e ON r.employee_id = e.id\n  WHERE r.request_type = 'vacation'\n    AND r.status = 'pending'\n    AND (e.category != 'ancillary' OR e.category IS NULL)\n    AND e.is_active = 1\n)\nSELECT \n  COUNT(DISTINCT request_id) AS p1_requests_within_cap\nFROM date_ranks\nWHERE priority = 1 AND rank_in_shift <= 8;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nWITH date_ranks AS (\n  SELECT \n    rd.date,\n    r.id AS request_id,\n    r.employee_id,\n    e.shift,\n    r.priority,\n    r.status,\n    ROW_NUMBER() OVER (\n      PARTITION BY rd.date, e.shift \n      ORDER BY r.priority ASC, e.seniority_date ASC\n    ) AS rank_in_shift\n  FROM request_dates rd\n  JOIN requests r ON rd.request_id = r.id\n  JOIN employees e ON r.employee_id = e.id\n  WHERE r.request_type = 'vacation'\n    AND r.status = 'pending'\n    AND (e.category != 'ancillary' OR e.category IS NULL)\n    AND e.is_active = 1\n)\nSELECT \n  COUNT(DISTINCT request_id) AS p1_requests_within_cap\nFROM date_ranks\nWHERE priority = 1 AND rank_in_shift <= 8;\n",
+  "rows": [
+    {
+      "p1_requests_within_cap": "156"
+    }
+  ],
+  "messages": [],
+  "stdout": "p1_requests_within_cap\n156\n",
+  "stderr": "",
+  "execution_time_ms": 290
+}

@@ -1,0 +1,46 @@
+{
+  "query": "\n-- Distribution of active vacation requests per employee\nSELECT \n  req_count,\n  COUNT(*) AS employees\nFROM (\n  SELECT employee_id, COUNT(*) AS req_count\n  FROM requests\n  WHERE request_type = 'vacation' AND status = 'pending'\n  GROUP BY employee_id\n) t\nGROUP BY req_count\nORDER BY req_count;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \n-- Distribution of active vacation requests per employee\nSELECT \n  req_count,\n  COUNT(*) AS employees\nFROM (\n  SELECT employee_id, COUNT(*) AS req_count\n  FROM requests\n  WHERE request_type = 'vacation' AND status = 'pending'\n  GROUP BY employee_id\n) t\nGROUP BY req_count\nORDER BY req_count;\n",
+  "rows": [
+    {
+      "req_count": "1",
+      "employees": "41"
+    },
+    {
+      "req_count": "2",
+      "employees": "41"
+    },
+    {
+      "req_count": "3",
+      "employees": "37"
+    },
+    {
+      "req_count": "4",
+      "employees": "24"
+    },
+    {
+      "req_count": "5",
+      "employees": "7"
+    },
+    {
+      "req_count": "6",
+      "employees": "2"
+    },
+    {
+      "req_count": "7",
+      "employees": "2"
+    },
+    {
+      "req_count": "8",
+      "employees": "2"
+    },
+    {
+      "req_count": "10",
+      "employees": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "req_count\temployees\n1\t41\n2\t41\n3\t37\n4\t24\n5\t7\n6\t2\n7\t2\n8\t2\n10\t1\n",
+  "stderr": "",
+  "execution_time_ms": 278
+}

@@ -47,6 +47,7 @@ export const requests = mysqlTable("requests", {
   requestType: mysqlEnum("request_type", ["vacation", "education"]).notNull(),
   continuityType: mysqlEnum("continuity_type", ["continuous", "intermittent"]).notNull(),
   priority: int("priority").notNull().default(5), // 1 = highest, 9 = lowest
+  workingPriority: int("working_priority"), // computed from CSV export; null for withdrawn
   comment: text("comment"),
   status: mysqlEnum("status", ["pending", "approved", "denied", "withdrawn"]).notNull().default("pending"),
   submittedAt: timestamp("submitted_at").defaultNow().notNull(),

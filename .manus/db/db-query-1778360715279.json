@@ -1,0 +1,25 @@
+{
+  "query": "\nSELECT ROUND(100.0 * SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS verification_rate_pct\nFROM employees WHERE id IN (SELECT DISTINCT employee_id FROM requests);\n\nSELECT COUNT(DISTINCT employee_id) AS employees_with_comments,\n  ROUND(100.0 * COUNT(DISTINCT employee_id) / 162, 1) AS pct_of_participants\nFROM requests\nWHERE comment IS NOT NULL AND comment != '' AND request_type = 'vacation' AND status = 'pending';\n\nSELECT ROUND(AVG(date_count), 1) AS avg_days_per_request\nFROM (\n  SELECT r.id, COUNT(*) AS date_count\n  FROM requests r\n  JOIN request_dates rd ON rd.request_id = r.id\n  WHERE r.request_type = 'vacation' AND r.status = 'pending'\n  GROUP BY r.id\n) t;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT ROUND(100.0 * SUM(CASE WHEN is_verified = 1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS verification_rate_pct\nFROM employees WHERE id IN (SELECT DISTINCT employee_id FROM requests);\n\nSELECT COUNT(DISTINCT employee_id) AS employees_with_comments,\n  ROUND(100.0 * COUNT(DISTINCT employee_id) / 162, 1) AS pct_of_participants\nFROM requests\nWHERE comment IS NOT NULL AND comment != '' AND request_type = 'vacation' AND status = 'pending';\n\nSELECT ROUND(AVG(date_count), 1) AS avg_days_per_request\nFROM (\n  SELECT r.id, COUNT(*) AS date_count\n  FROM requests r\n  JOIN request_dates rd ON rd.request_id = r.id\n  WHERE r.request_type = 'vacation' AND r.status = 'pending'\n  GROUP BY r.id\n) t;\n",
+  "rows": [
+    {
+      "verification_rate_pct": "96.9"
+    },
+    {
+      "verification_rate_pct": "employees_with_comments\tpct_of_participants"
+    },
+    {
+      "verification_rate_pct": "54\t33.3"
+    },
+    {
+      "verification_rate_pct": "avg_days_per_request"
+    },
+    {
+      "verification_rate_pct": "6.4"
+    }
+  ],
+  "messages": [],
+  "stdout": "verification_rate_pct\n96.9\nemployees_with_comments\tpct_of_participants\n54\t33.3\navg_days_per_request\n6.4\n",
+  "stderr": "",
+  "execution_time_ms": 274
+}

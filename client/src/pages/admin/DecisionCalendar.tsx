@@ -43,6 +43,7 @@ type DayRequest = {
   status: string;
   submittedAt: string;
   comment: string | null;
+  workingPriority: number | null;
   seniorityRank: number;
   overCap: boolean;
 };
@@ -81,6 +82,26 @@ function PriorityBadge({ priority }: { priority: number }) {
   return (
     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold border ${getPriorityStyle(priority)}`}>
       P{priority}
+    </span>
+  );
+}
+
+// ─── Working Priority Badge ───────────────────────────────────────────────────
+function WorkingPriorityBadge({ wp }: { wp: number | null }) {
+  if (wp === null) return null;
+  const style = wp === 1
+    ? "bg-teal-500/20 text-teal-200 border-teal-500/50"
+    : wp === 2
+    ? "bg-sky-500/20 text-sky-200 border-sky-500/50"
+    : wp <= 4
+    ? "bg-indigo-500/20 text-indigo-200 border-indigo-500/40"
+    : "bg-zinc-600/30 text-zinc-300 border-zinc-500/40";
+  return (
+    <span
+      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-bold border ${style}`}
+      title="Working Priority — employee's ranked preference order across all their requests"
+    >
+      <span className="text-[9px] opacity-70">WP</span>{wp}
     </span>
   );
 }
@@ -283,6 +304,7 @@ function DayDrillDown({
                                     <Shield className="w-3 h-3 text-teal-400 shrink-0" />
                                   )}
                                   <PriorityBadge priority={req.priority} />
+                                  <WorkingPriorityBadge wp={req.workingPriority} />
                                   <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs border ${STATUS_STYLES[req.status] ?? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30"}`}>
                                     {req.status}
                                   </span>
@@ -600,9 +622,10 @@ export default function DecisionCalendar() {
       <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3">
         <p className="text-xs text-zinc-500 leading-relaxed">
           <strong className="text-zinc-400">How to use:</strong> Click any date to open the shift-by-shift drill-down.
-          Requests are sorted by <strong className="text-zinc-400">working priority</strong> (P1 = first choice) then seniority.
+          Each row shows two badges: <strong className="text-zinc-300">P#</strong> = the employee's declared priority for that request (1 = top choice);
+          <strong className="text-teal-300">WP#</strong> = working priority, the system-computed rank across all of the employee's requests for the cycle (WP1 = their most important request overall).
+          Rows are sorted by <strong className="text-zinc-400">WP</strong> ascending, then seniority date.
           The <strong className="text-red-400">8-person cap line</strong> marks who can be displaced.
-          A P1 employee below the cap line may displace a senior employee with P2+ above the cap.
           Admins make all final decisions.
         </p>
       </div>

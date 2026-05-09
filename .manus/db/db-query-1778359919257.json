@@ -1,0 +1,25 @@
+{
+  "query": "\n-- Continuity type breakdown\nSELECT continuity_type, COUNT(*) AS count\nFROM requests\nWHERE request_type = 'vacation' AND status = 'pending'\nGROUP BY continuity_type;\n\n-- Employees with multiple vacation requests\nSELECT \n  COUNT(*) AS employees_with_multiple_requests\nFROM (\n  SELECT employee_id, COUNT(*) AS req_count\n  FROM requests\n  WHERE request_type = 'vacation'\n  GROUP BY employee_id\n  HAVING req_count > 1\n) t;\n\n-- Average requests per employee\nSELECT \n  ROUND(COUNT(*) / COUNT(DISTINCT employee_id), 2) AS avg_requests_per_employee\nFROM requests\nWHERE request_type = 'vacation';\n\n-- Employees who only have P1 requests\nSELECT COUNT(DISTINCT employee_id) AS employees_only_p1\nFROM requests\nWHERE request_type = 'vacation' AND status = 'pending'\n  AND employee_id NOT IN (\n    SELECT DISTINCT employee_id FROM requests\n    WHERE request_type = 'vacation' AND status = 'pending' AND priority > 1\n  );\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \n-- Continuity type breakdown\nSELECT continuity_type, COUNT(*) AS count\nFROM requests\nWHERE request_type = 'vacation' AND status = 'pending'\nGROUP BY continuity_type;\n\n-- Employees with multiple vacation requests\nSELECT \n  COUNT(*) AS employees_with_multiple_requests\nFROM (\n  SELECT employee_id, COUNT(*) AS req_count\n  FROM requests\n  WHERE request_type = 'vacation'\n  GROUP BY employee_id\n  HAVING req_count > 1\n) t;\n\n-- Average requests per employee\nSELECT \n  ROUND(COUNT(*) / COUNT(DISTINCT employee_id), 2) AS avg_requests_per_employee\nFROM requests\nWHERE request_type = 'vacation';\n\n-- Employees who only have P1 requests\nSELECT COUNT(DISTINCT employee_id) AS employees_only_p1\nFROM requests\nWHERE request_type = 'vacation' AND status = 'pending'\n  AND employee_id NOT IN (\n    SELECT DISTINCT employee_id FROM requests\n    WHERE request_type = 'vacation' AND status = 'pending' AND priority > 1\n  );\n",
+  "rows": [
+    {
+      "continuity_type": "continuous",
+      "count": "397"
+    },
+    {
+      "continuity_type": "intermittent",
+      "count": "20"
+    }
+  ],
+  "messages": [
+    "employees_with_multiple_requests",
+    "123",
+    "avg_requests_per_employee",
+    "3.27",
+    "employees_only_p1",
+    "39"
+  ],
+  "stdout": "continuity_type\tcount\ncontinuous\t397\nintermittent\t20\nemployees_with_multiple_requests\n123\navg_requests_per_employee\n3.27\nemployees_only_p1\n39\n",
+  "stderr": "",
+  "execution_time_ms": 296
+}

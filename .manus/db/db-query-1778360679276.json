@@ -1,0 +1,130 @@
+{
+  "query": "\nSELECT \n  FLOOR(DATEDIFF(CURDATE(), e.seniority_date) / 365.25) AS seniority_years,\n  COUNT(*) AS employee_count\nFROM employees e\nWHERE e.id IN (SELECT DISTINCT employee_id FROM requests)\n  AND e.seniority_date IS NOT NULL\nGROUP BY seniority_years\nORDER BY seniority_years;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT \n  FLOOR(DATEDIFF(CURDATE(), e.seniority_date) / 365.25) AS seniority_years,\n  COUNT(*) AS employee_count\nFROM employees e\nWHERE e.id IN (SELECT DISTINCT employee_id FROM requests)\n  AND e.seniority_date IS NOT NULL\nGROUP BY seniority_years\nORDER BY seniority_years;\n",
+  "rows": [
+    {
+      "seniority_years": "0",
+      "employee_count": "17"
+    },
+    {
+      "seniority_years": "1",
+      "employee_count": "18"
+    },
+    {
+      "seniority_years": "2",
+      "employee_count": "20"
+    },
+    {
+      "seniority_years": "3",
+      "employee_count": "19"
+    },
+    {
+      "seniority_years": "4",
+      "employee_count": "10"
+    },
+    {
+      "seniority_years": "5",
+      "employee_count": "6"
+    },
+    {
+      "seniority_years": "6",
+      "employee_count": "9"
+    },
+    {
+      "seniority_years": "7",
+      "employee_count": "3"
+    },
+    {
+      "seniority_years": "8",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "9",
+      "employee_count": "6"
+    },
+    {
+      "seniority_years": "10",
+      "employee_count": "5"
+    },
+    {
+      "seniority_years": "11",
+      "employee_count": "6"
+    },
+    {
+      "seniority_years": "12",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "13",
+      "employee_count": "3"
+    },
+    {
+      "seniority_years": "14",
+      "employee_count": "3"
+    },
+    {
+      "seniority_years": "15",
+      "employee_count": "5"
+    },
+    {
+      "seniority_years": "17",
+      "employee_count": "3"
+    },
+    {
+      "seniority_years": "18",
+      "employee_count": "7"
+    },
+    {
+      "seniority_years": "19",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "20",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "21",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "22",
+      "employee_count": "1"
+    },
+    {
+      "seniority_years": "23",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "24",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "28",
+      "employee_count": "1"
+    },
+    {
+      "seniority_years": "30",
+      "employee_count": "1"
+    },
+    {
+      "seniority_years": "34",
+      "employee_count": "1"
+    },
+    {
+      "seniority_years": "36",
+      "employee_count": "2"
+    },
+    {
+      "seniority_years": "37",
+      "employee_count": "1"
+    },
+    {
+      "seniority_years": "44",
+      "employee_count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "seniority_years\temployee_count\n0\t17\n1\t18\n2\t20\n3\t19\n4\t10\n5\t6\n6\t9\n7\t3\n8\t2\n9\t6\n10\t5\n11\t6\n12\t2\n13\t3\n14\t3\n15\t5\n17\t3\n18\t7\n19\t2\n20\t2\n21\t2\n22\t1\n23\t2\n24\t2\n28\t1\n30\t1\n34\t1\n36\t2\n37\t1\n44\t1\n",
+  "stderr": "",
+  "execution_time_ms": 1213
+}
