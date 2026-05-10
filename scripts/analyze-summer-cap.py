@@ -1,26 +1,31 @@
 """
-Analyze all July/August vacation requests to find those exceeding 14 consecutive days.
-Outputs:
-  - List of affected employees + request IDs + shut-out dates
-  - Summary stats
+Summer 14-Day Cap Analysis — CORRECTED LOGIC
+=============================================
+Rule: For July and August ONLY, if an employee's request contains a block of
+CONSECUTIVE CALENDAR DAYS (no gaps) that exceeds 14 days, only the first 14
+days of that block are allowed. Days 15+ of that same unbroken run are shut out.
+
+Key clarifications:
+- "Consecutive" means calendar days with no gap (e.g., Jul 1, 2, 3, ... 15 → day 15 is shut out)
+- Scattered dates (e.g., Jul 4, 5, 9, 10, 13, 14) are NOT consecutive runs — they are separate
+  2-day blocks and NONE of them are shut out
+- A request that has multiple short runs (each ≤ 14 days) is NOT affected at all
+- Only a single unbroken run of 15+ calendar days triggers shut-outs
+- Dates outside July/August are completely ignored for this rule
 """
 
 import csv
+import json
 from collections import defaultdict
 from datetime import date, timedelta
 
 CSV_PATH = "/home/ubuntu/vnc-icu-portal/exports/11_working_priority_requests.csv"
 
-# Load all rows
-rows = []
-with open(CSV_PATH, newline="", encoding="utf-8") as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        rows.append(row)
+rows = list(csv.DictReader(open(CSV_PATH, encoding="utf-8")))
 
-# Group by request_id → collect all dates for that request
-request_dates = defaultdict(list)
-request_meta = {}
+# Group July/August dates by request_id (exclude withdrawn)
+request_summer_dates: dict[str, list[date]] = defaultdict(list)
+request_meta: dict[str, dict] = {}
 
 for row in rows:
     req_id = row["request_id"].strip()
@@ -37,53 +42,51 @@ for row in rows:
     # Only July and August
     if d.month not in (7, 8):
         continue
-    request_dates[req_id].append(d)
+    request_summer_dates[req_id].append(d)
     if req_id not in request_meta:
         request_meta[req_id] = {
             "employee_number": row["employee_number"].strip(),
             "last_name": row["last_name"].strip(),
             "first_name": row["first_name"].strip(),
             "shift": row["shift"].strip(),
-            "request_type": row["request_type"].strip() if "request_type" in row else "vacation",
             "working_priority": row["working_priority"].strip(),
         }
 
-# For each request, sort dates and find consecutive runs
-# Only the first consecutive run of 14 days is allowed.
-# Any date beyond day 14 of the first consecutive run is shut out.
+def find_consecutive_runs(dates: list[date]) -> list[list[date]]:
+    """Split a sorted list of dates into groups of consecutive calendar days."""
+    if not dates:
+        return []
+    runs = []
+    current = [dates[0]]
+    for d in dates[1:]:
+        if d == current[-1] + timedelta(days=1):
+            current.append(d)
+        else:
+            runs.append(current)
+            current = [d]
+    runs.append(current)
+    return runs
 
-affected = []  # list of dicts
+affected = []
 
-for req_id, dates in request_dates.items():
+for req_id, dates in request_summer_dates.items():
     dates_sorted = sorted(set(dates))
     meta = request_meta[req_id]
 
-    # Find consecutive runs
-    runs = []
-    current_run = [dates_sorted[0]]
-    for d in dates_sorted[1:]:
-        if d == current_run[-1] + timedelta(days=1):
-            current_run.append(d)
-        else:
-            runs.append(current_run)
-            current_run = [d]
-    runs.append(current_run)
+    # Find all consecutive runs within the July/August dates
+    runs = find_consecutive_runs(dates_sorted)
 
-    # The rule: first consecutive run only, max 14 days
-    # All dates in runs after the first run, and all dates in the first run beyond day 14, are shut out
     shutout_dates = []
     allowed_dates = []
 
-    first_run = runs[0]
-    if len(first_run) > 14:
-        allowed_dates.extend(first_run[:14])
-        shutout_dates.extend(first_run[14:])
-    else:
-        allowed_dates.extend(first_run)
-
-    # All subsequent runs are shut out (non-consecutive = separate block, not allowed in summer)
-    for run in runs[1:]:
-        shutout_dates.extend(run)
+    for run in runs:
+        if len(run) > 14:
+            # First 14 days allowed, rest shut out
+            allowed_dates.extend(run[:14])
+            shutout_dates.extend(run[14:])
+        else:
+            # Run is 14 days or fewer — entirely allowed
+            allowed_dates.extend(run)
 
     if shutout_dates:
         affected.append({
@@ -100,24 +103,25 @@ for req_id, dates in request_dates.items():
             "last_shutout_date": max(shutout_dates).isoformat(),
             "shutout_dates": [d.isoformat() for d in sorted(shutout_dates)],
             "allowed_date_range": f"{min(allowed_dates).isoformat()} → {max(allowed_dates).isoformat()}",
+            "consecutive_run_length": max(len(r) for r in runs),
         })
 
 # Sort by last_name
 affected.sort(key=lambda x: (x["last_name"], x["first_name"]))
 
-print(f"\n{'='*70}")
-print(f"SUMMER 14-DAY CAP ANALYSIS — July & August Vacation Requests")
-print(f"{'='*70}")
-print(f"Total July/August requests analyzed: {len(request_dates)}")
-print(f"Requests exceeding 14 consecutive days: {len(affected)}")
+print(f"\n{'='*75}")
+print(f"SUMMER 14-DAY CAP ANALYSIS (CORRECTED) — Consecutive Calendar Days Only")
+print(f"{'='*75}")
+print(f"Total July/August requests analyzed: {len(request_summer_dates)}")
+print(f"Requests with a consecutive run > 14 days: {len(affected)}")
 print()
 
 if affected:
-    print(f"{'#':<4} {'Name':<22} {'Shift':<5} {'WP':<4} {'Req ID':<8} {'Total':<6} {'Allowed':<8} {'Shut Out':<9} {'First Shut-Out Date'}")
-    print("-"*90)
+    print(f"{'#':<4} {'Name':<24} {'Shift':<5} {'WP':<4} {'Req ID':<10} {'Run':<5} {'Total':<6} {'Allowed':<8} {'Shut Out':<9} {'First Shut-Out'}")
+    print("-"*95)
     for i, a in enumerate(affected, 1):
         name = f"{a['last_name']}, {a['first_name']}"
-        print(f"{i:<4} {name:<22} {a['shift']:<5} {a['working_priority']:<4} {a['request_id']:<8} {a['total_summer_dates']:<6} {a['allowed_dates']:<8} {a['shutout_count']:<9} {a['first_shutout_date']}")
+        print(f"{i:<4} {name:<24} {a['shift']:<5} {a['working_priority']:<4} {a['request_id']:<10} {a['consecutive_run_length']:<5} {a['total_summer_dates']:<6} {a['allowed_dates']:<8} {a['shutout_count']:<9} {a['first_shutout_date']}")
 
     print()
     print("SHUT-OUT DATE DETAILS:")
@@ -125,11 +129,13 @@ if affected:
     for a in affected:
         name = f"{a['last_name']}, {a['first_name']}"
         print(f"\n  {name} (Req #{a['request_id']}, WP={a['working_priority']}, {a['shift']})")
+        print(f"    Consecutive run: {a['consecutive_run_length']} days")
         print(f"    Allowed:   {a['allowed_date_range']} ({a['allowed_dates']} days)")
         print(f"    Shut out:  {', '.join(a['shutout_dates'])}")
+else:
+    print("No requests qualify for shut-out under the corrected rule.")
 
-# Write output JSON for use by the import script
-import json
+# Write output JSON
 out_path = "/home/ubuntu/vnc-icu-portal/exports/summer_cap_shutouts.json"
 with open(out_path, "w") as f:
     json.dump(affected, f, indent=2)

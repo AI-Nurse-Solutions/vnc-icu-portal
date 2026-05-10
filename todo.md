@@ -228,3 +228,10 @@
 - [x] Update getDecisionCalendarDay backend to mark shut-out rows and exclude them from cap count
 - [x] Update Decision Calendar UI: show "Summer 14-Day Cap — Shut Out" notation on affected rows
 - [x] Add summer cap banner and orange divider line in the drill-down
+
+## Summer Cap Recalculation (May 9, 2026)
+- [x] Audit bug: non-consecutive dates were incorrectly treated as a run
+- [x] Rewrite analyze-summer-cap.py: only flag dates within a SINGLE consecutive calendar-day run > 14 days; days 1-14 allowed, days 15+ shut out; scattered/non-consecutive dates in July/August are NOT shut out
+- [x] Reset all summer_shutout flags to false in DB
+- [x] Re-import corrected shut-out flags (26 rows, 7 requests, 7 employees)
+- [x] Verify affected employee list is correct
