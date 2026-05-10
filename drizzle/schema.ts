@@ -115,6 +115,22 @@ export const config = mysqlTable("config", {
 export type Config = typeof config.$inferSelect;
 export type InsertConfig = typeof config.$inferInsert;
 
+// ─── Request Date Decisions ─────────────────────────────────────────────────
+// Stores per-date admin decisions for the Decision Calendar day-by-day workflow.
+// A request may have many dates; each date gets its own decision independently.
+export const requestDateDecisions = mysqlTable("request_date_decisions", {
+  id: int("id").autoincrement().primaryKey(),
+  requestId: int("request_id").notNull(),
+  date: date("date").notNull(),
+  decision: mysqlEnum("decision", ["approved", "denied"]).notNull(),
+  decidedBy: int("decided_by").notNull(), // employee.id of the admin
+  note: text("note"),
+  decidedAt: timestamp("decided_at").defaultNow().notNull(),
+});
+
+export type RequestDateDecision = typeof requestDateDecisions.$inferSelect;
+export type InsertRequestDateDecision = typeof requestDateDecisions.$inferInsert;
+
 // ─── Audit Log ────────────────────────────────────────────────────────────────
 export const auditLog = mysqlTable("audit_log", {
   id: int("id").autoincrement().primaryKey(),

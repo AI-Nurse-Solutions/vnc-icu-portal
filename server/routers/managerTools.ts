@@ -13,6 +13,7 @@ import {
   getHotDatesData,
   getPendingRequestsForApprovalRun,
   getRequestDates,
+  upsertDateDecision,
 } from "../db";
 
 async function requireManagerOrAdmin(ctx: any) {
@@ -334,7 +335,13 @@ export const managerToolsRouter = router({
         comment: r.comment ?? null,
         workingPriority: r.workingPriority ?? null,
         summerShutout: r.summerShutout ?? false,
-        // Seniority rank on this date (1 = most senior)
+        // Unit-wide seniority rank (1 = most senior across all active ICU staff)
+        unitSeniorityRank: r.unitSeniorityRank ?? null,
+        // Per-date decision (from request_date_decisions table)
+        dateDecision: r.dateDecision ?? null,
+        dateDecisionNote: r.dateDecisionNote ?? null,
+        dateDecidedAt: r.dateDecidedAt ?? null,
+        // Seniority rank within this date's results (1 = most senior)
         seniorityRank: idx + 1,
         // Over cap flag
         overCap: idx >= cap,
@@ -381,7 +388,34 @@ export const managerToolsRouter = router({
       };
     }),
 
-  // ─── Enhanced Audit Log ──────────────────────────────────────────────────────
+  // ─── Per-Date Approve / Deny ────────────────────────────────────────────────────────────
+  // Approve a single date of a request (does NOT approve the whole request)
+  approveDateDecision: publicProcedure
+    .input(z.object({
+      requestId: z.number(),
+      date: z.string(), // "YYYY-MM-DD"
+      note: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      await upsertDateDecision(input.requestId, input.date, "approved", admin.id, input.note);
+      return { success: true };
+    }),
+
+  // Deny a single date of a request (does NOT deny the whole request)
+  denyDateDecision: publicProcedure
+    .input(z.object({
+      requestId: z.number(),
+      date: z.string(), // "YYYY-MM-DD"
+      note: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      await upsertDateDecision(input.requestId, input.date, "denied", admin.id, input.note);
+      return { success: true };
+    }),
+
+  // ─── Enhanced Audit Log ────────────────────────────────────────────────────────────────
   getAuditLogEnhanced: publicProcedure
     .input(z.object({
       limit: z.number().min(1).max(500).default(50),

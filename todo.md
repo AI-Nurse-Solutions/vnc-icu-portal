@@ -235,3 +235,11 @@
 - [x] Reset all summer_shutout flags to false in DB
 - [x] Re-import corrected shut-out flags (26 rows, 7 requests, 7 employees)
 - [x] Verify affected employee list is correct
+
+## Decision Calendar Day-by-Day Actions (May 10, 2026)
+- [x] Add request_date_decisions table (request_id, date, decision: approved|denied, decided_by, decided_at, note)
+- [x] Add approveDate and denyDate tRPC procedures (per request_id + date)
+- [x] Update getDecisionCalendarDay to join date-level decisions and return per-date status
+- [x] Update Decision Calendar UI: Approve/Deny buttons act on the specific date shown, not the whole request
+- [x] Show per-date decision status badge (approved/denied/pending) on each row
+- [x] Add seniority rank (unit-wide, 1 = most senior) next to employee name on each row

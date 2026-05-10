@@ -47,6 +47,12 @@ type DayRequest = {
   summerShutout: boolean;
   seniorityRank: number;
   overCap: boolean;
+  // Unit-wide seniority rank (1 = most senior across all active ICU staff)
+  unitSeniorityRank: number | null;
+  // Per-date decision
+  dateDecision: "approved" | "denied" | null;
+  dateDecisionNote: string | null;
+  dateDecidedAt: string | null;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -133,18 +139,18 @@ function DayDrillDown({
     { enabled: !!date }
   );
 
-  const approveMutation = trpc.manager.approve.useMutation({
+  const approveDateMutation = trpc.tools.approveDateDecision.useMutation({
     onSuccess: () => {
-      toast.success("Request approved");
+      toast.success("Date approved");
       refetch();
       utils.tools.getDecisionCalendarMonth.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });
 
-  const denyMutation = trpc.manager.deny.useMutation({
+  const denyDateMutation = trpc.tools.denyDateDecision.useMutation({
     onSuccess: () => {
-      toast.success("Request denied");
+      toast.success("Date denied");
       refetch();
       utils.tools.getDecisionCalendarMonth.invalidate();
     },
@@ -336,9 +342,18 @@ function DayDrillDown({
                                 {isSummerShutout ? "☀" : idx + 1}
                               </span>
 
-                              {/* Name */}
+                              {/* Name + seniority rank */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
+                                  {/* Unit-wide seniority rank badge */}
+                                  {req.unitSeniorityRank !== null && (
+                                    <span
+                                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border border-zinc-500/40 bg-zinc-700/60 text-zinc-300"
+                                      title={`Unit seniority rank #${req.unitSeniorityRank} (1 = most senior across all active ICU staff)`}
+                                    >
+                                      <span className="opacity-60 text-[9px]">SR</span>{req.unitSeniorityRank}
+                                    </span>
+                                  )}
                                   <span className={`text-sm font-semibold ${isOverCap ? "text-zinc-400" : "text-white"}`}>
                                     {req.lastName}, {req.firstName}
                                   </span>
@@ -352,6 +367,17 @@ function DayDrillDown({
                                       ☀ Summer Cap — Shut Out
                                     </span>
                                   )}
+                                  {/* Per-date decision badge */}
+                                  {req.dateDecision === "approved" && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
+                                      <CheckCircle2 className="w-2.5 h-2.5" /> Date Approved
+                                    </span>
+                                  )}
+                                  {req.dateDecision === "denied" && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-red-500/40 bg-red-500/10 text-red-300">
+                                      <XIcon className="w-2.5 h-2.5" /> Date Denied
+                                    </span>
+                                  )}
                                   <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs border ${STATUS_STYLES[req.status] ?? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30"}`}>
                                     {req.status}
                                   </span>
@@ -362,6 +388,12 @@ function DayDrillDown({
                                   <span>{seniorityYears(req.seniorityDate)}y seniority</span>
                                   <span>·</span>
                                   <span>{req.requestType}</span>
+                                  {req.dateDecisionNote && (
+                                    <>
+                                      <span>·</span>
+                                      <span className="text-zinc-400 italic">{req.dateDecisionNote}</span>
+                                    </>
+                                  )}
                                   {req.comment && (
                                     <>
                                       <span>·</span>
@@ -371,36 +403,34 @@ function DayDrillDown({
                                 </div>
                               </div>
 
-                              {/* Action buttons */}
-                              {isPending && (
+                              {/* Per-date action buttons — always available unless summer shut-out */}
+                              {!isSummerShutout && (
                                 <div className="flex gap-1.5 shrink-0">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-7 px-2.5 text-xs border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/15 hover:text-emerald-300"
-                                    disabled={approveMutation.isPending}
-                                    onClick={() => approveMutation.mutate({ requestId: req.requestId })}
-                                  >
-                                    {approveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
-                                    <span className="ml-1">Approve</span>
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-7 px-2.5 text-xs border-red-500/40 text-red-400 hover:bg-red-500/15 hover:text-red-300"
-                                    disabled={denyMutation.isPending}
-                                    onClick={() => denyMutation.mutate({ requestId: req.requestId })}
-                                  >
-                                    {denyMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XIcon className="w-3 h-3" />}
-                                    <span className="ml-1">Deny</span>
-                                  </Button>
+                                  {req.dateDecision !== "approved" && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 px-2.5 text-xs border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/15 hover:text-emerald-300"
+                                      disabled={approveDateMutation.isPending}
+                                      onClick={() => approveDateMutation.mutate({ requestId: req.requestId, date })}
+                                    >
+                                      {approveDateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                                      <span className="ml-1">{req.dateDecision === "denied" ? "Re-approve" : "Approve"}</span>
+                                    </Button>
+                                  )}
+                                  {req.dateDecision !== "denied" && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 px-2.5 text-xs border-red-500/40 text-red-400 hover:bg-red-500/15 hover:text-red-300"
+                                      disabled={denyDateMutation.isPending}
+                                      onClick={() => denyDateMutation.mutate({ requestId: req.requestId, date })}
+                                    >
+                                      {denyDateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XIcon className="w-3 h-3" />}
+                                      <span className="ml-1">{req.dateDecision === "approved" ? "Re-deny" : "Deny"}</span>
+                                    </Button>
+                                  )}
                                 </div>
-                              )}
-                              {isApproved && (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                              )}
-                              {isDenied && (
-                                <XIcon className="w-4 h-4 text-red-400 shrink-0" />
                               )}
                             </div>
                           </div>

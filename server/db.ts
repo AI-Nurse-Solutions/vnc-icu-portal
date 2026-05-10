@@ -7,6 +7,7 @@ import {
   config,
   employees,
   InsertEmployee,
+  requestDateDecisions,
   requestDates,
   requests,
   submissionDeadlines,
@@ -16,6 +17,7 @@ import {
   type InsertConfig,
   type InsertRequest,
   type InsertRequestDate,
+  type InsertRequestDateDecision,
   type InsertSubmissionDeadline,
   type InsertUser,
 } from "../drizzle/schema";
@@ -635,9 +637,10 @@ export async function getAuditLogWithActors(opts: {
   };
 }
 
-// ─── Decision Calendar ────────────────────────────────────────────────────────
+// ─── Decision Calendar ────────────────────────────────────────────────────────────────
 // Get all non-withdrawn, non-ancillary, active-employee requests for a given date.
-// Returns one row per request (not per date), with employee info.
+// Returns one row per request (not per date), with employee info, per-date decision,
+// and unit-wide seniority rank.
 // Shift filter is optional — if omitted, returns all shifts.
 export async function getDecisionCalendarDay(date: string, shift?: string) {
   const db = await getDb();
@@ -673,20 +676,96 @@ export async function getDecisionCalendarDay(date: string, shift?: string) {
       comment: requests.comment,
       workingPriority: requests.workingPriority,
       summerShutout: requestDates.summerShutout,
+      // Per-date decision (from request_date_decisions)
+      dateDecision: requestDateDecisions.decision,
+      dateDecisionNote: requestDateDecisions.note,
+      dateDecidedAt: requestDateDecisions.decidedAt,
     })
     .from(requestDates)
     .innerJoin(requests, eq(requestDates.requestId, requests.id))
     .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .leftJoin(
+      requestDateDecisions,
+      and(
+        eq(requestDateDecisions.requestId, requests.id),
+        sql`${requestDateDecisions.date} = ${date}`
+      )
+    )
     .where(and(...whereConditions))
     .orderBy(requests.workingPriority, employees.seniorityDate);
 
   // Deduplicate: a request may span multiple dates; we only want it once per date
   const seen = new Set<number>();
-  return rows.filter(r => {
+  const deduped = rows.filter(r => {
     if (seen.has(r.requestId)) return false;
     seen.add(r.requestId);
     return true;
   });
+
+  // Compute unit-wide seniority rank: rank all active ICU employees by seniorityDate ASC
+  // We do this by sorting all returned employees by seniority and assigning 1-based ranks.
+  // Note: this rank is across all shifts (unit-wide), not shift-specific.
+  const allActiveEmpRows = await db
+    .select({ id: employees.id, seniorityDate: employees.seniorityDate })
+    .from(employees)
+    .where(
+      and(
+        eq(employees.isActive, true),
+        sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+        sql`${employees.role} != 'ancillary'`
+      )
+    )
+    .orderBy(employees.seniorityDate);
+
+  const seniorityRankMap = new Map<number, number>();
+  allActiveEmpRows.forEach((e, idx) => seniorityRankMap.set(e.id, idx + 1));
+
+  return deduped.map(r => ({
+    ...r,
+    unitSeniorityRank: seniorityRankMap.get(r.employeeId) ?? null,
+    dateDecidedAt: r.dateDecidedAt instanceof Date ? r.dateDecidedAt.toISOString() : (r.dateDecidedAt ? String(r.dateDecidedAt) : null),
+  }));
+}
+
+// Upsert a per-date decision (approve or deny a single date of a request)
+export async function upsertDateDecision(
+  requestId: number,
+  date: string,
+  decision: "approved" | "denied",
+  decidedBy: number,
+  note?: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+
+  // Check if a decision already exists for this request+date
+  const existing = await db
+    .select({ id: requestDateDecisions.id })
+    .from(requestDateDecisions)
+    .where(
+      and(
+        eq(requestDateDecisions.requestId, requestId),
+        sql`${requestDateDecisions.date} = ${date}`
+      )
+    )
+    .limit(1);
+
+  if (existing.length > 0) {
+    // Update existing decision
+    await db
+      .update(requestDateDecisions)
+      .set({ decision, decidedBy, note: note ?? null, decidedAt: new Date() })
+      .where(eq(requestDateDecisions.id, existing[0].id));
+  } else {
+    // Insert new decision
+    await db.insert(requestDateDecisions).values({
+      requestId,
+      date: date as unknown as Date,
+      decision,
+      decidedBy,
+      note: note ?? null,
+    });
+  }
 }
 
 // Get all dates that have at least one non-withdrawn vacation request in a month.
