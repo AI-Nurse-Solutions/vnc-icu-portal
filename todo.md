@@ -243,3 +243,8 @@
 - [x] Update Decision Calendar UI: Approve/Deny buttons act on the specific date shown, not the whole request
 - [x] Show per-date decision status badge (approved/denied/pending) on each row
 - [x] Add seniority rank (unit-wide, 1 = most senior) next to employee name on each row
+
+## Clear Date Decision (May 10, 2026)
+- [x] Add clearDateDecision DB helper (deletes row from request_date_decisions)
+- [x] Add clearDateDecision tRPC procedure in managerTools router
+- [x] Add undo/clear icon button on rows with an existing dateDecision

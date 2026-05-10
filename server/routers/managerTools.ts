@@ -14,6 +14,7 @@ import {
   getPendingRequestsForApprovalRun,
   getRequestDates,
   upsertDateDecision,
+  clearDateDecision,
 } from "../db";
 
 async function requireManagerOrAdmin(ctx: any) {
@@ -412,6 +413,18 @@ export const managerToolsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const admin = await requireAdmin(ctx);
       await upsertDateDecision(input.requestId, input.date, "denied", admin.id, input.note);
+      return { success: true };
+    }),
+
+  // Clear (undo) a per-date decision — resets the date back to undecided
+  clearDateDecision: publicProcedure
+    .input(z.object({
+      requestId: z.number(),
+      date: z.string(), // "YYYY-MM-DD"
+    }))
+    .mutation(async ({ input, ctx }) => {
+      await requireAdmin(ctx);
+      await clearDateDecision(input.requestId, input.date);
       return { success: true };
     }),
 

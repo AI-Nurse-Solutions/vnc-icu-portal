@@ -807,3 +807,17 @@ export async function getDecisionCalendarMonth(year: number, month: number) {
 
   return rows;
 }
+
+// Delete a per-date decision (reset to undecided)
+export async function clearDateDecision(requestId: number, date: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db
+    .delete(requestDateDecisions)
+    .where(
+      and(
+        eq(requestDateDecisions.requestId, requestId),
+        sql`${requestDateDecisions.date} = ${date}`
+      )
+    );
+}

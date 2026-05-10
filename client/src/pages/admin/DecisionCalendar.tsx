@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   ChevronLeft, ChevronRight, CalendarDays, Users, ShieldCheck,
   AlertTriangle, CheckCircle2, Clock, Loader2, X as XIcon,
-  ArrowLeft, Shield
+  ArrowLeft, Shield, RotateCcw
 } from "lucide-react";
 import { format, parseISO, getDaysInMonth, startOfMonth, getDay } from "date-fns";
 
@@ -151,6 +151,15 @@ function DayDrillDown({
   const denyDateMutation = trpc.tools.denyDateDecision.useMutation({
     onSuccess: () => {
       toast.success("Date denied");
+      refetch();
+      utils.tools.getDecisionCalendarMonth.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const clearDateMutation = trpc.tools.clearDateDecision.useMutation({
+    onSuccess: () => {
+      toast.success("Date decision cleared");
       refetch();
       utils.tools.getDecisionCalendarMonth.invalidate();
     },
@@ -428,6 +437,19 @@ function DayDrillDown({
                                     >
                                       {denyDateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XIcon className="w-3 h-3" />}
                                       <span className="ml-1">{req.dateDecision === "approved" ? "Re-deny" : "Deny"}</span>
+                                    </Button>
+                                  )}
+                                  {/* Clear (undo) button — only shown when a decision exists */}
+                                  {req.dateDecision !== null && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 w-7 p-0 border-zinc-600/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200"
+                                      title="Clear this date decision (reset to undecided)"
+                                      disabled={clearDateMutation.isPending}
+                                      onClick={() => clearDateMutation.mutate({ requestId: req.requestId, date })}
+                                    >
+                                      {clearDateMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
                                     </Button>
                                   )}
                                 </div>
