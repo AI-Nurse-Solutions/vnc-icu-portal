@@ -3,7 +3,7 @@ import { ENV } from "./env";
 
 const secret = new TextEncoder().encode(ENV.cookieSecret || "vnc-icu-portal-secret-key-2026");
 
-export async function signJwt(payload: Record<string, unknown>, expiresIn = "8h"): Promise<string> {
+export async function signJwt(payload: Record<string, unknown>, expiresIn = "24h"): Promise<string> {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT \n  DATE_FORMAT(rd.date, '%Y-%m') AS month,\n  COUNT(*) AS total_dates,\n  COUNT(rdd.id) AS decided\nFROM request_dates rd\nJOIN vacation_requests vr ON vr.id = rd.request_id\nJOIN employees e ON e.id = vr.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE vr.status NOT IN ('withdrawn', 'draft')\n  AND e.is_active = 1\n  AND (e.role IS NULL OR e.role != 'ancillary')\nGROUP BY month\nORDER BY month;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT \n  DATE_FORMAT(rd.date, '%Y-%m') AS month,\n  COUNT(*) AS total_dates,\n  COUNT(rdd.id) AS decided\nFROM request_dates rd\nJOIN vacation_requests vr ON vr.id = rd.request_id\nJOIN employees e ON e.id = vr.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE vr.status NOT IN ('withdrawn', 'draft')\n  AND e.is_active = 1\n  AND (e.role IS NULL OR e.role != 'ancillary')\nGROUP BY month\nORDER BY month;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 2: Table '8ttpjtbwnrkm8qcjp9ko4t.vacation_requests' doesn't exist"
+  ]
+}

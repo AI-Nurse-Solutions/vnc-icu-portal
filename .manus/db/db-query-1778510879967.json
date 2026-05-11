@@ -1,0 +1,40 @@
+{
+  "query": "\nSELECT role, category, is_active, COUNT(*) as cnt \nFROM employees \nGROUP BY role, category, is_active\nORDER BY cnt DESC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT role, category, is_active, COUNT(*) as cnt \nFROM employees \nGROUP BY role, category, is_active\nORDER BY cnt DESC;\n",
+  "rows": [
+    {
+      "role": "employee",
+      "category": "icu",
+      "is_active": "1",
+      "cnt": "168"
+    },
+    {
+      "role": "employee",
+      "category": "icu",
+      "is_active": "0",
+      "cnt": "11"
+    },
+    {
+      "role": "admin",
+      "category": "icu",
+      "is_active": "1",
+      "cnt": "2"
+    },
+    {
+      "role": "ancillary",
+      "category": "icu",
+      "is_active": "1",
+      "cnt": "1"
+    },
+    {
+      "role": "super_admin",
+      "category": "icu",
+      "is_active": "1",
+      "cnt": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "role\tcategory\tis_active\tcnt\nemployee\ticu\t1\t168\nemployee\ticu\t0\t11\nadmin\ticu\t1\t2\nancillary\ticu\t1\t1\nsuper_admin\ticu\t1\t1\n",
+  "stderr": "",
+  "execution_time_ms": 261
+}

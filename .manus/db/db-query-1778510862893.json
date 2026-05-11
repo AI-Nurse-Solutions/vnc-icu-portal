@@ -1,0 +1,80 @@
+{
+  "query": "\nSELECT \n  DATE_FORMAT(rd.date, '%Y-%m') AS month,\n  COUNT(*) AS total_dates,\n  COUNT(rdd.id) AS decided\nFROM request_dates rd\nJOIN requests r ON r.id = rd.request_id\nJOIN employees e ON e.id = r.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE r.status NOT IN ('withdrawn', 'draft')\n  AND e.is_active = 1\nGROUP BY month\nORDER BY month\nLIMIT 20;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT \n  DATE_FORMAT(rd.date, '%Y-%m') AS month,\n  COUNT(*) AS total_dates,\n  COUNT(rdd.id) AS decided\nFROM request_dates rd\nJOIN requests r ON r.id = rd.request_id\nJOIN employees e ON e.id = r.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE r.status NOT IN ('withdrawn', 'draft')\n  AND e.is_active = 1\nGROUP BY month\nORDER BY month\nLIMIT 20;\n",
+  "rows": [
+    {
+      "month": "2026-04",
+      "total_dates": "1",
+      "decided": "0"
+    },
+    {
+      "month": "2026-05",
+      "total_dates": "12",
+      "decided": "0"
+    },
+    {
+      "month": "2026-06",
+      "total_dates": "50",
+      "decided": "0"
+    },
+    {
+      "month": "2026-07",
+      "total_dates": "526",
+      "decided": "454"
+    },
+    {
+      "month": "2026-08",
+      "total_dates": "391",
+      "decided": "382"
+    },
+    {
+      "month": "2026-09",
+      "total_dates": "544",
+      "decided": "507"
+    },
+    {
+      "month": "2026-10",
+      "total_dates": "539",
+      "decided": "522"
+    },
+    {
+      "month": "2026-11",
+      "total_dates": "293",
+      "decided": "234"
+    },
+    {
+      "month": "2026-12",
+      "total_dates": "321",
+      "decided": "213"
+    },
+    {
+      "month": "2027-01",
+      "total_dates": "19",
+      "decided": "0"
+    },
+    {
+      "month": "2027-04",
+      "total_dates": "4",
+      "decided": "0"
+    },
+    {
+      "month": "2027-05",
+      "total_dates": "2",
+      "decided": "0"
+    },
+    {
+      "month": "2027-06",
+      "total_dates": "13",
+      "decided": "0"
+    },
+    {
+      "month": "2027-09",
+      "total_dates": "21",
+      "decided": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "month\ttotal_dates\tdecided\n2026-04\t1\t0\n2026-05\t12\t0\n2026-06\t50\t0\n2026-07\t526\t454\n2026-08\t391\t382\n2026-09\t544\t507\n2026-10\t539\t522\n2026-11\t293\t234\n2026-12\t321\t213\n2027-01\t19\t0\n2027-04\t4\t0\n2027-05\t2\t0\n2027-06\t13\t0\n2027-09\t21\t0\n",
+  "stderr": "",
+  "execution_time_ms": 270
+}

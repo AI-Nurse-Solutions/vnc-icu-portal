@@ -1,0 +1,35 @@
+{
+  "query": "\nSELECT request_type, status, COUNT(*) as cnt \nFROM requests \nGROUP BY request_type, status\nORDER BY cnt DESC\nLIMIT 20;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT request_type, status, COUNT(*) as cnt \nFROM requests \nGROUP BY request_type, status\nORDER BY cnt DESC\nLIMIT 20;\n",
+  "rows": [
+    {
+      "request_type": "vacation",
+      "status": "pending",
+      "cnt": "409"
+    },
+    {
+      "request_type": "vacation",
+      "status": "withdrawn",
+      "cnt": "106"
+    },
+    {
+      "request_type": "education",
+      "status": "pending",
+      "cnt": "31"
+    },
+    {
+      "request_type": "education",
+      "status": "withdrawn",
+      "cnt": "11"
+    },
+    {
+      "request_type": "vacation",
+      "status": "approved",
+      "cnt": "9"
+    }
+  ],
+  "messages": [],
+  "stdout": "request_type\tstatus\tcnt\nvacation\tpending\t409\nvacation\twithdrawn\t106\neducation\tpending\t31\neducation\twithdrawn\t11\nvacation\tapproved\t9\n",
+  "stderr": "",
+  "execution_time_ms": 262
+}
