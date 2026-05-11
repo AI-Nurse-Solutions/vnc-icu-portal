@@ -236,13 +236,7 @@ export default function MyPortal() {
                   return (
                     <div
                       key={req.id}
-                      className={`rounded-xl border px-4 py-3 ${
-                        isPending && !hasDecisions
-                          ? "bg-amber-50 border-amber-200"
-                          : hasDecisions
-                          ? "bg-white border-gray-200"
-                          : "bg-white border-gray-100"
-                      }`}
+                      className="rounded-xl border px-4 py-3 bg-white border-gray-200"
                     >
                       {/* Row header */}
                       <div className="flex items-center justify-between gap-2">

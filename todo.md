@@ -335,3 +335,7 @@
 - [x] Fix "New Request" button — navigate to correct employee new-request route
 - [x] Fix "Shift Demand Calendar" button — navigate to correct employee calendar route
 - [x] Fix "View My Results in Calendar" link — navigate to correct calendar route
+
+## MyPortal & Calendar UI Fixes
+- [x] Remove amber pending background from request card header row (keep amber only on pending date pills)
+- [x] Add prev/next month navigation arrows to employee Shift Demand Calendar

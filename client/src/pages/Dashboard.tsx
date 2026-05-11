@@ -134,11 +134,11 @@ export default function Dashboard() {
     }
     if (location === "/dashboard/shift-demand-calendar" || location === "/dashboard/calendar") {
       return (
-        <div className="min-h-screen bg-[#f0ede8]">
-          <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="min-h-screen bg-background text-foreground">
+          <div className="max-w-6xl mx-auto px-4 py-4">
             <button
               onClick={() => navigate("/dashboard")}
-              className="mb-4 flex items-center gap-1.5 text-sm text-[#6b8f71] font-semibold hover:underline"
+              className="mb-3 flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline"
             >
               ← Back to My Portal
             </button>
