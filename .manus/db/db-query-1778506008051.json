@@ -1,0 +1,16 @@
+{
+  "query": "\nSELECT\n  COUNT(*) AS total_request_dates,\n  SUM(CASE WHEN rdd.decision IS NULL THEN 1 ELSE 0 END) AS pending_no_decision,\n  SUM(CASE WHEN rdd.decision = 'approved' THEN 1 ELSE 0 END) AS approved,\n  SUM(CASE WHEN rdd.decision = 'denied' THEN 1 ELSE 0 END) AS denied\nFROM request_dates rd\nJOIN requests r ON r.id = rd.request_id\nJOIN employees e ON e.id = r.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE r.status != 'withdrawn'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\n  AND r.request_type = 'vacation';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT\n  COUNT(*) AS total_request_dates,\n  SUM(CASE WHEN rdd.decision IS NULL THEN 1 ELSE 0 END) AS pending_no_decision,\n  SUM(CASE WHEN rdd.decision = 'approved' THEN 1 ELSE 0 END) AS approved,\n  SUM(CASE WHEN rdd.decision = 'denied' THEN 1 ELSE 0 END) AS denied\nFROM request_dates rd\nJOIN requests r ON r.id = rd.request_id\nJOIN employees e ON e.id = r.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE r.status != 'withdrawn'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\n  AND r.request_type = 'vacation';\n",
+  "rows": [
+    {
+      "total_request_dates": "2657",
+      "pending_no_decision": "345",
+      "approved": "2092",
+      "denied": "220"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_request_dates\tpending_no_decision\tapproved\tdenied\n2657\t345\t2092\t220\n",
+  "stderr": "",
+  "execution_time_ms": 297
+}

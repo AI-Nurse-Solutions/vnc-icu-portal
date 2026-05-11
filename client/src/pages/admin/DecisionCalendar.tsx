@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   ChevronLeft, ChevronRight, CalendarDays, Users, ShieldCheck,
   AlertTriangle, CheckCircle2, Clock, Loader2, X as XIcon,
-  ArrowLeft, Shield, RotateCcw, CheckCheck
+  ArrowLeft, Shield, RotateCcw, CheckCheck, Filter
 } from "lucide-react";
 import { format, parseISO, getDaysInMonth, startOfMonth, getDay } from "date-fns";
 import { useLocation } from "wouter";
@@ -129,9 +129,11 @@ function ShiftBadge({ shift }: { shift: string }) {
 function DayDrillDown({
   date,
   onClose,
+  pendingOnly = false,
 }: {
   date: string;
   onClose: () => void;
+  pendingOnly?: boolean;
 }) {
   const [activeShift, setActiveShift] = useState<"ALL" | "AM" | "PM" | "NOC">("ALL");
   const utils = trpc.useUtils();
@@ -188,15 +190,24 @@ function DayDrillDown({
   }, [date]);
 
   // Group requests by shift for display
+  // When pendingOnly=true, only include rows with no dateDecision
   const byShift = useMemo(() => {
     if (!data) return {};
     const map: Record<string, DayRequest[]> = {};
-    for (const r of data.requests) {
+    const rows = pendingOnly
+      ? data.requests.filter((r: DayRequest) => r.dateDecision === null)
+      : data.requests;
+    for (const r of rows) {
       if (!map[r.shift]) map[r.shift] = [];
       map[r.shift].push(r);
     }
     return map;
-  }, [data]);
+  }, [data, pendingOnly]);
+
+  // Count of pending rows in the full dataset (for the banner)
+  const totalPendingCount = useMemo(() =>
+    data ? data.requests.filter((r: DayRequest) => r.dateDecision === null).length : 0,
+  [data]);
 
   const shiftsToShow = activeShift === "ALL" ? SHIFTS.filter(s => byShift[s]?.length) : [activeShift];
 
@@ -227,6 +238,16 @@ function DayDrillDown({
             <XIcon className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Pending Only active banner */}
+        {pendingOnly && (
+          <div className="flex items-center gap-2 px-5 py-2 bg-amber-500/10 border-b border-amber-500/20 shrink-0">
+            <Filter className="w-3 h-3 text-amber-400 shrink-0" />
+            <span className="text-xs text-amber-300 font-medium">
+              Pending Only — showing {totalPendingCount} undecided row{totalPendingCount !== 1 ? "s" : ""} out of {data?.totalCount ?? 0} total
+            </span>
+          </div>
+        )}
 
         {/* Shift filter tabs */}
         <div className="flex gap-1 px-5 py-3 border-b border-zinc-800 shrink-0">
@@ -264,6 +285,12 @@ function DayDrillDown({
             <div className="flex flex-col items-center justify-center py-16 text-zinc-500">
               <CalendarDays className="w-8 h-8 mb-2 opacity-40" />
               <p className="text-sm">No vacation requests for this date{activeShift !== "ALL" ? ` (${activeShift})` : ""}</p>
+            </div>
+          ) : pendingOnly && Object.keys(byShift).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-500 gap-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500/50" />
+              <p className="text-sm font-medium text-emerald-400">All decisions made for this date</p>
+              <p className="text-xs text-zinc-500">Every request-date row has been approved or denied.</p>
             </div>
           ) : (
             shiftsToShow.map(shift => {
@@ -522,12 +549,14 @@ function CalendarGrid({
   dates,
   cap,
   onSelectDate,
+  pendingOnly = false,
 }: {
   year: number;
   month: number;
   dates: CalendarDateEntry[];
   cap: number;
   onSelectDate: (date: string) => void;
+  pendingOnly?: boolean;
 }) {
   const daysInMonth = getDaysInMonth(new Date(year, month - 1));
   const firstDayOfWeek = getDay(startOfMonth(new Date(year, month - 1))); // 0=Sun
@@ -580,6 +609,8 @@ function CalendarGrid({
 
               // Determine pending state: has requests but not all decided
               const hasPending = entry && entry.decidedCount < entry.totalCount;
+              // In pendingOnly mode, dim dates that are fully decided or have no requests
+              const isDimmed = pendingOnly && (!hasPending || !hasRequests);
               // Color coding — use solid, high-contrast backgrounds
               let cellClass = "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800";
               if (isOverCap) cellClass = "border-red-500 bg-red-950 hover:bg-red-900";
@@ -593,7 +624,7 @@ function CalendarGrid({
                   onClick={() => onSelectDate(date)}
                   className={`relative aspect-square rounded-lg border text-left p-1.5 transition-all cursor-pointer group ${cellClass} ${
                     isToday ? "ring-1 ring-teal-500/60" : ""
-                  }`}
+                  } ${isDimmed ? "opacity-25 saturate-0 pointer-events-none" : ""}`}
                 >
                   {/* Day number */}
                   <span className={`text-xs font-bold ${
@@ -690,6 +721,7 @@ export default function DecisionCalendar() {
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(7); // July 2026
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [pendingOnly, setPendingOnly] = useState(false);
   const [, navigate] = useLocation();
 
   const { data, isLoading, error } = trpc.tools.getDecisionCalendarMonth.useQuery(
@@ -777,8 +809,29 @@ export default function DecisionCalendar() {
           </p>
         </div>
 
-        {/* Month nav + Jump to Month */}
+        {/* Month nav + Jump to Month + Pending Only toggle */}
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Pending Only toggle */}
+          <button
+            onClick={() => setPendingOnly(p => !p)}
+            title={pendingOnly ? "Showing pending only — click to show all" : "Filter to pending decisions only"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+              pendingOnly
+                ? "bg-amber-500/20 border-amber-400/60 text-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.2)]"
+                : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+            }`}
+          >
+            <Filter className="w-3.5 h-3.5" />
+            Pending Only
+            {stats && stats.pending > 0 && (
+              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                pendingOnly ? "bg-amber-400/30 text-amber-200" : "bg-zinc-700 text-zinc-300"
+              }`}>
+                {stats.pending}
+              </span>
+            )}
+          </button>
+
           {/* Quick-jump dropdown */}
           <select
             value={`${year}-${month}`}
@@ -847,6 +900,7 @@ export default function DecisionCalendar() {
             dates={data?.dates ?? []}
             cap={data?.cap ?? 8}
             onSelectDate={setSelectedDate}
+            pendingOnly={pendingOnly}
           />
         )}
       </div>
@@ -868,6 +922,7 @@ export default function DecisionCalendar() {
         <DayDrillDown
           date={selectedDate}
           onClose={() => setSelectedDate(null)}
+          pendingOnly={pendingOnly}
         />
       )}
     </div>

@@ -1,0 +1,194 @@
+{
+  "query": "SHOW COLUMNS FROM employees;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute SHOW COLUMNS FROM employees;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "employee_number",
+      "Type": "varchar(32)",
+      "Null": "NO",
+      "Key": "UNI",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "first_name",
+      "Type": "varchar(64)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "last_name",
+      "Type": "varchar(64)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "seniority_date",
+      "Type": "date",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "shift",
+      "Type": "enum('AM','PM','NOC')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "email",
+      "Type": "varchar(320)",
+      "Null": "NO",
+      "Key": "UNI",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "role",
+      "Type": "enum('employee','manager','admin','super_admin','ancillary')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "employee",
+      "Extra": ""
+    },
+    {
+      "Field": "auth_provider_id",
+      "Type": "varchar(128)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "password_hash",
+      "Type": "varchar(256)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "otp_code",
+      "Type": "varchar(6)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "otp_expires_at",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "otp_attempts",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "otp_locked_until",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "reset_token",
+      "Type": "varchar(128)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "reset_token_expires_at",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "invite_token",
+      "Type": "varchar(128)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "invite_token_expires_at",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "is_active",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1",
+      "Extra": ""
+    },
+    {
+      "Field": "created_at",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updated_at",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Field": "is_verified",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "category",
+      "Type": "enum('icu','ancillary')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "icu",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nemployee_number\tvarchar(32)\tNO\tUNI\tNULL\t\nfirst_name\tvarchar(64)\tNO\t\tNULL\t\nlast_name\tvarchar(64)\tNO\t\tNULL\t\nseniority_date\tdate\tNO\t\tNULL\t\nshift\tenum('AM','PM','NOC')\tNO\t\tNULL\t\nemail\tvarchar(320)\tNO\tUNI\tNULL\t\nrole\tenum('employee','manager','admin','super_admin','ancillary')\tNO\t\temployee\t\nauth_provider_id\tvarchar(128)\tYES\t\tNULL\t\npassword_hash\tvarchar(256)\tYES\t\tNULL\t\notp_code\tvarchar(6)\tYES\t\tNULL\t\notp_expires_at\ttimestamp\tYES\t\tNULL\t\notp_attempts\tint\tYES\t\t0\t\notp_locked_until\ttimestamp\tYES\t\tNULL\t\nreset_token\tvarchar(128)\tYES\t\tNULL\t\nreset_token_expires_at\ttimestamp\tYES\t\tNULL\t\ninvite_token\tvarchar(128)\tYES\t\tNULL\t\ninvite_token_expires_at\ttimestamp\tYES\t\tNULL\t\nis_active\ttinyint(1)\tNO\t\t1\t\ncreated_at\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdated_at\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nis_verified\ttinyint(1)\tNO\t\t0\t\ncategory\tenum('icu','ancillary')\tNO\t\ticu\t\n",
+  "stderr": "",
+  "execution_time_ms": 270
+}

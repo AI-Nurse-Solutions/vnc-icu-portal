@@ -299,3 +299,9 @@
 - [x] Remove Review Dashboard from nav, routes, imports, and delete page file
 - [x] Remove Hot Dates View from nav, routes, imports, and delete page file
 - [x] Remove 21-Day Ceiling Tracker from nav, routes, imports, and delete page file
+
+## Decision Calendar — Pending Only Filter (May 11, 2026)
+- [x] Add pendingOnly toggle button in calendar header
+- [x] Month grid: when pendingOnly=true, dim/grey out fully-decided dates, highlight only dates with pending rows
+- [x] Drill-down panel: when pendingOnly=true, filter request list to show only rows with no dateDecision
+- [x] Show pending count badge on the toggle button

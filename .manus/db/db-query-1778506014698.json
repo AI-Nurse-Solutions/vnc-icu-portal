@@ -1,0 +1,75 @@
+{
+  "query": "\nSELECT\n  DATE_FORMAT(rd.date, '%Y-%m') AS month,\n  COUNT(*) AS pending_dates,\n  COUNT(DISTINCT r.employee_id) AS employees_affected\nFROM request_dates rd\nJOIN requests r ON r.id = rd.request_id\nJOIN employees e ON e.id = r.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE r.status != 'withdrawn'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\n  AND r.request_type = 'vacation'\n  AND rdd.decision IS NULL\nGROUP BY DATE_FORMAT(rd.date, '%Y-%m')\nORDER BY month;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT\n  DATE_FORMAT(rd.date, '%Y-%m') AS month,\n  COUNT(*) AS pending_dates,\n  COUNT(DISTINCT r.employee_id) AS employees_affected\nFROM request_dates rd\nJOIN requests r ON r.id = rd.request_id\nJOIN employees e ON e.id = r.employee_id\nLEFT JOIN request_date_decisions rdd ON rdd.request_id = rd.request_id AND rdd.date = rd.date\nWHERE r.status != 'withdrawn'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\n  AND r.request_type = 'vacation'\n  AND rdd.decision IS NULL\nGROUP BY DATE_FORMAT(rd.date, '%Y-%m')\nORDER BY month;\n",
+  "rows": [
+    {
+      "month": "2026-05",
+      "pending_dates": "12",
+      "employees_affected": "2"
+    },
+    {
+      "month": "2026-06",
+      "pending_dates": "48",
+      "employees_affected": "13"
+    },
+    {
+      "month": "2026-07",
+      "pending_dates": "52",
+      "employees_affected": "28"
+    },
+    {
+      "month": "2026-08",
+      "pending_dates": "2",
+      "employees_affected": "2"
+    },
+    {
+      "month": "2026-09",
+      "pending_dates": "20",
+      "employees_affected": "19"
+    },
+    {
+      "month": "2026-10",
+      "pending_dates": "1",
+      "employees_affected": "1"
+    },
+    {
+      "month": "2026-11",
+      "pending_dates": "48",
+      "employees_affected": "21"
+    },
+    {
+      "month": "2026-12",
+      "pending_dates": "103",
+      "employees_affected": "41"
+    },
+    {
+      "month": "2027-01",
+      "pending_dates": "19",
+      "employees_affected": "5"
+    },
+    {
+      "month": "2027-04",
+      "pending_dates": "4",
+      "employees_affected": "1"
+    },
+    {
+      "month": "2027-05",
+      "pending_dates": "2",
+      "employees_affected": "1"
+    },
+    {
+      "month": "2027-06",
+      "pending_dates": "13",
+      "employees_affected": "1"
+    },
+    {
+      "month": "2027-09",
+      "pending_dates": "21",
+      "employees_affected": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "month\tpending_dates\temployees_affected\n2026-05\t12\t2\n2026-06\t48\t13\n2026-07\t52\t28\n2026-08\t2\t2\n2026-09\t20\t19\n2026-10\t1\t1\n2026-11\t48\t21\n2026-12\t103\t41\n2027-01\t19\t5\n2027-04\t4\t1\n2027-05\t2\t1\n2027-06\t13\t1\n2027-09\t21\t1\n",
+  "stderr": "",
+  "execution_time_ms": 276
+}
