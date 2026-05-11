@@ -305,3 +305,10 @@
 - [x] Month grid: when pendingOnly=true, dim/grey out fully-decided dates, highlight only dates with pending rows
 - [x] Drill-down panel: when pendingOnly=true, filter request list to show only rows with no dateDecision
 - [x] Show pending count badge on the toggle button
+
+## New Decision Calendar Frontend (May 11, 2026)
+- [x] Read backend API contract (getDecisionCalendarMonth, getDecisionCalendarDay)
+- [x] Build new DecisionCalendarV2 page: month selector, summary stats bar, date list with pending/approved/denied counts
+- [x] Day+shift drill-down panel: shift tabs, sorted request rows, approve/deny/clear buttons
+- [x] Pending Only toggle, session expiry banner
+- [x] Swap Dashboard.tsx route to new page, delete old DecisionCalendar.tsx

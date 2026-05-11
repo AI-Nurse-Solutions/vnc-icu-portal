@@ -23,7 +23,7 @@ import AdminAuditLog from "./admin/AdminAuditLog";
 import AdminImport from "./admin/AdminImport";
 import AuditLog from "./admin/AuditLog";
 import SuperAdminDates from "./superadmin/SuperAdminDates";
-import DecisionCalendar from "./admin/DecisionCalendar";
+import DecisionCalendarV2 from "./admin/DecisionCalendarV2";
 
 /** Guard component — shows "Access Denied" if the user lacks the required role */
 function RoleGuard({ allowed, children }: { allowed: boolean; children: React.ReactNode }) {
@@ -343,7 +343,7 @@ export default function Dashboard() {
           )}
            {/* ─── Admin ────────────────────────────────────────────────────── */}
           {location === "/dashboard/admin/decision-calendar" && (
-            <RoleGuard allowed={isAdmin}><DecisionCalendar /></RoleGuard>
+            <RoleGuard allowed={isAdmin}><DecisionCalendarV2 /></RoleGuard>
           )}
           {location === "/dashboard/admin/employees" && (
             <RoleGuard allowed={isAdmin}><AdminEmployees /></RoleGuard>
