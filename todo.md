@@ -260,3 +260,8 @@
 - [x] Sync per-date admin decisions (approved/denied) to employee calendar view — show correct status not pending
 - [x] Summer cap: change from auto-shutout to flag-only — admins retain full Approve/Deny/Clear on summer-capped rows; divider now reads "ADMIN DECISION REQUIRED"
 - [x] Export report: add error handling to all three handleFetch functions so failures surface as toast errors instead of silently failing
+
+## Decision Calendar Status Sync Fix (May 11, 2026)
+- [x] After every approveDate/denyDate/clearDate action: recompute request-level status from request_date_decisions and sync to requests.status
+- [x] Status logic: all approved → approved; all denied → denied; mix (no undecided) → approved; any undecided → pending
+- [x] Verify export queries return correct counts after sync

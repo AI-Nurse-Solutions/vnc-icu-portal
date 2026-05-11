@@ -730,6 +730,56 @@ export async function getDecisionCalendarDay(date: string, shift?: string) {
 }
 
 // Upsert a per-date decision (approve or deny a single date of a request)
+// Recompute and persist the request-level status from all per-date decisions.
+// Rules:
+//   - All dates decided as approved → approved
+//   - All dates decided as denied  → denied
+//   - Mix of approved + denied (no undecided) → approved (partial; treat as approved so export counts it)
+//   - Any undecided dates remain   → pending
+export async function syncRequestStatusFromDateDecisions(requestId: number) {
+  const db = await getDb();
+  if (!db) return;
+
+  // Get all dates for this request
+  const allDates = await db
+    .select({ date: requestDates.date })
+    .from(requestDates)
+    .where(eq(requestDates.requestId, requestId));
+
+  if (allDates.length === 0) return;
+
+  // Get all per-date decisions for this request
+  const decisions = await db
+    .select({ date: requestDateDecisions.date, decision: requestDateDecisions.decision })
+    .from(requestDateDecisions)
+    .where(eq(requestDateDecisions.requestId, requestId));
+
+  const decidedDates = new Set(decisions.map((d) => String(d.date).slice(0, 10)));
+  const totalDates = allDates.length;
+  const decidedCount = decisions.length;
+  const approvedCount = decisions.filter((d) => d.decision === "approved").length;
+  const deniedCount = decisions.filter((d) => d.decision === "denied").length;
+
+  let newStatus: "pending" | "approved" | "denied";
+
+  if (decidedCount < totalDates) {
+    // Some dates still undecided — keep pending
+    newStatus = "pending";
+  } else if (approvedCount === totalDates) {
+    newStatus = "approved";
+  } else if (deniedCount === totalDates) {
+    newStatus = "denied";
+  } else {
+    // Mix: at least one approved, at least one denied — treat as approved (partial)
+    newStatus = "approved";
+  }
+
+  await db
+    .update(requests)
+    .set({ status: newStatus })
+    .where(eq(requests.id, requestId));
+}
+
 export async function upsertDateDecision(
   requestId: number,
   date: string,
@@ -768,6 +818,9 @@ export async function upsertDateDecision(
       note: note ?? null,
     });
   }
+
+  // Sync request-level status from all per-date decisions
+  await syncRequestStatusFromDateDecisions(requestId);
 }
 
 // Get all dates that have at least one non-withdrawn vacation request in a month.
@@ -822,4 +875,6 @@ export async function clearDateDecision(requestId: number, date: string) {
         sql`${requestDateDecisions.date} = ${date}`
       )
     );
+  // After clearing a date decision, request reverts to pending (has undecided dates again)
+  await syncRequestStatusFromDateDecisions(requestId);
 }
