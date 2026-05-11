@@ -265,3 +265,9 @@
 - [x] After every approveDate/denyDate/clearDate action: recompute request-level status from request_date_decisions and sync to requests.status
 - [x] Status logic: all approved → approved; all denied → denied; mix (no undecided) → approved; any undecided → pending
 - [x] Verify export queries return correct counts after sync
+
+## Decision Calendar Enhancements (May 11, 2026)
+- [x] Add bulkApproveDates tRPC procedure: approves all dates of a request in one call, syncs request status
+- [x] Add Bulk Approve All button per shift in the drill-down panel header
+- [x] Update getDecisionCalendarMonth to return decidedCount per date cell
+- [x] Show "X/Y decided" progress counter on each month grid cell (green=all done, amber=partial, gray=none)

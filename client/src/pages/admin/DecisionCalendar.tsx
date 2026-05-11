@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   ChevronLeft, ChevronRight, CalendarDays, Users, ShieldCheck,
   AlertTriangle, CheckCircle2, Clock, Loader2, X as XIcon,
-  ArrowLeft, Shield, RotateCcw
+  ArrowLeft, Shield, RotateCcw, CheckCheck
 } from "lucide-react";
 import { format, parseISO, getDaysInMonth, startOfMonth, getDay } from "date-fns";
 
@@ -24,6 +24,7 @@ type CalendarDateEntry = {
   date: string;
   shifts: ShiftData[];
   totalCount: number;
+  decidedCount: number;
   isOverCap: boolean;
   allApproved: boolean;
 };
@@ -157,7 +158,7 @@ function DayDrillDown({
     onError: (e) => toast.error(e.message),
   });
 
-  const clearDateMutation = trpc.tools.clearDateDecision.useMutation({
+   const clearDateMutation = trpc.tools.clearDateDecision.useMutation({
     onSuccess: () => {
       toast.success("Date decision cleared");
       refetch();
@@ -165,7 +166,14 @@ function DayDrillDown({
     },
     onError: (e) => toast.error(e.message),
   });
-
+  const bulkApproveMutation = trpc.tools.bulkApproveDates.useMutation({
+    onSuccess: () => {
+      toast.success("All dates approved");
+      refetch();
+      utils.tools.getDecisionCalendarMonth.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const formatted = useMemo(() => {
     if (!date) return "";
     try { return format(parseISO(date), "EEEE, MMMM d, yyyy"); }
@@ -269,11 +277,27 @@ function DayDrillDown({
                       {shiftReqs.length} request{shiftReqs.length !== 1 ? "s" : ""}
                     </span>
                     {shiftReqs.length > cap && (
-                      <span className="ml-auto flex items-center gap-1 text-xs text-red-400">
+                      <span className="flex items-center gap-1 text-xs text-red-400">
                         <AlertTriangle className="w-3 h-3" />
                         {shiftReqs.length - cap} over cap
                       </span>
                     )}
+                    {/* Bulk Approve All — approves every request in this shift for this date */}
+                    <button
+                      className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/40 transition-colors disabled:opacity-40"
+                      disabled={bulkApproveMutation.isPending}
+                      title={`Approve all ${shiftReqs.length} requests in ${shift} shift for this date`}
+                      onClick={() => {
+                        // Get unique requestIds in this shift
+                        const uniqueIds = Array.from(new Set(shiftReqs.map(r => r.requestId)));
+                        uniqueIds.forEach(id => bulkApproveMutation.mutate({ requestId: id }));
+                      }}
+                    >
+                      {bulkApproveMutation.isPending
+                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                        : <CheckCheck className="w-3 h-3" />}
+                      Approve All
+                    </button>
                   </div>
 
                   {/* Summer cap summary banner */}
@@ -562,6 +586,21 @@ function CalendarGrid({
                     {dayNum}
                   </span>
 
+                  {/* Decision progress counter */}
+                  {entry && entry.totalCount > 0 && (
+                    <div
+                      className={`text-[9px] font-semibold leading-tight mt-0.5 ${
+                        entry.decidedCount === entry.totalCount
+                          ? "text-emerald-400"
+                          : entry.decidedCount > 0
+                          ? "text-amber-400"
+                          : "text-zinc-500"
+                      }`}
+                      title={`${entry.decidedCount} of ${entry.totalCount} requests decided`}
+                    >
+                      {entry.decidedCount}/{entry.totalCount}
+                    </div>
+                  )}
                   {/* Shift dots */}
                   {entry && (
                     <div className="absolute bottom-1 left-1 right-1 flex gap-0.5 flex-wrap">

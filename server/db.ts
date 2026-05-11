@@ -842,6 +842,13 @@ export async function getDecisionCalendarMonth(year: number, month: number) {
       approvedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'approved' THEN 1 ELSE 0 END)`,
       pendingCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'pending' THEN 1 ELSE 0 END)`,
       deniedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'denied' THEN 1 ELSE 0 END)`,
+      // Count of request-dates that have at least one per-date decision on this specific date
+      decidedCount: sql<number>`SUM(CASE WHEN EXISTS (
+        SELECT 1 FROM request_date_decisions rdd
+        WHERE rdd.request_id = ${requests.id}
+        AND DATE(rdd.date) = DATE(${requestDates.date})
+      ) THEN 1 ELSE 0 END)`,
+      totalCount: sql<number>`COUNT(DISTINCT ${requests.id})`,
     })
     .from(requestDates)
     .innerJoin(requests, eq(requestDates.requestId, requests.id))
@@ -876,5 +883,50 @@ export async function clearDateDecision(requestId: number, date: string) {
       )
     );
   // After clearing a date decision, request reverts to pending (has undecided dates again)
+  await syncRequestStatusFromDateDecisions(requestId);
+}
+
+// Approve ALL dates of a request in one call, then sync request-level status.
+export async function bulkApproveDates(requestId: number, decidedBy: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+
+  // Get all dates for this request
+  const allDates = await db
+    .select({ date: requestDates.date })
+    .from(requestDates)
+    .where(eq(requestDates.requestId, requestId));
+
+  for (const row of allDates) {
+    const dateStr = String(row.date).slice(0, 10);
+    // Check if a decision already exists
+    const existing = await db
+      .select({ id: requestDateDecisions.id })
+      .from(requestDateDecisions)
+      .where(
+        and(
+          eq(requestDateDecisions.requestId, requestId),
+          sql`${requestDateDecisions.date} = ${dateStr}`
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .update(requestDateDecisions)
+        .set({ decision: "approved", decidedBy, decidedAt: new Date(), note: null })
+        .where(eq(requestDateDecisions.id, existing[0].id));
+    } else {
+      await db.insert(requestDateDecisions).values({
+        requestId,
+        date: dateStr as unknown as Date,
+        decision: "approved",
+        decidedBy,
+        note: null,
+      });
+    }
+  }
+
+  // Sync request-level status — all dates approved → approved
   await syncRequestStatusFromDateDecisions(requestId);
 }

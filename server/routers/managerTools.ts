@@ -15,6 +15,7 @@ import {
   getRequestDates,
   upsertDateDecision,
   clearDateDecision,
+  bulkApproveDates,
 } from "../db";
 
 async function requireManagerOrAdmin(ctx: any) {
@@ -263,6 +264,7 @@ export const managerToolsRouter = router({
         approvedCount: number;
         pendingCount: number;
         deniedCount: number;
+        decidedCount: number;
         overCap: boolean;
       }[]> = {};
 
@@ -276,6 +278,7 @@ export const managerToolsRouter = router({
           approvedCount: Number(row.approvedCount),
           pendingCount: Number(row.pendingCount),
           deniedCount: Number(row.deniedCount),
+          decidedCount: Number(row.decidedCount ?? 0),
           overCap: count > cap,
         });
       }
@@ -288,6 +291,7 @@ export const managerToolsRouter = router({
           date,
           shifts,
           totalCount: shifts.reduce((s, x) => s + x.count, 0),
+          decidedCount: shifts.reduce((s, x) => s + x.decidedCount, 0),
           isOverCap: shifts.some(s => s.overCap),
           allApproved: shifts.every(s => s.pendingCount === 0 && s.approvedCount > 0),
         })).sort((a, b) => a.date.localeCompare(b.date)),
@@ -425,6 +429,17 @@ export const managerToolsRouter = router({
     .mutation(async ({ input, ctx }) => {
       await requireAdmin(ctx);
       await clearDateDecision(input.requestId, input.date);
+      return { success: true };
+    }),
+
+  // Bulk approve ALL dates of a request in one action
+  bulkApproveDates: publicProcedure
+    .input(z.object({
+      requestId: z.number(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      await bulkApproveDates(input.requestId, admin.id);
       return { success: true };
     }),
 
