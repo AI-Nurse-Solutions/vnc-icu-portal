@@ -330,3 +330,8 @@
 - [x] Per-date decision breakdown on portal request rows: show approved vs denied dates separately
 - [x] Update portal.getPortalData to return per-date decisions for each request
 - [x] View My Results deep link: button on each request row navigating to calendar filtered to that date range
+
+## MyPortal Navigation Fixes
+- [x] Fix "New Request" button — navigate to correct employee new-request route
+- [x] Fix "Shift Demand Calendar" button — navigate to correct employee calendar route
+- [x] Fix "View My Results in Calendar" link — navigate to correct calendar route

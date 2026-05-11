@@ -98,10 +98,56 @@ export default function Dashboard() {
 
   if (!employee) return null;
 
-  // ── Employee lockout ─────────────────────────────────────────────────────────
-  // Only employee and ancillary roles are blocked. Managers, admins, and
-  // super_admins continue to have full access.
+  // ── Employee portal ─────────────────────────────────────────────────────────
+  // Employees and ancillary staff get a lightweight portal without the sidebar.
+  // Route within /dashboard/* is handled here so all three buttons work.
   if (employee.role === "employee" || employee.role === "ancillary") {
+    if (location === "/dashboard/new-request") {
+      return (
+        <div className="min-h-screen bg-[#f0ede8]">
+          <div className="max-w-2xl mx-auto px-4 py-6">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mb-4 flex items-center gap-1.5 text-sm text-[#6b8f71] font-semibold hover:underline"
+            >
+              ← Back to My Portal
+            </button>
+            <NewRequest />
+          </div>
+        </div>
+      );
+    }
+    if (location === "/dashboard/my-requests") {
+      return (
+        <div className="min-h-screen bg-[#f0ede8]">
+          <div className="max-w-3xl mx-auto px-4 py-6">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mb-4 flex items-center gap-1.5 text-sm text-[#6b8f71] font-semibold hover:underline"
+            >
+              ← Back to My Portal
+            </button>
+            <MyRequests />
+          </div>
+        </div>
+      );
+    }
+    if (location === "/dashboard/shift-demand-calendar" || location === "/dashboard/calendar") {
+      return (
+        <div className="min-h-screen bg-[#f0ede8]">
+          <div className="max-w-5xl mx-auto px-4 py-6">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mb-4 flex items-center gap-1.5 text-sm text-[#6b8f71] font-semibold hover:underline"
+            >
+              ← Back to My Portal
+            </button>
+            <CalendarView />
+          </div>
+        </div>
+      );
+    }
+    // Default: My Portal landing page
     return <MyPortal />;
   }
 

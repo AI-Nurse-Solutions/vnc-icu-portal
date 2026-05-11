@@ -207,7 +207,7 @@ export default function MyPortal() {
               <Plus className="w-4 h-4" /> New Request
             </button>
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/dashboard/shift-demand-calendar")}
               className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
             >
               <CalendarDays className="w-4 h-4" /> Shift Demand Calendar
@@ -291,7 +291,7 @@ export default function MyPortal() {
                       {/* View My Results link */}
                       {hasDecisions && (
                         <button
-                          onClick={() => navigate("/dashboard")}
+                          onClick={() => navigate("/dashboard/shift-demand-calendar")}
                           className="mt-2 flex items-center gap-1 text-[11px] text-[#6b8f71] font-semibold hover:underline"
                         >
                           <ExternalLink className="w-3 h-3" /> View My Results in Calendar
