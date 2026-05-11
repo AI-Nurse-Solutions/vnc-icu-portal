@@ -24,6 +24,9 @@ type DrillRow = {
   displayName: string;
   requestType: string;
   priority?: number | null;
+  workingPriority?: number | null;
+  summerShutout?: boolean | null;
+  dateDecision?: string | null;
   status: string;
   seniorityDate: Date;
   submittedAt: Date;
@@ -125,37 +128,58 @@ function DrillDownPanel({
               <div className="space-y-1 animate-stagger">
                 {vacation.map((r, idx) => {
                   const isAboveCap = idx === cap;
-                  const isNonFirstPriority = r.priority != null && r.priority > 1;
+                  const wp = r.workingPriority;
+                  const isSummerCapped = r.summerShutout === true;
+                  // Per-date decision overrides request-level status for display
+                  const displayStatus = r.dateDecision ?? r.status;
                   return (
                     <div key={r.requestId}>
                       {isAboveCap && (
                         <div className="rank-cutoff my-2 pt-2" />
                       )}
                       <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs ${
-                        idx < cap ? "bg-secondary/30" : "bg-destructive/5 opacity-70"
+                        isSummerCapped
+                          ? "bg-amber-500/8 border border-amber-500/25"
+                          : idx < cap ? "bg-secondary/30" : "bg-destructive/5 opacity-70"
                       }`}>
-                        {/* Seniority rank bubble */}
+                        {/* Rank bubble */}
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                           idx < cap ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                         }`}>
                           {r.rank}
                         </span>
-                        {/* Name — amber if non-first-priority */}
-                        <span className={`font-medium flex-1 truncate ${
-                          isNonFirstPriority ? "text-amber-400" : "text-foreground"
-                        }`}>
+                        {/* Name */}
+                        <span className="font-medium flex-1 truncate text-foreground">
                           {r.displayName}
                         </span>
-                        {/* Priority badge — only shown for non-P1 */}
-                        {isNonFirstPriority && (
+                        {/* Summer cap flag */}
+                        {isSummerCapped && (
                           <span
                             className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0"
-                            title={`This is their P${r.priority} request — not their first choice`}
+                            title="Summer 14-day cap applies — pending admin decision"
                           >
-                            P{r.priority}
+                            ☀ Cap
                           </span>
                         )}
-                        <span className={`badge-${r.status}`}>{r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>
+                        {/* WP badge */}
+                        {wp != null && (
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                              wp === 1
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                : wp === 2
+                                ? "bg-sky-500/20 text-sky-400 border border-sky-500/30"
+                                : "bg-muted text-muted-foreground border border-border/40"
+                            }`}
+                            title={`Working Priority ${wp} — system-computed rank across all this employee's requests`}
+                          >
+                            WP{wp}
+                          </span>
+                        )}
+                        {/* Per-date decision status */}
+                        <span className={`badge-${displayStatus}`}>
+                          {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}
+                        </span>
                       </div>
                     </div>
                   );

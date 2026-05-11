@@ -248,3 +248,15 @@
 - [x] Add clearDateDecision DB helper (deletes row from request_date_decisions)
 - [x] Add clearDateDecision tRPC procedure in managerTools router
 - [x] Add undo/clear icon button on rows with an existing dateDecision
+
+## Four Fixes (May 10, 2026)
+- [ ] Employee shift demand calendar: show WP# instead of P# on each request row
+- [ ] Employee shift demand calendar: show approved/denied from request_date_decisions (not always pending)
+- [ ] Summer cap: change from auto-shutout to admin-decidable flag only (remove exclusion from cap count, keep amber flag, allow approve/deny)
+- [ ] Fix broken export report
+
+## Four Fixes (May 10, 2026)
+- [x] Show WP ranking instead of regular priority on employee shift demand calendar
+- [x] Sync per-date admin decisions (approved/denied) to employee calendar view — show correct status not pending
+- [x] Summer cap: change from auto-shutout to flag-only — admins retain full Approve/Deny/Clear on summer-capped rows; divider now reads "ADMIN DECISION REQUIRED"
+- [x] Export report: add error handling to all three handleFetch functions so failures surface as toast errors instead of silently failing

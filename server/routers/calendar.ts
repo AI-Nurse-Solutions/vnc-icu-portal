@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
-import { getRequestsForDateRange, getBlackoutDates, getSubmissionDeadlines, getAllConfig } from "../db";
+import { getRequestsForDateRange, getBlackoutDates, getSubmissionDeadlines, getAllConfig, getDb } from "../db";
 import { verifyJwt } from "../_core/jwt";
 import { COOKIE_NAME } from "../../shared/const";
 import { getEmployeeById } from "../db";
+import { requestDateDecisions } from "../../drizzle/schema";
+import { eq, and, sql } from "drizzle-orm";
 
 export const calendarRouter = router({
   // Get calendar data for a month: per-shift demand counts, blackout dates
@@ -105,6 +107,17 @@ export const calendarRouter = router({
       const rows = await getRequestsForDateRange(input.date, input.date);
       const shiftRows = rows.filter(r => r.shift === input.shift);
 
+      // Load per-date decisions for this date
+      const db = await getDb();
+      const dateDecisionRows = db ? await db
+        .select()
+        .from(requestDateDecisions)
+        .where(sql`${requestDateDecisions.date} = ${input.date}`) : [];
+      const decisionMap: Record<number, string | null> = {};
+      for (const d of dateDecisionRows) {
+        decisionMap[d.requestId] = d.decision;
+      }
+
       // Separate vacation and education requests
       const vacationRows = shiftRows.filter(r => r.requestType !== "education");
       const educationRows = shiftRows.filter(r => r.requestType === "education");
@@ -128,6 +141,9 @@ export const calendarRouter = router({
           : `${r.firstName} ${r.lastName.charAt(0)}.`,
         requestType: r.requestType,
         priority: r.priority,
+        workingPriority: (r as any).workingPriority ?? null,
+        summerShutout: (r as any).summerShutout ?? false,
+        dateDecision: decisionMap[r.requestId] ?? null,
         status: r.status,
         seniorityDate: r.seniorityDate,
         submittedAt: r.submittedAt,

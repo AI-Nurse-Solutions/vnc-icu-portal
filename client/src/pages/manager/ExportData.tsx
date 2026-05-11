@@ -52,12 +52,15 @@ function EmployeeExportPanel() {
   );
 
   const handleFetch = async () => {
-    const result = await refetch();
-    if (result.data) {
-      setPreview(result.data);
-      if (result.data.length === 0) toast.info("No employees match the selected filters.");
-      else toast.success(`Found ${result.data.length} employee${result.data.length !== 1 ? "s" : ""}.`);
-    }
+    try {
+      const result = await refetch();
+      if (result.error) { toast.error(`Export failed: ${result.error.message}`); return; }
+      if (result.data) {
+        setPreview(result.data);
+        if (result.data.length === 0) toast.info("No employees match the selected filters.");
+        else toast.success(`Found ${result.data.length} employee${result.data.length !== 1 ? "s" : ""}.`);
+      }
+    } catch (e: any) { toast.error(`Export error: ${e?.message ?? "Unknown error"}`); }
   };
 
   const handleExport = () => {
@@ -209,12 +212,15 @@ function EducationReportPanel() {
 
   const handleFetch = async () => {
     if (statuses.length === 0) { toast.error("Select at least one status."); return; }
-    const result = await refetch();
-    if (result.data) {
-      setPreview(result.data);
-      if (result.data.length === 0) toast.info("No education requests match the selected filters.");
-      else toast.success(`Found ${result.data.length} education request row${result.data.length !== 1 ? "s" : ""}.`);
-    }
+    try {
+      const result = await refetch();
+      if (result.error) { toast.error(`Export failed: ${result.error.message}`); return; }
+      if (result.data) {
+        setPreview(result.data);
+        if (result.data.length === 0) toast.info("No education requests match the selected filters.");
+        else toast.success(`Found ${result.data.length} education request row${result.data.length !== 1 ? "s" : ""}.`);
+      }
+    } catch (e: any) { toast.error(`Export error: ${e?.message ?? "Unknown error"}`); }
   };
 
   const handleExport = () => {
@@ -399,12 +405,15 @@ export default function ExportData() {
 
   const handleFetch = async () => {
     if (statuses.length === 0) { toast.error("Select at least one status to export."); return; }
-    const result = await refetch();
-    if (result.data) {
-      setPreview(result.data);
-      if (result.data.length === 0) toast.info("No requests match the selected filters.");
-      else toast.success(`Found ${result.data.length} rows.`);
-    }
+    try {
+      const result = await refetch();
+      if (result.error) { toast.error(`Export failed: ${result.error.message}`); return; }
+      if (result.data) {
+        setPreview(result.data);
+        if (result.data.length === 0) toast.info("No requests match the selected filters.");
+        else toast.success(`Found ${result.data.length} rows.`);
+      }
+    } catch (e: any) { toast.error(`Export error: ${e?.message ?? "Unknown error"}`); }
   };
 
   const handleExport = () => {

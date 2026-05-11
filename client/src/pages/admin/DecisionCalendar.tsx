@@ -314,14 +314,14 @@ function DayDrillDown({
                             ) : null;
                           })()
                           }
-                          {/* Summer shut-out divider — show before first shut-out row */}
+                          {/* Summer cap divider — show before first summer-capped row */}
                           {isSummerShutout && (() => {
                             const prevReq = shiftReqs[idx - 1];
                             return prevReq && !prevReq.summerShutout ? (
                               <div className="flex items-center gap-2 my-2">
                                 <div className="flex-1 h-px bg-orange-500/40" />
                                 <span className="text-[10px] text-orange-400 font-semibold px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/30">
-                                  ☀ SUMMER 14-DAY CAP — SHUT OUT BELOW
+                                  ☀ SUMMER 14-DAY CAP — ADMIN DECISION REQUIRED
                                 </span>
                                 <div className="flex-1 h-px bg-orange-500/40" />
                               </div>
@@ -373,7 +373,7 @@ function DayDrillDown({
                                   <WorkingPriorityBadge wp={req.workingPriority} />
                                   {isSummerShutout && (
                                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-orange-500/40 bg-orange-500/10 text-orange-300">
-                                      ☀ Summer Cap — Shut Out
+                                      ☀ Summer Cap — Pending Decision
                                     </span>
                                   )}
                                   {/* Per-date decision badge */}
@@ -412,9 +412,8 @@ function DayDrillDown({
                                 </div>
                               </div>
 
-                              {/* Per-date action buttons — always available unless summer shut-out */}
-                              {!isSummerShutout && (
-                                <div className="flex gap-1.5 shrink-0">
+                              {/* Per-date action buttons — always available, including summer-capped rows */}
+                              <div className="flex gap-1.5 shrink-0">
                                   {req.dateDecision !== "approved" && (
                                     <Button
                                       size="sm"
@@ -453,7 +452,6 @@ function DayDrillDown({
                                     </Button>
                                   )}
                                 </div>
-                              )}
                             </div>
                           </div>
                         </div>
