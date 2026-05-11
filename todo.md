@@ -294,3 +294,8 @@
 - [x] Add "Jump to Month" quick-select dropdown (Jul–Dec 2026) in calendar header
 - [x] Add retry: false to both month and day queries so auth errors surface immediately instead of retrying
 - [x] 0 TypeScript errors, 19/19 tests passing
+
+## Remove Unused Manager Tools (May 11, 2026)
+- [x] Remove Review Dashboard from nav, routes, imports, and delete page file
+- [x] Remove Hot Dates View from nav, routes, imports, and delete page file
+- [x] Remove 21-Day Ceiling Tracker from nav, routes, imports, and delete page file

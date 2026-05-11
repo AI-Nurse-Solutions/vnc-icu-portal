@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   Calendar, CalendarDays, ClipboardList, Settings, Users, FileDown,
   LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
-  LayoutDashboard, Flame, TrendingUp, Star, Sun, Moon
+  Star, Sun, Moon
 } from "lucide-react";
 import { useState } from "react";
 import MyRequests from "./employee/MyRequests";
@@ -17,9 +17,7 @@ import CalendarView from "./employee/CalendarView";
 import ManagerReview from "./manager/ManagerReview";
 import PolicySettings from "./manager/PolicySettings";
 import ExportData from "./manager/ExportData";
-import ReviewDashboard from "./manager/ReviewDashboard";
-import HotDatesView from "./manager/HotDatesView";
-import CeilingTracker from "./manager/CeilingTracker";
+
 import AdminEmployees from "./admin/AdminEmployees";
 import AdminAuditLog from "./admin/AdminAuditLog";
 import AdminImport from "./admin/AdminImport";
@@ -149,11 +147,8 @@ export default function Dashboard() {
     { href: "/dashboard/manager/policy", label: "Policy Settings", icon: Settings },
   ];
 
-  // ─── New Tools section (manager + admin) ───────────────────────────────────
+  // ─── Tools section (manager + admin) ───────────────────────────────────────
   const toolsNav = [
-    { href: "/dashboard/tools/review-dashboard", label: "Review Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/tools/hot-dates", label: "Hot Dates View", icon: Flame },
-    { href: "/dashboard/tools/ceiling-tracker", label: "21-Day Tracker", icon: TrendingUp },
     { href: "/dashboard/tools/audit-log", label: "Audit Log", icon: Shield },
   ];
 
@@ -172,8 +167,7 @@ export default function Dashboard() {
   const allRoutes = [
     "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
     "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
-    "/dashboard/tools/review-dashboard", "/dashboard/tools/hot-dates",
-    "/dashboard/tools/ceiling-tracker", "/dashboard/tools/audit-log",
+    "/dashboard/tools/audit-log",
     "/dashboard/admin/decision-calendar",
     "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit",
     "/dashboard/superadmin/add-dates",
@@ -343,16 +337,7 @@ export default function Dashboard() {
           {location === "/dashboard/manager/policy" && (
             <RoleGuard allowed={isManager}><PolicySettings /></RoleGuard>
           )}
-          {/* ─── New Manager Tools ─────────────────────────────────────────── */}
-          {location === "/dashboard/tools/review-dashboard" && (
-            <RoleGuard allowed={isManager}><ReviewDashboard /></RoleGuard>
-          )}
-          {location === "/dashboard/tools/hot-dates" && (
-            <RoleGuard allowed={isManager}><HotDatesView /></RoleGuard>
-          )}
-          {location === "/dashboard/tools/ceiling-tracker" && (
-            <RoleGuard allowed={isManager}><CeilingTracker /></RoleGuard>
-          )}
+          {/* ─── Manager Tools ────────────────────────────────────────────── */}
           {location === "/dashboard/tools/audit-log" && (
             <RoleGuard allowed={isManager}><AuditLog /></RoleGuard>
           )}
