@@ -56,11 +56,8 @@ function StatusBadge({ status }: { status: string }) {
         <XCircle className="w-4 h-4" /> Denied
       </span>
     );
-  return (
-    <span className="flex items-center gap-1 text-amber-600 font-medium text-sm">
-      <Clock className="w-4 h-4" /> Pending
-    </span>
-  );
+  // Pending — no badge shown
+  return null;
 }
 
 // ─── Date range label ─────────────────────────────────────────────────────────
