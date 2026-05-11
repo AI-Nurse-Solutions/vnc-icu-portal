@@ -678,11 +678,21 @@ export default function DecisionCalendar() {
   // Summary stats for the month
   const stats = useMemo(() => {
     if (!data) return null;
-        const total = data.dates.reduce((s: number, d: CalendarDateEntry) => s + d.totalCount, 0);
-        const overCap = data.dates.filter((d: CalendarDateEntry) => d.isOverCap).length;
-        const allApproved = data.dates.filter((d: CalendarDateEntry) => d.allApproved).length;
-        const pending = data.dates.filter((d: CalendarDateEntry) => d.shifts.some((s: ShiftData) => s.pendingCount > 0)).length;
-    return { total, overCap, allApproved, pending };
+    // total = sum of all request-date rows across the month
+    const total = data.dates.reduce((s: number, d: CalendarDateEntry) => s + d.totalCount, 0);
+    // overCap = number of calendar dates where any shift exceeds the cap
+    const overCap = data.dates.filter((d: CalendarDateEntry) => d.isOverCap).length;
+    // allApproved = number of calendar dates where every request-date row has been approved
+    const allApproved = data.dates.filter((d: CalendarDateEntry) =>
+      d.shifts.every((s: ShiftData) => s.pendingCount === 0 && s.deniedCount === 0 && s.approvedCount > 0)
+    ).length;
+    // pending = number of calendar dates that still have at least one undecided request-date row
+    const pending = data.dates.filter((d: CalendarDateEntry) =>
+      d.shifts.some((s: ShiftData) => s.pendingCount > 0)
+    ).length;
+    // totalDecided = sum of all decided request-date rows across the month
+    const totalDecided = data.dates.reduce((s: number, d: CalendarDateEntry) => s + d.decidedCount, 0);
+    return { total, overCap, allApproved, pending, totalDecided };
   }, [data]);
 
   return (
@@ -719,12 +729,13 @@ export default function DecisionCalendar() {
 
       {/* Stats row */}
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
-            { label: "Total requests", value: stats.total, icon: Users, color: "text-zinc-300" },
+            { label: "Request-dates", value: stats.total, icon: Users, color: "text-zinc-300" },
+            { label: "Decided", value: stats.totalDecided, icon: CheckCheck, color: stats.totalDecided > 0 ? "text-teal-400" : "text-zinc-500" },
             { label: "Days over cap", value: stats.overCap, icon: AlertTriangle, color: stats.overCap > 0 ? "text-red-400" : "text-zinc-500" },
-            { label: "Days pending", value: stats.pending, icon: Clock, color: stats.pending > 0 ? "text-amber-400" : "text-zinc-500" },
-            { label: "Days approved", value: stats.allApproved, icon: CheckCircle2, color: stats.allApproved > 0 ? "text-emerald-400" : "text-zinc-500" },
+            { label: "Dates pending", value: stats.pending, icon: Clock, color: stats.pending > 0 ? "text-amber-400" : "text-zinc-500" },
+            { label: "Dates fully approved", value: stats.allApproved, icon: CheckCircle2, color: stats.allApproved > 0 ? "text-emerald-400" : "text-zinc-500" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 flex items-center gap-3">
               <Icon className={`w-4 h-4 shrink-0 ${color}`} />

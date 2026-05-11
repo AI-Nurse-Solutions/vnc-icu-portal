@@ -233,11 +233,21 @@ export async function getApprovedRequestsForExport(
 ) {
   const db = await getDb();
   if (!db) return [];
+  // Status filtering is now per-date (from request_date_decisions), not per-request.
+  // "approved" = date has an approved decision
+  // "denied"   = date has a denied decision
+  // "pending"  = date has NO decision yet (left join is null)
   const allowedStatuses = statuses && statuses.length > 0 ? statuses : ["approved"];
+
+  // Build the per-date status expression:
+  // CASE WHEN rdd.decision IS NULL THEN 'pending' ELSE rdd.decision END
+  const dateStatusExpr = sql<string>`CASE WHEN ${requestDateDecisions.decision} IS NULL THEN 'pending' ELSE ${requestDateDecisions.decision} END`;
+
   const conditions = [
-    sql`${requests.status} IN (${sql.join(allowedStatuses.map(s => sql`${s}`), sql`, `)})`,
     sql`${requestDates.date} >= ${startDate}`,
     sql`${requestDates.date} <= ${endDate}`,
+    sql`${requests.status} != 'withdrawn'`,
+    sql`(CASE WHEN ${requestDateDecisions.decision} IS NULL THEN 'pending' ELSE ${requestDateDecisions.decision} END) IN (${sql.join(allowedStatuses.map(s => sql`${s}`), sql`, `)})`,
   ];
   if (shift) conditions.push(eq(employees.shift, shift as any));
   if (requestType) conditions.push(eq(requests.requestType, requestType as any));
@@ -251,14 +261,23 @@ export async function getApprovedRequestsForExport(
       seniorityDate: employees.seniorityDate,
       requestType: requests.requestType,
       priority: requests.priority,
+      workingPriority: requests.workingPriority,
       date: requestDates.date,
-      status: requests.status,
-      decidedAt: requests.decidedAt,
-      decidedBy: requests.decidedBy,
+      // Per-date decision status (approved / denied / pending)
+      dateStatus: dateStatusExpr,
+      decidedAt: requestDateDecisions.decidedAt,
+      decidedBy: requestDateDecisions.decidedBy,
     })
     .from(requestDates)
     .innerJoin(requests, eq(requestDates.requestId, requests.id))
     .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .leftJoin(
+      requestDateDecisions,
+      and(
+        eq(requestDateDecisions.requestId, requestDates.requestId),
+        eq(requestDateDecisions.date, requestDates.date)
+      )
+    )
     .where(and(...conditions))
     .orderBy(requestDates.date, employees.shift, employees.seniorityDate);
 }
@@ -834,25 +853,30 @@ export async function getDecisionCalendarMonth(year: number, month: number) {
   const lastDay = new Date(year, month, 0).getDate();
   const endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
+  // Use per-date decisions (request_date_decisions) for approved/pending/denied counts.
+  // A date-row is "approved" if rdd.decision='approved', "denied" if rdd.decision='denied',
+  // and "pending" if no rdd row exists for that request+date combination.
   const rows = await db
     .select({
       date: requestDates.date,
       shift: employees.shift,
       count: sql<number>`COUNT(DISTINCT ${requests.id})`,
-      approvedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'approved' THEN 1 ELSE 0 END)`,
-      pendingCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'pending' THEN 1 ELSE 0 END)`,
-      deniedCount: sql<number>`SUM(CASE WHEN ${requests.status} = 'denied' THEN 1 ELSE 0 END)`,
-      // Count of request-dates that have at least one per-date decision on this specific date
-      decidedCount: sql<number>`SUM(CASE WHEN EXISTS (
-        SELECT 1 FROM request_date_decisions rdd
-        WHERE rdd.request_id = ${requests.id}
-        AND DATE(rdd.date) = DATE(${requestDates.date})
-      ) THEN 1 ELSE 0 END)`,
+      approvedCount: sql<number>`SUM(CASE WHEN rdd.decision = 'approved' THEN 1 ELSE 0 END)`,
+      pendingCount: sql<number>`SUM(CASE WHEN rdd.decision IS NULL THEN 1 ELSE 0 END)`,
+      deniedCount: sql<number>`SUM(CASE WHEN rdd.decision = 'denied' THEN 1 ELSE 0 END)`,
+      decidedCount: sql<number>`SUM(CASE WHEN rdd.decision IS NOT NULL THEN 1 ELSE 0 END)`,
       totalCount: sql<number>`COUNT(DISTINCT ${requests.id})`,
     })
     .from(requestDates)
     .innerJoin(requests, eq(requestDates.requestId, requests.id))
     .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .leftJoin(
+      requestDateDecisions,
+      and(
+        eq(requestDateDecisions.requestId, requestDates.requestId),
+        sql`DATE(${requestDateDecisions.date}) = DATE(${requestDates.date})`
+      )
+    )
     .where(
       and(
         sql`${requestDates.date} >= ${startDate}`,

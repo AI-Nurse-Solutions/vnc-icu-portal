@@ -271,3 +271,9 @@
 - [x] Add Bulk Approve All button per shift in the drill-down panel header
 - [x] Update getDecisionCalendarMonth to return decidedCount per date cell
 - [x] Show "X/Y decided" progress counter on each month grid cell (green=all done, amber=partial, gray=none)
+
+## Export & Calendar Counter Bugs (May 11, 2026)
+- [x] Fix export "pending" filter — now filters by per-date decision (no rdd row = pending)
+- [x] Fix export "approved" filter — now filters by rdd.decision='approved' per date row
+- [x] Fix export "denied" filter — now filters by rdd.decision='denied' per date row (was only showing 1 employee because requests.status was used)
+- [x] Fix Decision Calendar month dashboard counters — now uses per-date decisions for approvedCount/pendingCount/deniedCount; added "Decided" counter card; stats now match actual data

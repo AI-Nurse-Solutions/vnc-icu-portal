@@ -281,9 +281,10 @@ export const managerRouter = router({
             : String(r.seniorityDate ?? "").split("T")[0],
           request_type: r.requestType,
           priority: r.priority ?? 1,
+          working_priority: r.workingPriority ?? "",
           date: dateStr,
           seniority_rank_on_date: rankMap[rankKey] ?? "",
-          status: r.status,
+          status: r.dateStatus ?? "pending",
           decided_date: r.decidedAt
             ? (r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt))
             : "",
