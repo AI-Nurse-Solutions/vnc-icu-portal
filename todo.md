@@ -277,3 +277,7 @@
 - [x] Fix export "approved" filter — now filters by rdd.decision='approved' per date row
 - [x] Fix export "denied" filter — now filters by rdd.decision='denied' per date row (was only showing 1 employee because requests.status was used)
 - [x] Fix Decision Calendar month dashboard counters — now uses per-date decisions for approvedCount/pendingCount/deniedCount; added "Decided" counter card; stats now match actual data
+
+## Decision Calendar Blank Grid + Pending Mismatch (May 11, 2026)
+- [x] Fix blank month grid — root cause was calendar defaulting to May 2026 (only 12 rows); fixed by defaulting to July 2026 (520 rows); date normalization also hardened to use UTC parts
+- [x] Fix pending export — export now reads per-date decisions (approved=2092, pending=324, denied=220 for Jul-Dec); requests.status is a summary field and works correctly by design

@@ -653,9 +653,10 @@ function CalendarGrid({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function DecisionCalendar() {
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1); // 1-12
+  // Default to July 2026 — first month with significant vacation data (520 request-dates).
+  // The portal covers Jul–Dec 2026; current month (May 2026) has minimal data.
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(7); // July 2026
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const { data, isLoading } = trpc.tools.getDecisionCalendarMonth.useQuery(

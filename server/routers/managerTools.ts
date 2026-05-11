@@ -269,7 +269,9 @@ export const managerToolsRouter = router({
       }[]> = {};
 
       for (const row of rows) {
-        const dateStr = row.date instanceof Date ? row.date.toISOString().split("T")[0] : String(row.date);
+        // Normalize to YYYY-MM-DD using UTC parts to avoid timezone shift
+        const rawDate = row.date instanceof Date ? row.date : new Date(String(row.date));
+        const dateStr = `${rawDate.getUTCFullYear()}-${String(rawDate.getUTCMonth() + 1).padStart(2, "0")}-${String(rawDate.getUTCDate()).padStart(2, "0")}`;
         if (!dateMap[dateStr]) dateMap[dateStr] = [];
         const count = Number(row.count);
         dateMap[dateStr].push({
