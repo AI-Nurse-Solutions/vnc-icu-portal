@@ -216,9 +216,11 @@ export default function MyRequests() {
                       <span className={req.requestType === "vacation" ? "badge-vacation" : "badge-education"}>
                         {req.requestType.charAt(0).toUpperCase() + req.requestType.slice(1)}
                       </span>
-                      <span className={`badge-${req.status}`}>
-                        {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-                      </span>
+                      {req.status !== "pending" && (
+                        <span className={`badge-${req.status}`}>
+                          {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                        </span>
+                      )}
                       <span className="text-xs text-muted-foreground capitalize">{req.continuityType}</span>
                       {req.shiftPriority > 0 && (
                         <PriorityBadge rank={req.shiftPriority} total={req.totalInShift} />
