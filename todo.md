@@ -286,3 +286,11 @@
 - [x] Trace full data path: root cause was DATE column returning JS Date object (2026-07-01T04:00:00.000Z) — UTC conversion shifted to 2026-06-30 in Pacific time, causing all dateMap lookups to miss
 - [x] Fix: use DATE_FORMAT(rd.date, '%Y-%m-%d') in SQL to force clean YYYY-MM-DD string; simplified server normalization to String(row.date)
 - [x] Improve visual clarity: high-contrast cell colors (amber=pending, red=over-cap, green=all-decided, sky=has-requests); updated legend; progress counter shows '0/8 pending' or '✓ 8/8'
+
+## Session Expiry Fix + Decision Calendar UX (May 11, 2026)
+- [x] Root cause of blank grid confirmed: JWT session cookie expires after 8 hours — user must log in again
+- [x] Add session expiry banner to Decision Calendar: shows red alert with "Go to Login" button when UNAUTHORIZED/FORBIDDEN error is returned
+- [x] Add error handling to DayDrillDown: shows "Session expired" message instead of blank panel
+- [x] Add "Jump to Month" quick-select dropdown (Jul–Dec 2026) in calendar header
+- [x] Add retry: false to both month and day queries so auth errors surface immediately instead of retrying
+- [x] 0 TypeScript errors, 19/19 tests passing

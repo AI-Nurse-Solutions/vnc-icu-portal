@@ -9,6 +9,7 @@ import {
   ArrowLeft, Shield, RotateCcw, CheckCheck
 } from "lucide-react";
 import { format, parseISO, getDaysInMonth, startOfMonth, getDay } from "date-fns";
+import { useLocation } from "wouter";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ShiftData = {
@@ -135,9 +136,15 @@ function DayDrillDown({
   const [activeShift, setActiveShift] = useState<"ALL" | "AM" | "PM" | "NOC">("ALL");
   const utils = trpc.useUtils();
 
-  const { data, isLoading, refetch } = trpc.tools.getDecisionCalendarDay.useQuery(
+  const { data, isLoading, error: dayError, refetch } = trpc.tools.getDecisionCalendarDay.useQuery(
     { date, shift: activeShift === "ALL" ? undefined : activeShift },
-    { enabled: !!date }
+    { enabled: !!date, retry: false }
+  );
+
+  // Show auth error in drill-down too
+  const isDayAuthError = dayError && (
+    (dayError as any)?.data?.code === "UNAUTHORIZED" ||
+    (dayError as any)?.data?.code === "FORBIDDEN"
   );
 
   const approveDateMutation = trpc.tools.approveDateDecision.useMutation({
@@ -243,7 +250,13 @@ function DayDrillDown({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-          {isLoading ? (
+          {isDayAuthError ? (
+            <div className="flex flex-col items-center justify-center py-16 text-red-400 gap-2">
+              <Shield className="w-8 h-8 opacity-60" />
+              <p className="text-sm font-semibold">Session expired</p>
+              <p className="text-xs text-red-400/70">Please log in again to view this data.</p>
+            </div>
+          ) : isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="w-6 h-6 animate-spin text-teal-400" />
             </div>
@@ -661,16 +674,36 @@ function CalendarGrid({
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
+// Quick-jump months for Jul–Dec 2026
+const QUICK_MONTHS = [
+  { label: "July 2026",      year: 2026, month: 7 },
+  { label: "August 2026",    year: 2026, month: 8 },
+  { label: "September 2026", year: 2026, month: 9 },
+  { label: "October 2026",   year: 2026, month: 10 },
+  { label: "November 2026",  year: 2026, month: 11 },
+  { label: "December 2026",  year: 2026, month: 12 },
+];
+
 export default function DecisionCalendar() {
   // Default to July 2026 — first month with significant vacation data (520 request-dates).
   // The portal covers Jul–Dec 2026; current month (May 2026) has minimal data.
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(7); // July 2026
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [, navigate] = useLocation();
 
-  const { data, isLoading } = trpc.tools.getDecisionCalendarMonth.useQuery(
+  const { data, isLoading, error } = trpc.tools.getDecisionCalendarMonth.useQuery(
     { year, month },
-    { staleTime: 30_000 }
+    {
+      staleTime: 30_000,
+      retry: false,
+    }
+  );
+
+  // Surface auth errors clearly instead of silently showing blank calendar
+  const isAuthError = error && (
+    (error as any)?.data?.code === "UNAUTHORIZED" ||
+    (error as any)?.data?.code === "FORBIDDEN"
   );
 
   const monthLabel = format(new Date(year, month - 1), "MMMM yyyy");
@@ -683,6 +716,12 @@ export default function DecisionCalendar() {
   function nextMonth() {
     if (month === 12) { setMonth(1); setYear(y => y + 1); }
     else setMonth(m => m + 1);
+  }
+
+  function jumpToMonth(y: number, m: number) {
+    setYear(y);
+    setMonth(m);
+    setSelectedDate(null);
   }
 
   // Summary stats for the month
@@ -707,6 +746,25 @@ export default function DecisionCalendar() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+      {/* Session expiry / auth error banner */}
+      {isAuthError && (
+        <div className="rounded-lg border border-red-500/40 bg-red-950/60 px-4 py-4 flex items-start gap-3">
+          <Shield className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-300">Session expired or access denied</p>
+            <p className="text-xs text-red-400/80 mt-0.5">
+              Your session cookie has expired (JWT is valid for 8 hours). Please log in again to access the Decision Calendar.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/login")}
+            className="shrink-0 text-xs font-semibold text-red-300 border border-red-500/40 rounded px-3 py-1.5 hover:bg-red-900/60 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      )}
+
       {/* Page header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
@@ -719,8 +777,26 @@ export default function DecisionCalendar() {
           </p>
         </div>
 
-        {/* Month nav */}
-        <div className="flex items-center gap-2">
+        {/* Month nav + Jump to Month */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Quick-jump dropdown */}
+          <select
+            value={`${year}-${month}`}
+            onChange={e => {
+              const [y, m] = e.target.value.split("-").map(Number);
+              jumpToMonth(y, m);
+            }}
+            className="text-xs font-medium bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-lg px-2 py-1.5 cursor-pointer hover:border-zinc-500 transition-colors"
+            title="Jump to month"
+          >
+            {QUICK_MONTHS.map(qm => (
+              <option key={`${qm.year}-${qm.month}`} value={`${qm.year}-${qm.month}`}>
+                {qm.label}
+              </option>
+            ))}
+          </select>
+
+          {/* Prev / label / Next */}
           <button
             onClick={prevMonth}
             className="p-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
