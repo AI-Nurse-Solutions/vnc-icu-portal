@@ -322,3 +322,11 @@
 - [x] No sidebar — full-width layout with top nav only
 - [x] Wire route in Dashboard.tsx and add portal tRPC router
 - [x] Add announcements table/seed data to schema
+
+## My Portal Enhancements (Phase 2)
+- [x] Admin announcement editor: create/edit/toggle active/delete announcements in Admin panel
+- [x] Add announcements tRPC procedures: list, create, update, toggle, delete (admin-only)
+- [x] Wire announcement editor into Admin sidebar nav
+- [x] Per-date decision breakdown on portal request rows: show approved vs denied dates separately
+- [x] Update portal.getPortalData to return per-date decisions for each request
+- [x] View My Results deep link: button on each request row navigating to calendar filtered to that date range

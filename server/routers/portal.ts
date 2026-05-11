@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { router, publicProcedure } from "../_core/trpc";
 import { getAllEmployees, getRequestsByEmployee, getRequestDates, getEmployeeById, getDb } from "../db";
-import { announcements } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { announcements, requestDateDecisions } from "../../drizzle/schema";
+import { eq, and } from "drizzle-orm";
 import { verifyJwt } from "../_core/jwt";
 import { COOKIE_NAME } from "../../shared/const";
 
@@ -36,14 +36,35 @@ export const portalRouter = router({
     const shiftRank = shiftEmployees.findIndex(e => e.id === emp.id) + 1;
     const totalInShift = shiftEmployees.length;
 
-    // My requests with date ranges
+    // My requests with date ranges and per-date decisions
     const reqs = await getRequestsByEmployee(emp.id);
+    const dbConn2 = await getDb();
     const requestsWithDates = await Promise.all(
       reqs.map(async (req) => {
         const dates = await getRequestDates(req.id);
         const sortedDates = dates
           .map(d => (d.date instanceof Date ? d.date : new Date(d.date as string)).toISOString().split("T")[0])
           .sort();
+
+        // Per-date decisions for this request
+        let approvedDates: string[] = [];
+        let deniedDates: string[] = [];
+        if (dbConn2) {
+          const decisions = await dbConn2
+            .select()
+            .from(requestDateDecisions)
+            .where(eq(requestDateDecisions.requestId, req.id));
+          approvedDates = decisions
+            .filter(d => d.decision === "approved")
+            .map(d => (d.date instanceof Date ? d.date : new Date(d.date as string)).toISOString().split("T")[0])
+            .sort();
+          deniedDates = decisions
+            .filter(d => d.decision === "denied")
+            .map(d => (d.date instanceof Date ? d.date : new Date(d.date as string)).toISOString().split("T")[0])
+            .sort();
+        }
+        const pendingDates = sortedDates.filter(d => !approvedDates.includes(d) && !deniedDates.includes(d));
+
         return {
           id: req.id,
           requestType: req.requestType,
@@ -54,14 +75,16 @@ export const portalRouter = router({
           dateStart: sortedDates[0] ?? null,
           dateEnd: sortedDates[sortedDates.length - 1] ?? null,
           totalDates: sortedDates.length,
+          approvedDates,
+          deniedDates,
+          pendingDates,
         };
       })
     );
 
-    // Total approved vacation days (all time, in scope period Jul–Dec 2026)
+    // Total approved vacation days
     const approvedDays = requestsWithDates
-      .filter(r => r.status === "approved" && r.requestType === "vacation")
-      .reduce((sum, r) => sum + r.totalDates, 0);
+      .reduce((sum, r) => sum + r.approvedDates.length, 0);
 
     // Active announcements
     const dbConn = await getDb();

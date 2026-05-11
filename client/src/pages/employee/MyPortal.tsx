@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Bell, Lightbulb, CalendarDays, Plus, CheckCircle2, XCircle, Clock, LogOut } from "lucide-react";
+import { Bell, Lightbulb, CalendarDays, Plus, CheckCircle2, XCircle, Clock, LogOut, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
 // ─── Donut ring ───────────────────────────────────────────────────────────────
 function DonutRing({ rank, total }: { rank: number; total: number }) {
@@ -68,6 +68,32 @@ function fmtDate(iso: string | null) {
   if (!iso) return "—";
   const d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+// ─── Collapsed date list ─────────────────────────────────────────────────────
+function DateList({ dates, color }: { dates: string[]; color: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const show = expanded ? dates : dates.slice(0, 4);
+  if (dates.length === 0) return null;
+  return (
+    <div className="mt-1">
+      <div className="flex flex-wrap gap-1">
+        {show.map(d => (
+          <span key={d} className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${color}`}>
+            {fmtDate(d)}
+          </span>
+        ))}
+        {dates.length > 4 && (
+          <button
+            onClick={() => setExpanded(e => !e)}
+            className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center gap-0.5"
+          >
+            {expanded ? <><ChevronUp className="w-2.5 h-2.5" /> less</> : <><ChevronDown className="w-2.5 h-2.5" /> +{dates.length - 4} more</>}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -203,39 +229,77 @@ export default function MyPortal() {
                 <p className="text-sm">No requests submitted yet.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left py-2 pr-4 text-xs font-semibold text-gray-500">Request ID</th>
-                      <th className="text-left py-2 pr-4 text-xs font-semibold text-gray-500">Dates</th>
-                      <th className="text-left py-2 text-xs font-semibold text-gray-500">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedRequests.map((req, idx) => (
-                      <tr
-                        key={req.id}
-                        className={`border-b border-gray-50 last:border-0 ${
-                          req.status === "pending" ? "bg-amber-50" : ""
-                        }`}
-                      >
-                        <td className="py-3 pr-4 font-mono font-semibold text-gray-700">
-                          {String(req.id).padStart(6, "0")}
-                        </td>
-                        <td className="py-3 pr-4 text-gray-600 whitespace-nowrap">
+              <div className="space-y-3">
+                {sortedRequests.map((req) => {
+                  const hasDecisions = (req.approvedDates?.length ?? 0) > 0 || (req.deniedDates?.length ?? 0) > 0;
+                  const isPending = (req.pendingDates?.length ?? 0) > 0;
+                  return (
+                    <div
+                      key={req.id}
+                      className={`rounded-xl border px-4 py-3 ${
+                        isPending && !hasDecisions
+                          ? "bg-amber-50 border-amber-200"
+                          : hasDecisions
+                          ? "bg-white border-gray-200"
+                          : "bg-white border-gray-100"
+                      }`}
+                    >
+                      {/* Row header */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono font-bold text-gray-700 text-sm">
+                          #{String(req.id).padStart(6, "0")}
+                        </span>
+                        <span className="text-xs text-gray-400">
                           {req.dateStart === req.dateEnd
                             ? fmtDate(req.dateStart)
                             : `${fmtDate(req.dateStart)} – ${fmtDate(req.dateEnd)}`}
-                          <span className="ml-1 text-xs text-gray-400">({req.totalDates}d)</span>
-                        </td>
-                        <td className="py-3">
-                          <StatusBadge status={req.status} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          <span className="ml-1">({req.totalDates}d)</span>
+                        </span>
+                        <StatusBadge status={req.status} />
+                      </div>
+
+                      {/* Per-date breakdown */}
+                      {hasDecisions && (
+                        <div className="mt-2 space-y-1 border-t border-gray-100 pt-2">
+                          {(req.approvedDates?.length ?? 0) > 0 && (
+                            <div>
+                              <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide">
+                                ✓ Approved ({req.approvedDates!.length})
+                              </span>
+                              <DateList dates={req.approvedDates!} color="bg-emerald-100 text-emerald-700" />
+                            </div>
+                          )}
+                          {(req.deniedDates?.length ?? 0) > 0 && (
+                            <div>
+                              <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
+                                ✗ Denied ({req.deniedDates!.length})
+                              </span>
+                              <DateList dates={req.deniedDates!} color="bg-red-100 text-red-700" />
+                            </div>
+                          )}
+                          {(req.pendingDates?.length ?? 0) > 0 && (
+                            <div>
+                              <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">
+                                ⏳ Pending ({req.pendingDates!.length})
+                              </span>
+                              <DateList dates={req.pendingDates!} color="bg-amber-100 text-amber-700" />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View My Results link */}
+                      {hasDecisions && (
+                        <button
+                          onClick={() => navigate("/dashboard")}
+                          className="mt-2 flex items-center gap-1 text-[11px] text-[#6b8f71] font-semibold hover:underline"
+                        >
+                          <ExternalLink className="w-3 h-3" /> View My Results in Calendar
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 

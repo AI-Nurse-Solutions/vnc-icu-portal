@@ -15,6 +15,9 @@ import {
   updateEmployee,
 } from "../db";
 import { sendInviteEmail } from "../email";
+import { getDb } from "../db";
+import { announcements } from "../../drizzle/schema";
+import { eq, asc } from "drizzle-orm";
 
 async function requireAdmin(ctx: any) {
   const token = ctx.req.cookies?.[COOKIE_NAME] || ctx.req.headers.authorization?.replace("Bearer ", "");
@@ -274,5 +277,64 @@ export const adminRouter = router({
     .query(async ({ input, ctx }) => {
       await requireAdmin(ctx);
       return getAuditLog(input.limit);
+    }),
+
+  // ── Announcements CRUD (admin-only) ───────────────────────────────────────────
+  listAnnouncements: publicProcedure.query(async ({ ctx }) => {
+    await requireAdmin(ctx);
+    const db = await getDb();
+    if (!db) return [];
+    return db.select().from(announcements).orderBy(asc(announcements.createdAt));
+  }),
+
+  createAnnouncement: publicProcedure
+    .input(z.object({
+      type: z.enum(["announcement", "tip"]),
+      title: z.string().min(1).max(128),
+      body: z.string().min(1),
+      isActive: z.boolean().default(true),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db.insert(announcements).values({
+        type: input.type,
+        title: input.title,
+        body: input.body,
+        isActive: input.isActive,
+        createdBy: admin.id,
+      });
+      await logAudit({ actorId: admin.id, action: "create_announcement", targetType: "announcement", targetId: "new", details: { title: input.title } });
+      return { success: true };
+    }),
+
+  updateAnnouncement: publicProcedure
+    .input(z.object({
+      id: z.number(),
+      type: z.enum(["announcement", "tip"]).optional(),
+      title: z.string().min(1).max(128).optional(),
+      body: z.string().min(1).optional(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      const { id, ...fields } = input;
+      await db.update(announcements).set(fields).where(eq(announcements.id, id));
+      await logAudit({ actorId: admin.id, action: "update_announcement", targetType: "announcement", targetId: String(id), details: fields });
+      return { success: true };
+    }),
+
+  deleteAnnouncement: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const admin = await requireAdmin(ctx);
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      await db.delete(announcements).where(eq(announcements.id, input.id));
+      await logAudit({ actorId: admin.id, action: "delete_announcement", targetType: "announcement", targetId: String(input.id), details: {} });
+      return { success: true };
     }),
 });

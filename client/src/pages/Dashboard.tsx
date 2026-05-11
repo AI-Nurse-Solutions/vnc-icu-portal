@@ -24,6 +24,7 @@ import AdminImport from "./admin/AdminImport";
 import AuditLog from "./admin/AuditLog";
 import SuperAdminDates from "./superadmin/SuperAdminDates";
 import DecisionCalendarV2 from "./admin/DecisionCalendarV2";
+import AdminAnnouncements from "./admin/AdminAnnouncements";
 import MyPortal from "./employee/MyPortal";
 
 /** Guard component — shows "Access Denied" if the user lacks the required role */
@@ -125,6 +126,7 @@ export default function Dashboard() {
     { href: "/dashboard/admin/decision-calendar", label: "Decision Calendar", icon: CalendarDays },
     { href: "/dashboard/admin/employees", label: "Employees", icon: Users },
     { href: "/dashboard/admin/import", label: "CSV Import", icon: FileDown },
+    { href: "/dashboard/admin/announcements", label: "Announcements", icon: Bell },
     { href: "/dashboard/admin/audit", label: "Audit Log (Legacy)", icon: Shield },
   ];
 
@@ -138,7 +140,7 @@ export default function Dashboard() {
     "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
     "/dashboard/tools/audit-log",
     "/dashboard/admin/decision-calendar",
-    "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit",
+    "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit", "/dashboard/admin/announcements",
     "/dashboard/superadmin/add-dates",
   ];
 
@@ -322,6 +324,9 @@ export default function Dashboard() {
           )}
           {location === "/dashboard/admin/audit" && (
             <RoleGuard allowed={isAdmin}><AdminAuditLog /></RoleGuard>
+          )}
+          {location === "/dashboard/admin/announcements" && (
+            <RoleGuard allowed={isAdmin}><AdminAnnouncements /></RoleGuard>
           )}
           {/* ─── Super Admin ─────────────────────────────────────────────── */}
           {location === "/dashboard/superadmin/add-dates" && (
