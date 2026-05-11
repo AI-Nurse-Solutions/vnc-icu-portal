@@ -312,3 +312,13 @@
 - [x] Day+shift drill-down panel: shift tabs, sorted request rows, approve/deny/clear buttons
 - [x] Pending Only toggle, session expiry banner
 - [x] Swap Dashboard.tsx route to new page, delete old DecisionCalendar.tsx
+
+## My Portal Employee Landing Page
+- [x] Build MyPortal page: hero card (name, shift label, seniority rank donut)
+- [x] Stats bar: seniority date, total vacation days used with dot progress indicator
+- [x] New Request and Shift Demand Calendar action buttons
+- [x] Requests table (left panel): Request ID, date range, status with color coding
+- [x] Announcements & Tips panel (right panel): bell/lightbulb icons, alternating highlight
+- [x] No sidebar — full-width layout with top nav only
+- [x] Wire route in Dashboard.tsx and add portal tRPC router
+- [x] Add announcements table/seed data to schema

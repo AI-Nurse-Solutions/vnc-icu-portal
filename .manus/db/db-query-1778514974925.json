@@ -1,0 +1,184 @@
+{
+  "query": "\nSELECT\n  e.shift,\n  DATE_FORMAT(rdd.date, '%Y-%m') AS month,\n  rdd.decision,\n  COUNT(*) AS cnt\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE e.is_active = 1\n  AND e.role != 'ancillary'\n  AND NOT (rdd.date BETWEEN '2026-11-23' AND '2026-11-29')\n  AND NOT (rdd.date BETWEEN '2026-12-20' AND '2026-12-31')\nGROUP BY e.shift, month, rdd.decision\nORDER BY e.shift, month, rdd.decision;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT\n  e.shift,\n  DATE_FORMAT(rdd.date, '%Y-%m') AS month,\n  rdd.decision,\n  COUNT(*) AS cnt\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE e.is_active = 1\n  AND e.role != 'ancillary'\n  AND NOT (rdd.date BETWEEN '2026-11-23' AND '2026-11-29')\n  AND NOT (rdd.date BETWEEN '2026-12-20' AND '2026-12-31')\nGROUP BY e.shift, month, rdd.decision\nORDER BY e.shift, month, rdd.decision;\n",
+  "rows": [
+    {
+      "shift": "AM",
+      "month": "2026-07",
+      "decision": "approved",
+      "cnt": "225"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-07",
+      "decision": "denied",
+      "cnt": "31"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-08",
+      "decision": "approved",
+      "cnt": "187"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-08",
+      "decision": "denied",
+      "cnt": "30"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-09",
+      "decision": "approved",
+      "cnt": "221"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-09",
+      "decision": "denied",
+      "cnt": "55"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-10",
+      "decision": "approved",
+      "cnt": "244"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-10",
+      "decision": "denied",
+      "cnt": "42"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-11",
+      "decision": "approved",
+      "cnt": "96"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-11",
+      "decision": "denied",
+      "cnt": "1"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-12",
+      "decision": "approved",
+      "cnt": "119"
+    },
+    {
+      "shift": "AM",
+      "month": "2026-12",
+      "decision": "denied",
+      "cnt": "7"
+    },
+    {
+      "shift": "PM",
+      "month": "2026-07",
+      "decision": "approved",
+      "cnt": "24"
+    },
+    {
+      "shift": "PM",
+      "month": "2026-08",
+      "decision": "approved",
+      "cnt": "32"
+    },
+    {
+      "shift": "PM",
+      "month": "2026-09",
+      "decision": "approved",
+      "cnt": "40"
+    },
+    {
+      "shift": "PM",
+      "month": "2026-10",
+      "decision": "approved",
+      "cnt": "22"
+    },
+    {
+      "shift": "PM",
+      "month": "2026-11",
+      "decision": "approved",
+      "cnt": "5"
+    },
+    {
+      "shift": "PM",
+      "month": "2026-12",
+      "decision": "approved",
+      "cnt": "14"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-07",
+      "decision": "approved",
+      "cnt": "168"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-07",
+      "decision": "denied",
+      "cnt": "6"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-08",
+      "decision": "approved",
+      "cnt": "133"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-09",
+      "decision": "approved",
+      "cnt": "176"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-09",
+      "decision": "denied",
+      "cnt": "15"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-10",
+      "decision": "approved",
+      "cnt": "198"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-10",
+      "decision": "denied",
+      "cnt": "16"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-11",
+      "decision": "approved",
+      "cnt": "117"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-11",
+      "decision": "denied",
+      "cnt": "3"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-12",
+      "decision": "approved",
+      "cnt": "60"
+    },
+    {
+      "shift": "NOC",
+      "month": "2026-12",
+      "decision": "denied",
+      "cnt": "13"
+    }
+  ],
+  "messages": [],
+  "stdout": "shift\tmonth\tdecision\tcnt\nAM\t2026-07\tapproved\t225\nAM\t2026-07\tdenied\t31\nAM\t2026-08\tapproved\t187\nAM\t2026-08\tdenied\t30\nAM\t2026-09\tapproved\t221\nAM\t2026-09\tdenied\t55\nAM\t2026-10\tapproved\t244\nAM\t2026-10\tdenied\t42\nAM\t2026-11\tapproved\t96\nAM\t2026-11\tdenied\t1\nAM\t2026-12\tapproved\t119\nAM\t2026-12\tdenied\t7\nPM\t2026-07\tapproved\t24\nPM\t2026-08\tapproved\t32\nPM\t2026-09\tapproved\t40\nPM\t2026-10\tapproved\t22\nPM\t2026-11\tapproved\t5\nPM\t2026-12\tapproved\t14\nNOC\t2026-07\tapproved\t168\nNOC\t2026-07\tdenied\t6\nNOC\t2026-08\tapproved\t133\nNOC\t2026-09\tapproved\t176\nNOC\t2026-09\tdenied\t15\nNOC\t2026-10\tapproved\t198\nNOC\t2026-10\tdenied\t16\nNOC\t2026-11\tapproved\t117\nNOC\t2026-11\tdenied\t3\nNOC\t2026-12\tapproved\t60\nNOC\t2026-12\tdenied\t13\n",
+  "stderr": "",
+  "execution_time_ms": 285
+}

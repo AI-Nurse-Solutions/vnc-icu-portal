@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT DATE_FORMAT(date, '%Y-%m-%d') as date, reason, shift\nFROM blackout_dates\nWHERE date >= '2026-07-01' AND date <= '2026-12-31'\nORDER BY date;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT DATE_FORMAT(date, '%Y-%m-%d') as date, reason, shift\nFROM blackout_dates\nWHERE date >= '2026-07-01' AND date <= '2026-12-31'\nORDER BY date;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'shift' in 'field list'"
+  ]
+}

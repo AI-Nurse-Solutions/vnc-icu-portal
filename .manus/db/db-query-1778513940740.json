@@ -1,0 +1,15 @@
+{
+  "query": "\nSELECT COUNT(*) as total_denied,\n  SUM(CASE WHEN rdd.date >= '2026-07-01' AND rdd.date <= '2026-08-31' THEN 1 ELSE 0 END) as summer_denied,\n  COUNT(DISTINCT e.id) as unique_employees\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE rdd.decision = 'denied'\n  AND e.is_active = 1\n  AND e.role != 'ancillary';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT COUNT(*) as total_denied,\n  SUM(CASE WHEN rdd.date >= '2026-07-01' AND rdd.date <= '2026-08-31' THEN 1 ELSE 0 END) as summer_denied,\n  COUNT(DISTINCT e.id) as unique_employees\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE rdd.decision = 'denied'\n  AND e.is_active = 1\n  AND e.role != 'ancillary';\n",
+  "rows": [
+    {
+      "total_denied": "220",
+      "summer_denied": "67",
+      "unique_employees": "65"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_denied\tsummer_denied\tunique_employees\n220\t67\t65\n",
+  "stderr": "",
+  "execution_time_ms": 355
+}

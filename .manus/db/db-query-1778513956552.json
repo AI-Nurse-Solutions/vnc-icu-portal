@@ -1,0 +1,42 @@
+{
+  "query": "SELECT `key`, `value` FROM config ORDER BY `key`;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute SELECT `key`, `value` FROM config ORDER BY `key`;",
+  "rows": [
+    {
+      "key": "cap_am",
+      "value": "8"
+    },
+    {
+      "key": "cap_noc",
+      "value": "8"
+    },
+    {
+      "key": "cap_pm",
+      "value": "8"
+    },
+    {
+      "key": "color_red_threshold",
+      "value": "8"
+    },
+    {
+      "key": "color_yellow_threshold",
+      "value": "5"
+    },
+    {
+      "key": "deadline_reminder_days",
+      "value": "7"
+    },
+    {
+      "key": "vacation_max_days",
+      "value": "21"
+    },
+    {
+      "key": "vacation_rolling_months",
+      "value": "6"
+    }
+  ],
+  "messages": [],
+  "stdout": "key\tvalue\ncap_am\t8\ncap_noc\t8\ncap_pm\t8\ncolor_red_threshold\t8\ncolor_yellow_threshold\t5\ndeadline_reminder_days\t7\nvacation_max_days\t21\nvacation_rolling_months\t6\n",
+  "stderr": "",
+  "execution_time_ms": 263
+}

@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT \n  e.id AS employee_id,\n  CONCAT(e.first_name, ' ', e.last_name) AS full_name,\n  e.shift,\n  e.seniority_rank,\n  DATE_FORMAT(rdd.date, '%Y-%m-%d') AS decision_date,\n  rdd.decision\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE rdd.decision = 'approved'\n  AND rdd.date >= '2026-07-01'\n  AND rdd.date <= '2026-12-31'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\nORDER BY e.shift, e.seniority_rank, e.last_name, rdd.date;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT \n  e.id AS employee_id,\n  CONCAT(e.first_name, ' ', e.last_name) AS full_name,\n  e.shift,\n  e.seniority_rank,\n  DATE_FORMAT(rdd.date, '%Y-%m-%d') AS decision_date,\n  rdd.decision\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE rdd.decision = 'approved'\n  AND rdd.date >= '2026-07-01'\n  AND rdd.date <= '2026-12-31'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\nORDER BY e.shift, e.seniority_rank, e.last_name, rdd.date;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'e.seniority_rank' in 'order clause'"
+  ]
+}

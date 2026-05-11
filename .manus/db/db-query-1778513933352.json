@@ -1,0 +1,230 @@
+{
+  "query": "\nSELECT \n  e.id AS employee_id,\n  CONCAT(e.first_name, ' ', e.last_name) AS full_name,\n  e.shift,\n  e.seniority_date,\n  r.id AS request_id,\n  r.working_priority,\n  r.priority AS sr_priority,\n  r.continuity_type,\n  DATE_FORMAT(rdd.date, '%Y-%m-%d') AS denied_date\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE rdd.decision = 'denied'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\nORDER BY e.shift, rdd.date, e.seniority_date, e.last_name\nLIMIT 20;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT \n  e.id AS employee_id,\n  CONCAT(e.first_name, ' ', e.last_name) AS full_name,\n  e.shift,\n  e.seniority_date,\n  r.id AS request_id,\n  r.working_priority,\n  r.priority AS sr_priority,\n  r.continuity_type,\n  DATE_FORMAT(rdd.date, '%Y-%m-%d') AS denied_date\nFROM request_date_decisions rdd\nJOIN requests r ON r.id = rdd.request_id\nJOIN employees e ON e.id = r.employee_id\nWHERE rdd.decision = 'denied'\n  AND e.is_active = 1\n  AND e.role != 'ancillary'\nORDER BY e.shift, rdd.date, e.seniority_date, e.last_name\nLIMIT 20;\n",
+  "rows": [
+    {
+      "employee_id": "930003",
+      "full_name": "Lisa Diestel",
+      "shift": "AM",
+      "seniority_date": "2012-04-27",
+      "request_id": "870004",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-04"
+    },
+    {
+      "employee_id": "930003",
+      "full_name": "Lisa Diestel",
+      "shift": "AM",
+      "seniority_date": "2012-04-27",
+      "request_id": "870004",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-05"
+    },
+    {
+      "employee_id": "2580001",
+      "full_name": "Pamela Adler",
+      "shift": "AM",
+      "seniority_date": "2014-08-21",
+      "request_id": "3090003",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-10"
+    },
+    {
+      "employee_id": "2610001",
+      "full_name": "Siri Stillwachs",
+      "shift": "AM",
+      "seniority_date": "2016-10-16",
+      "request_id": "4830002",
+      "working_priority": "4",
+      "sr_priority": "4",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-11"
+    },
+    {
+      "employee_id": "1470001",
+      "full_name": "Saida Miller",
+      "shift": "AM",
+      "seniority_date": "2015-01-26",
+      "request_id": "3810001",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-12"
+    },
+    {
+      "employee_id": "4110001",
+      "full_name": "Austin Carpenter",
+      "shift": "AM",
+      "seniority_date": "2014-03-24",
+      "request_id": "7260002",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-13"
+    },
+    {
+      "employee_id": "1470001",
+      "full_name": "Saida Miller",
+      "shift": "AM",
+      "seniority_date": "2015-01-26",
+      "request_id": "3810001",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-13"
+    },
+    {
+      "employee_id": "4110001",
+      "full_name": "Austin Carpenter",
+      "shift": "AM",
+      "seniority_date": "2014-03-24",
+      "request_id": "7260002",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-14"
+    },
+    {
+      "employee_id": "1470001",
+      "full_name": "Saida Miller",
+      "shift": "AM",
+      "seniority_date": "2015-01-26",
+      "request_id": "3810001",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-14"
+    },
+    {
+      "employee_id": "1470001",
+      "full_name": "Saida Miller",
+      "shift": "AM",
+      "seniority_date": "2015-01-26",
+      "request_id": "3810001",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-15"
+    },
+    {
+      "employee_id": "3240002",
+      "full_name": "Jarrett Yamasaki",
+      "shift": "AM",
+      "seniority_date": "2024-04-22",
+      "request_id": "7140002",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-18"
+    },
+    {
+      "employee_id": "3720001",
+      "full_name": "Ashly Carlson",
+      "shift": "AM",
+      "seniority_date": "2023-07-16",
+      "request_id": "5370003",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-24"
+    },
+    {
+      "employee_id": "3060001",
+      "full_name": "JIMMY MIRANDA",
+      "shift": "AM",
+      "seniority_date": "2024-03-04",
+      "request_id": "6510003",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-24"
+    },
+    {
+      "employee_id": "630001",
+      "full_name": "Nahika Monestime",
+      "shift": "AM",
+      "seniority_date": "2026-02-25",
+      "request_id": "4620003",
+      "working_priority": "7",
+      "sr_priority": "7",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-24"
+    },
+    {
+      "employee_id": "3720001",
+      "full_name": "Ashly Carlson",
+      "shift": "AM",
+      "seniority_date": "2023-07-16",
+      "request_id": "5370003",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-25"
+    },
+    {
+      "employee_id": "3060001",
+      "full_name": "JIMMY MIRANDA",
+      "shift": "AM",
+      "seniority_date": "2024-03-04",
+      "request_id": "6510003",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-25"
+    },
+    {
+      "employee_id": "600001",
+      "full_name": "Jamil Aboumansour",
+      "shift": "AM",
+      "seniority_date": "2025-12-25",
+      "request_id": "4560001",
+      "working_priority": "2",
+      "sr_priority": "2",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-25"
+    },
+    {
+      "employee_id": "630001",
+      "full_name": "Nahika Monestime",
+      "shift": "AM",
+      "seniority_date": "2026-02-25",
+      "request_id": "4620003",
+      "working_priority": "7",
+      "sr_priority": "7",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-25"
+    },
+    {
+      "employee_id": "3720001",
+      "full_name": "Ashly Carlson",
+      "shift": "AM",
+      "seniority_date": "2023-07-16",
+      "request_id": "5370003",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-26"
+    },
+    {
+      "employee_id": "3060001",
+      "full_name": "JIMMY MIRANDA",
+      "shift": "AM",
+      "seniority_date": "2024-03-04",
+      "request_id": "6510003",
+      "working_priority": "3",
+      "sr_priority": "3",
+      "continuity_type": "continuous",
+      "denied_date": "2026-07-26"
+    }
+  ],
+  "messages": [],
+  "stdout": "employee_id\tfull_name\tshift\tseniority_date\trequest_id\tworking_priority\tsr_priority\tcontinuity_type\tdenied_date\n930003\tLisa Diestel\tAM\t2012-04-27\t870004\t3\t3\tcontinuous\t2026-07-04\n930003\tLisa Diestel\tAM\t2012-04-27\t870004\t3\t3\tcontinuous\t2026-07-05\n2580001\tPamela Adler\tAM\t2014-08-21\t3090003\t3\t3\tcontinuous\t2026-07-10\n2610001\tSiri Stillwachs\tAM\t2016-10-16\t4830002\t4\t4\tcontinuous\t2026-07-11\n1470001\tSaida Miller\tAM\t2015-01-26\t3810001\t2\t2\tcontinuous\t2026-07-12\n4110001\tAustin Carpenter\tAM\t2014-03-24\t7260002\t2\t2\tcontinuous\t2026-07-13\n1470001\tSaida Miller\tAM\t2015-01-26\t3810001\t2\t2\tcontinuous\t2026-07-13\n4110001\tAustin Carpenter\tAM\t2014-03-24\t7260002\t2\t2\tcontinuous\t2026-07-14\n1470001\tSaida Miller\tAM\t2015-01-26\t3810001\t2\t2\tcontinuous\t2026-07-14\n1470001\tSaida Miller\tAM\t2015-01-26\t3810001\t2\t2\tcontinuous\t2026-07-15\n3240002\tJarrett Yamasaki\tAM\t2024-04-22\t7140002\t2\t2\tcontinuous\t2026-07-18\n3720001\tAshly Carlson\tAM\t2023-07-16\t5370003\t3\t3\tcontinuous\t2026-07-24\n3060001\tJIMMY MIRANDA\tAM\t2024-03-04\t6510003\t3\t3\tcontinuous\t2026-07-24\n630001\tNahika Monestime\tAM\t2026-02-25\t4620003\t7\t7\tcontinuous\t2026-07-24\n3720001\tAshly Carlson\tAM\t2023-07-16\t5370003\t3\t3\tcontinuous\t2026-07-25\n3060001\tJIMMY MIRANDA\tAM\t2024-03-04\t6510003\t3\t3\tcontinuous\t2026-07-25\n600001\tJamil Aboumansour\tAM\t2025-12-25\t4560001\t2\t2\tcontinuous\t2026-07-25\n630001\tNahika Monestime\tAM\t2026-02-25\t4620003\t7\t7\tcontinuous\t2026-07-25\n3720001\tAshly Carlson\tAM\t2023-07-16\t5370003\t3\t3\tcontinuous\t2026-07-26\n3060001\tJIMMY MIRANDA\tAM\t2024-03-04\t6510003\t3\t3\tcontinuous\t2026-07-26\n",
+  "stderr": "",
+  "execution_time_ms": 1100
+}

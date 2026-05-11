@@ -145,6 +145,20 @@ export const auditLog = mysqlTable("audit_log", {
 export type AuditLog = typeof auditLog.$inferSelect;
 export type InsertAuditLog = typeof auditLog.$inferInsert;
 
+// ─── Announcements ───────────────────────────────────────────────────────────
+export const announcements = mysqlTable("announcements", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("type", ["announcement", "tip"]).notNull().default("announcement"),
+  title: varchar("title", { length: 128 }).notNull(),
+  body: text("body").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: int("created_by"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = typeof announcements.$inferInsert;
+
 // ─── Legacy users table (keep for template compatibility) ─────────────────────
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
