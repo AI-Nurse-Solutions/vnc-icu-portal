@@ -281,3 +281,8 @@
 ## Decision Calendar Blank Grid + Pending Mismatch (May 11, 2026)
 - [x] Fix blank month grid — root cause was calendar defaulting to May 2026 (only 12 rows); fixed by defaulting to July 2026 (520 rows); date normalization also hardened to use UTC parts
 - [x] Fix pending export — export now reads per-date decisions (approved=2092, pending=324, denied=220 for Jul-Dec); requests.status is a summary field and works correctly by design
+
+## Decision Calendar Grid Rendering Fix (May 11, 2026)
+- [x] Trace full data path: root cause was DATE column returning JS Date object (2026-07-01T04:00:00.000Z) — UTC conversion shifted to 2026-06-30 in Pacific time, causing all dateMap lookups to miss
+- [x] Fix: use DATE_FORMAT(rd.date, '%Y-%m-%d') in SQL to force clean YYYY-MM-DD string; simplified server normalization to String(row.date)
+- [x] Improve visual clarity: high-contrast cell colors (amber=pending, red=over-cap, green=all-decided, sky=has-requests); updated legend; progress counter shows '0/8 pending' or '✓ 8/8'

@@ -269,9 +269,8 @@ export const managerToolsRouter = router({
       }[]> = {};
 
       for (const row of rows) {
-        // Normalize to YYYY-MM-DD using UTC parts to avoid timezone shift
-        const rawDate = row.date instanceof Date ? row.date : new Date(String(row.date));
-        const dateStr = `${rawDate.getUTCFullYear()}-${String(rawDate.getUTCMonth() + 1).padStart(2, "0")}-${String(rawDate.getUTCDate()).padStart(2, "0")}`;
+        // DATE_FORMAT in the SQL query guarantees row.date is already 'YYYY-MM-DD'
+        const dateStr = String(row.date);
         if (!dateMap[dateStr]) dateMap[dateStr] = [];
         const count = Number(row.count);
         dateMap[dateStr].push({

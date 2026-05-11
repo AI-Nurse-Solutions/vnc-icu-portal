@@ -565,11 +565,14 @@ function CalendarGrid({
               const isOverCap = entry?.isOverCap;
               const allApproved = entry?.allApproved;
 
-              // Color coding
-              let cellClass = "border-zinc-800 bg-zinc-900 hover:bg-zinc-800";
-              if (isOverCap) cellClass = "border-red-500/40 bg-red-500/10 hover:bg-red-500/15";
-              else if (allApproved) cellClass = "border-emerald-500/30 bg-emerald-500/8 hover:bg-emerald-500/12";
-              else if (hasRequests) cellClass = "border-amber-500/30 bg-amber-500/8 hover:bg-amber-500/12";
+              // Determine pending state: has requests but not all decided
+              const hasPending = entry && entry.decidedCount < entry.totalCount;
+              // Color coding — use solid, high-contrast backgrounds
+              let cellClass = "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800";
+              if (isOverCap) cellClass = "border-red-500 bg-red-950 hover:bg-red-900";
+              else if (allApproved) cellClass = "border-emerald-500 bg-emerald-950 hover:bg-emerald-900";
+              else if (hasPending) cellClass = "border-amber-400 bg-amber-950 hover:bg-amber-900";
+              else if (hasRequests) cellClass = "border-sky-500/50 bg-sky-950/60 hover:bg-sky-900/60";
 
               return (
                 <button
@@ -580,8 +583,8 @@ function CalendarGrid({
                   }`}
                 >
                   {/* Day number */}
-                  <span className={`text-xs font-semibold ${
-                    isToday ? "text-teal-400" : hasRequests ? "text-white" : "text-zinc-600"
+                  <span className={`text-xs font-bold ${
+                    isToday ? "text-teal-300" : hasRequests ? "text-white" : "text-zinc-500"
                   }`}>
                     {dayNum}
                   </span>
@@ -589,16 +592,18 @@ function CalendarGrid({
                   {/* Decision progress counter */}
                   {entry && entry.totalCount > 0 && (
                     <div
-                      className={`text-[9px] font-semibold leading-tight mt-0.5 ${
+                      className={`text-[9px] font-bold leading-tight mt-0.5 ${
                         entry.decidedCount === entry.totalCount
-                          ? "text-emerald-400"
+                          ? "text-emerald-300"
                           : entry.decidedCount > 0
-                          ? "text-amber-400"
-                          : "text-zinc-500"
+                          ? "text-amber-300"
+                          : "text-amber-400"
                       }`}
                       title={`${entry.decidedCount} of ${entry.totalCount} requests decided`}
                     >
-                      {entry.decidedCount}/{entry.totalCount}
+                      {entry.decidedCount === entry.totalCount
+                        ? `✓ ${entry.decidedCount}/${entry.totalCount}`
+                        : `${entry.decidedCount}/${entry.totalCount} pending`}
                     </div>
                   )}
                   {/* Shift dots */}
@@ -630,21 +635,25 @@ function CalendarGrid({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 mt-4 text-[11px] text-zinc-500 flex-wrap">
+      <div className="flex items-center gap-4 mt-4 text-[11px] text-zinc-400 flex-wrap">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded border border-amber-500/30 bg-amber-500/8 inline-block" />
-          Has requests
+          <span className="w-3 h-3 rounded border border-amber-400 bg-amber-950 inline-block" />
+          Pending decisions
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded border border-red-500/40 bg-red-500/10 inline-block" />
+          <span className="w-3 h-3 rounded border border-red-500 bg-red-950 inline-block" />
           Over cap (8+)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded border border-emerald-500/30 bg-emerald-500/8 inline-block" />
-          All approved
+          <span className="w-3 h-3 rounded border border-emerald-500 bg-emerald-950 inline-block" />
+          All decided
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded border border-sky-500/50 bg-sky-950/60 inline-block" />
+          Has requests
         </span>
         <span className="flex items-center gap-1.5 ml-auto">
-          <span className="text-[10px] font-bold text-sky-300">A3</span> AM shift · <span className="text-[10px] font-bold text-violet-300">P2</span> PM · <span className="text-[10px] font-bold text-emerald-300">N1</span> NOC
+          <span className="text-[10px] font-bold text-sky-300">A3</span> AM &middot; <span className="text-[10px] font-bold text-violet-300">P2</span> PM &middot; <span className="text-[10px] font-bold text-emerald-300">N1</span> NOC
         </span>
       </div>
     </div>

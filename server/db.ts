@@ -858,7 +858,9 @@ export async function getDecisionCalendarMonth(year: number, month: number) {
   // and "pending" if no rdd row exists for that request+date combination.
   const rows = await db
     .select({
-      date: requestDates.date,
+      // Use DATE_FORMAT to force a clean 'YYYY-MM-DD' string — avoids timezone
+      // conversion that happens when Drizzle/mysql2 returns a JS Date object.
+      date: sql<string>`DATE_FORMAT(${requestDates.date}, '%Y-%m-%d')`,
       shift: employees.shift,
       count: sql<number>`COUNT(DISTINCT ${requests.id})`,
       approvedCount: sql<number>`SUM(CASE WHEN rdd.decision = 'approved' THEN 1 ELSE 0 END)`,
