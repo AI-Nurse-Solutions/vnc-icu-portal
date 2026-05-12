@@ -71,7 +71,7 @@ export const authRouter = router({
       // Issue JWT session immediately (MFA/OTP disabled)
       const token = await signJwt({ employeeId: emp.id, role: emp.role });
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 8 * 60 * 60 * 1000 });
+      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 24 * 60 * 60 * 1000 });
 
       await logAudit({ actorId: emp.id, action: "login", targetType: "employee", targetId: String(emp.id), details: { email: emp.email } });
 
@@ -131,7 +131,7 @@ export const authRouter = router({
       // Issue JWT session
       const token = await signJwt({ employeeId: emp.id, role: emp.role });
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 8 * 60 * 60 * 1000 });
+      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 24 * 60 * 60 * 1000 });
 
       await logAudit({ actorId: emp.id, action: "login", targetType: "employee", targetId: String(emp.id), details: { email: emp.email } });
 
@@ -199,7 +199,7 @@ export const authRouter = router({
       const { COOKIE_NAME } = await import("../../shared/const");
       const token = await signJwt({ employeeId: emp.id, role: emp.role });
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 8 * 60 * 60 * 1000 });
+      ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 24 * 60 * 60 * 1000 });
 
       await logAudit({ actorId: emp.id, action: "signup", targetType: "employee", targetId: String(emp.id), details: { email: emp.email } });
 
