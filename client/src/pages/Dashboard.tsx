@@ -63,9 +63,7 @@ function NavItem({ href, icon: Icon, label, active, onClick }: {
 }
 
 export default function Dashboard() {
-  const [, navigate] = useLocation();
-  // Use window.location.pathname for reliable full-path matching in nested wouter routes
-  const location = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const [location, navigate] = useLocation();
   const { employee, isLoading, isManager, isAdmin, isSuperAdmin } = useEmployee();
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);

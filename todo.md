@@ -350,3 +350,8 @@
 - [x] Root cause: working_priority was NULL on request ID 8040001 (submitted May 12); manually set to 1
 - [x] Fixed requests.submit procedure to auto-assign workingPriority = priority on all future submissions
 - [x] 0 TS errors, 19/19 tests passing
+
+## Bug: Decision Calendar Blank — Full Diagnostic (May 12)
+- [x] Root cause: Dashboard.tsx used window.location.pathname (static, non-reactive) instead of wouter's useLocation — any navigation mismatch caused the Decision Calendar component to never mount, so no tRPC calls fired
+- [x] Fix: replaced window.location.pathname with const [location, navigate] = useLocation() for proper reactive routing
+- [x] 0 TS errors, 19/19 tests passing
