@@ -1,0 +1,37 @@
+{
+  "query": "SHOW TABLES LIKE 'request_date_decisions'; DESCRIBE request_date_decisions;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute SHOW TABLES LIKE 'request_date_decisions'; DESCRIBE request_date_decisions;",
+  "rows": [
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "request_date_decisions"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "Field\tType\tNull\tKey\tDefault\tExtra"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "id\tint\tNO\tPRI\tNULL\tauto_increment"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "request_id\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "date\tdate\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "decision\tenum('approved','denied')\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "decided_by\tint\tNO\t\tNULL\t"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "note\ttext\tYES\t\tNULL\t"
+    },
+    {
+      "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)": "decided_at\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_8TTpjTbwNRkm8QcJp9ko4t (request_date_decisions)\nrequest_date_decisions\nField\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nrequest_id\tint\tNO\t\tNULL\t\ndate\tdate\tNO\t\tNULL\t\ndecision\tenum('approved','denied')\tNO\t\tNULL\t\ndecided_by\tint\tNO\t\tNULL\t\nnote\ttext\tYES\t\tNULL\t\ndecided_at\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\n",
+  "stderr": "",
+  "execution_time_ms": 1466
+}

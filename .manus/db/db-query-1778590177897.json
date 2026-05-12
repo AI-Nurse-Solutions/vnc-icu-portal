@@ -1,0 +1,45 @@
+{
+  "query": "SELECT DATE_FORMAT(rd.date, '%Y-%m-%d') as date, e.shift, COUNT(DISTINCT r.id) as cnt, SUM(CASE WHEN rdd.decision = 'approved' THEN 1 ELSE 0 END) as approvedCount, SUM(CASE WHEN rdd.decision IS NULL THEN 1 ELSE 0 END) as pendingCount FROM request_dates rd INNER JOIN requests r ON rd.request_id = r.id INNER JOIN employees e ON r.employee_id = e.id LEFT JOIN request_date_decisions rdd ON (rdd.request_id = rd.request_id AND DATE(rdd.date) = DATE(rd.date)) WHERE rd.date >= '2026-07-01' AND rd.date <= '2026-07-31' AND r.status != 'withdrawn' AND r.request_type = 'vacation' AND e.is_active = true AND COALESCE(e.category, 'icu') != 'ancillary' AND e.role != 'ancillary' GROUP BY rd.date, e.shift ORDER BY rd.date, e.shift LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute SELECT DATE_FORMAT(rd.date, '%Y-%m-%d') as date, e.shift, COUNT(DISTINCT r.id) as cnt, SUM(CASE WHEN rdd.decision = 'approved' THEN 1 ELSE 0 END) as approvedCount, SUM(CASE WHEN rdd.decision IS NULL THEN 1 ELSE 0 END) as pendingCount FROM request_dates rd INNER JOIN requests r ON rd.request_id = r.id INNER JOIN employees e ON r.employee_id = e.id LEFT JOIN request_date_decisions rdd ON (rdd.request_id = rd.request_id AND DATE(rdd.date) = DATE(rd.date)) WHERE rd.date >= '2026-07-01' AND rd.date <= '2026-07-31' AND r.status != 'withdrawn' AND r.request_type = 'vacation' AND e.is_active = true AND COALESCE(e.category, 'icu') != 'ancillary' AND e.role != 'ancillary' GROUP BY rd.date, e.shift ORDER BY rd.date, e.shift LIMIT 5",
+  "rows": [
+    {
+      "date": "2026-07-01",
+      "shift": "AM",
+      "cnt": "3",
+      "approvedCount": "3",
+      "pendingCount": "0"
+    },
+    {
+      "date": "2026-07-01",
+      "shift": "NOC",
+      "cnt": "4",
+      "approvedCount": "3",
+      "pendingCount": "1"
+    },
+    {
+      "date": "2026-07-02",
+      "shift": "AM",
+      "cnt": "5",
+      "approvedCount": "5",
+      "pendingCount": "0"
+    },
+    {
+      "date": "2026-07-02",
+      "shift": "NOC",
+      "cnt": "4",
+      "approvedCount": "3",
+      "pendingCount": "1"
+    },
+    {
+      "date": "2026-07-03",
+      "shift": "AM",
+      "cnt": "8",
+      "approvedCount": "8",
+      "pendingCount": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "date\tshift\tcnt\tapprovedCount\tpendingCount\n2026-07-01\tAM\t3\t3\t0\n2026-07-01\tNOC\t4\t3\t1\n2026-07-02\tAM\t5\t5\t0\n2026-07-02\tNOC\t4\t3\t1\n2026-07-03\tAM\t8\t8\t0\n",
+  "stderr": "",
+  "execution_time_ms": 419
+}

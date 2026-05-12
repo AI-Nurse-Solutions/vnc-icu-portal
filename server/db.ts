@@ -876,10 +876,10 @@ export async function getDecisionCalendarMonth(year: number, month: number) {
       date: sql<string>`DATE_FORMAT(${requestDates.date}, '%Y-%m-%d')`,
       shift: employees.shift,
       count: sql<number>`COUNT(DISTINCT ${requests.id})`,
-      approvedCount: sql<number>`SUM(CASE WHEN rdd.decision = 'approved' THEN 1 ELSE 0 END)`,
-      pendingCount: sql<number>`SUM(CASE WHEN rdd.decision IS NULL THEN 1 ELSE 0 END)`,
-      deniedCount: sql<number>`SUM(CASE WHEN rdd.decision = 'denied' THEN 1 ELSE 0 END)`,
-      decidedCount: sql<number>`SUM(CASE WHEN rdd.decision IS NOT NULL THEN 1 ELSE 0 END)`,
+      approvedCount: sql<number>`SUM(CASE WHEN ${requestDateDecisions.decision} = 'approved' THEN 1 ELSE 0 END)`,
+      pendingCount: sql<number>`SUM(CASE WHEN ${requestDateDecisions.decision} IS NULL THEN 1 ELSE 0 END)`,
+      deniedCount: sql<number>`SUM(CASE WHEN ${requestDateDecisions.decision} = 'denied' THEN 1 ELSE 0 END)`,
+      decidedCount: sql<number>`SUM(CASE WHEN ${requestDateDecisions.decision} IS NOT NULL THEN 1 ELSE 0 END)`,
       totalCount: sql<number>`COUNT(DISTINCT ${requests.id})`,
     })
     .from(requestDates)
