@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE employees SET password_hash = '$2b$12$XB1If8x/Y/d6pbhkCKPVvel94VOMKEIwus1riu7sfaPSt8FYE9ih6' WHERE email = 'great.ai.nurses@gmail.com'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute UPDATE employees SET password_hash = '$2b$12$XB1If8x/Y/d6pbhkCKPVvel94VOMKEIwus1riu7sfaPSt8FYE9ih6' WHERE email = 'great.ai.nurses@gmail.com'",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 290
+}
