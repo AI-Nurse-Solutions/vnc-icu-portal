@@ -345,3 +345,8 @@
 - [ ] Update getDecisionCalendarDay to return WP-ranked rows with summer cap flags per shift
 - [ ] Rebuild day drill-down: all shifts visible, WP rank + seniority rank next to name, status (approved/denied/summer-capped), approve/deny toggle per pending row
 - [ ] Exclude ancillary employees and inactive employees from counts and display
+
+## Bug Fix: Evonne Seisa Missing from Decision Calendar
+- [x] Root cause: working_priority was NULL on request ID 8040001 (submitted May 12); manually set to 1
+- [x] Fixed requests.submit procedure to auto-assign workingPriority = priority on all future submissions
+- [x] 0 TS errors, 19/19 tests passing

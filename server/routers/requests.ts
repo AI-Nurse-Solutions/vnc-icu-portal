@@ -73,6 +73,7 @@ export const requestsRouter = router({
           requestType: input.requestType,
           continuityType: input.continuityType,
           priority: input.priority,
+          workingPriority: input.priority, // default to submitted priority; re-ranked by admin batch
           comment: input.comment,
           status: "pending",
           submittedAt: new Date(),

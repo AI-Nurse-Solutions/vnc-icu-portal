@@ -1,0 +1,43 @@
+{
+  "query": "\nSELECT r.id as request_id, r.status, r.request_type, r.working_priority, r.priority, r.submitted_at,\n       COUNT(rd.id) as date_count,\n       MIN(rd.date) as first_date, MAX(rd.date) as last_date\nFROM requests r\nLEFT JOIN request_dates rd ON rd.request_id = r.id\nWHERE r.employee_id = 450001\nGROUP BY r.id, r.status, r.request_type, r.working_priority, r.priority, r.submitted_at;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT r.id as request_id, r.status, r.request_type, r.working_priority, r.priority, r.submitted_at,\n       COUNT(rd.id) as date_count,\n       MIN(rd.date) as first_date, MAX(rd.date) as last_date\nFROM requests r\nLEFT JOIN request_dates rd ON rd.request_id = r.id\nWHERE r.employee_id = 450001\nGROUP BY r.id, r.status, r.request_type, r.working_priority, r.priority, r.submitted_at;\n",
+  "rows": [
+    {
+      "request_id": "450001",
+      "status": "pending",
+      "request_type": "education",
+      "working_priority": "1",
+      "priority": "1",
+      "submitted_at": "2026-03-24 06:00:43",
+      "date_count": "3",
+      "first_date": "2026-07-04",
+      "last_date": "2026-07-08"
+    },
+    {
+      "request_id": "8040001",
+      "status": "pending",
+      "request_type": "vacation",
+      "working_priority": "NULL",
+      "priority": "1",
+      "submitted_at": "2026-05-12 06:43:13",
+      "date_count": "5",
+      "first_date": "2026-07-04",
+      "last_date": "2026-07-08"
+    },
+    {
+      "request_id": "420002",
+      "status": "withdrawn",
+      "request_type": "education",
+      "working_priority": "NULL",
+      "priority": "1",
+      "submitted_at": "2026-03-24 05:47:23",
+      "date_count": "3",
+      "first_date": "2026-07-04",
+      "last_date": "2026-07-07"
+    }
+  ],
+  "messages": [],
+  "stdout": "request_id\tstatus\trequest_type\tworking_priority\tpriority\tsubmitted_at\tdate_count\tfirst_date\tlast_date\n450001\tpending\teducation\t1\t1\t2026-03-24 06:00:43\t3\t2026-07-04\t2026-07-08\n8040001\tpending\tvacation\tNULL\t1\t2026-05-12 06:43:13\t5\t2026-07-04\t2026-07-08\n420002\twithdrawn\teducation\tNULL\t1\t2026-03-24 05:47:23\t3\t2026-07-04\t2026-07-07\n",
+  "stderr": "",
+  "execution_time_ms": 297
+}

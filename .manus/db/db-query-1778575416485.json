@@ -1,0 +1,49 @@
+{
+  "query": "\nSELECT id, first_name, last_name, email, employee_number, shift, role, category, is_active, is_verified, seniority_date\nFROM employees\nWHERE first_name LIKE '%Evonne%' OR last_name LIKE '%Seisa%' OR email LIKE '%evonne%' OR email LIKE '%seisa%';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute \nSELECT id, first_name, last_name, email, employee_number, shift, role, category, is_active, is_verified, seniority_date\nFROM employees\nWHERE first_name LIKE '%Evonne%' OR last_name LIKE '%Seisa%' OR email LIKE '%evonne%' OR email LIKE '%seisa%';\n",
+  "rows": [
+    {
+      "id": "450001",
+      "first_name": "Evonne",
+      "last_name": "Seisa",
+      "email": "manzanet@sutterhealth.org",
+      "employee_number": "evonnes",
+      "shift": "NOC",
+      "role": "employee",
+      "category": "icu",
+      "is_active": "1",
+      "is_verified": "1",
+      "seniority_date": "2017-11-13"
+    },
+    {
+      "id": "3750001",
+      "first_name": "Giornel",
+      "last_name": "Seisa",
+      "email": "giornel.seisa@sutterhealth.orv",
+      "employee_number": "27418275 a",
+      "shift": "NOC",
+      "role": "employee",
+      "category": "icu",
+      "is_active": "0",
+      "is_verified": "1",
+      "seniority_date": "2016-03-07"
+    },
+    {
+      "id": "3750002",
+      "first_name": "Giornel",
+      "last_name": "Seisa",
+      "email": "giornel.seisa@sutterhealth.org",
+      "employee_number": "27418275",
+      "shift": "NOC",
+      "role": "employee",
+      "category": "icu",
+      "is_active": "1",
+      "is_verified": "1",
+      "seniority_date": "2016-03-07"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfirst_name\tlast_name\temail\temployee_number\tshift\trole\tcategory\tis_active\tis_verified\tseniority_date\n450001\tEvonne\tSeisa\tmanzanet@sutterhealth.org\tevonnes\tNOC\temployee\ticu\t1\t1\t2017-11-13\n3750001\tGiornel\tSeisa\tgiornel.seisa@sutterhealth.orv\t27418275 a\tNOC\temployee\ticu\t0\t1\t2016-03-07\n3750002\tGiornel\tSeisa\tgiornel.seisa@sutterhealth.org\t27418275\tNOC\temployee\ticu\t1\t1\t2016-03-07\n",
+  "stderr": "",
+  "execution_time_ms": 282
+}
