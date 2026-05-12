@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   Calendar, CalendarDays, ClipboardList, Settings, Users, FileDown,
   LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
-  Star, Sun, Moon
+  Star, Sun, Moon, CheckCircle2
 } from "lucide-react";
 import { useState } from "react";
 import MyRequests from "./employee/MyRequests";
@@ -24,6 +24,7 @@ import AdminImport from "./admin/AdminImport";
 import AuditLog from "./admin/AuditLog";
 import SuperAdminDates from "./superadmin/SuperAdminDates";
 import DecisionCalendarV2 from "./admin/DecisionCalendarV2";
+import DecisionBoard from "./admin/DecisionBoard";
 import AdminAnnouncements from "./admin/AdminAnnouncements";
 import MyPortal from "./employee/MyPortal";
 
@@ -167,7 +168,8 @@ export default function Dashboard() {
   ];
 
   const adminNav = [
-    { href: "/dashboard/admin/decision-calendar", label: "Decision Calendar", icon: CalendarDays },
+    { href: "/dashboard/admin/decision-board", label: "Decision Board", icon: CheckCircle2 },
+    { href: "/dashboard/admin/decision-calendar", label: "Decision Calendar (Legacy)", icon: CalendarDays },
     { href: "/dashboard/admin/employees", label: "Employees", icon: Users },
     { href: "/dashboard/admin/import", label: "CSV Import", icon: FileDown },
     { href: "/dashboard/admin/announcements", label: "Announcements", icon: Bell },
@@ -183,6 +185,7 @@ export default function Dashboard() {
     "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
     "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
     "/dashboard/tools/audit-log",
+    "/dashboard/admin/decision-board",
     "/dashboard/admin/decision-calendar",
     "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit", "/dashboard/admin/announcements",
     "/dashboard/superadmin/add-dates",
@@ -357,6 +360,9 @@ export default function Dashboard() {
             <RoleGuard allowed={isManager}><AuditLog /></RoleGuard>
           )}
            {/* ─── Admin ────────────────────────────────────────────────────── */}
+          {location === "/dashboard/admin/decision-board" && (
+            <RoleGuard allowed={isAdmin}><DecisionBoard /></RoleGuard>
+          )}
           {location === "/dashboard/admin/decision-calendar" && (
             <RoleGuard allowed={isAdmin}><DecisionCalendarV2 /></RoleGuard>
           )}

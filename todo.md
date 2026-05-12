@@ -355,3 +355,10 @@
 - [x] Root cause: Dashboard.tsx used window.location.pathname (static, non-reactive) instead of wouter's useLocation — any navigation mismatch caused the Decision Calendar component to never mount, so no tRPC calls fired
 - [x] Fix: replaced window.location.pathname with const [location, navigate] = useLocation() for proper reactive routing
 - [x] 0 TS errors, 19/19 tests passing
+
+## Decision Board — New Standalone Page (May 12)
+- [x] Build DecisionBoard.tsx: shift tabs (AM/PM/NOC), month selector, date list with pending counts
+- [x] Day panel: WP-ranked rows, seniority rank, summer cap flag, approve/deny/clear buttons
+- [x] Stats bar: approved/pending/denied counts per selected date
+- [x] Wire route /dashboard/admin/decision-board in Dashboard.tsx
+- [x] Add to admin sidebar nav (Decision Board — top of Administration section)
