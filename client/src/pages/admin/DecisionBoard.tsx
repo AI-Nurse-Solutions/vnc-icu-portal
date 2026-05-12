@@ -256,10 +256,11 @@ function DayPanel({
           </div>
         )}
         {error && (
-          <div className="flex flex-col items-center justify-center h-32 gap-2 text-center">
+          <div className="flex flex-col items-center justify-center h-32 gap-2 text-center px-4">
             <AlertTriangle className="w-6 h-6 text-amber-400" />
-            <p className="text-sm text-foreground font-medium">Session expired</p>
-            <p className="text-xs text-muted-foreground">Please log out and log back in.</p>
+            <p className="text-sm text-foreground font-medium">Failed to load requests</p>
+            <p className="text-xs text-muted-foreground">{error.message?.includes('UNAUTHORIZED') ? 'Please log out and log back in.' : 'Connection error — click Retry.'}</p>
+            <button onClick={() => utils.tools.getDecisionCalendarDay.invalidate()} className="text-xs text-primary underline">Retry</button>
           </div>
         )}
         {!isLoading && !error && rows.length === 0 && (
@@ -304,6 +305,7 @@ export default function DecisionBoard() {
   const [selectedShift, setSelectedShift] = useState<Shift>("AM");
   const [monthIdx, setMonthIdx] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const utils = trpc.useUtils();
 
   const currentMonth = MONTHS[monthIdx];
 
@@ -389,7 +391,8 @@ export default function DecisionBoard() {
           {monthError && (
             <div className="flex flex-col items-center justify-center h-32 gap-2 px-4 text-center">
               <AlertTriangle className="w-5 h-5 text-amber-400" />
-              <p className="text-xs text-foreground font-medium">Session expired — please log in again</p>
+              <p className="text-xs text-foreground font-medium">{monthError.message?.includes('UNAUTHORIZED') ? 'Session expired — please log in again' : 'Connection error'}</p>
+              <button onClick={() => utils.tools.getDecisionCalendarMonth.invalidate()} className="text-xs text-primary underline">Retry</button>
             </div>
           )}
           {!monthLoading && !monthError && dateSummaries.length === 0 && (

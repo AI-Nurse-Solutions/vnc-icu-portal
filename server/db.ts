@@ -25,26 +25,39 @@ import {
 let _db: ReturnType<typeof drizzle> | null = null;
 let _pool: ReturnType<typeof createPool> | null = null;
 
+function createDbPool() {
+  const pool = createPool({
+    uri: process.env.DATABASE_URL,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
+    // Force DATE/DATETIME columns to be returned as strings (YYYY-MM-DD)
+    // This prevents mysql2 from converting DATE values to JS Date objects
+    // using the server's local timezone (America/New_York), which causes
+    // dates stored as UTC midnight to shift back by one day.
+    dateStrings: ["DATE"],
+  });
+  // Reset cached db instance whenever a connection error occurs so the
+  // next request gets a fresh pool (handles sandbox hibernation reconnects).
+  pool.on("error", (err) => {
+    console.warn("[Database] Pool error, resetting connection:", err.message);
+    _db = null;
+    _pool = null;
+  });
+  return pool;
+}
+
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _pool = createPool({
-        uri: process.env.DATABASE_URL,
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-        enableKeepAlive: true,
-        keepAliveInitialDelay: 0,
-        // Force DATE/DATETIME columns to be returned as strings (YYYY-MM-DD)
-        // This prevents mysql2 from converting DATE values to JS Date objects
-        // using the server's local timezone (America/New_York), which causes
-        // dates stored as UTC midnight to shift back by one day.
-        dateStrings: ["DATE"],
-      });
+      _pool = createDbPool();
       _db = drizzle(_pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
+      _pool = null;
     }
   }
   return _db;
