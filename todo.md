@@ -339,3 +339,9 @@
 ## MyPortal & Calendar UI Fixes
 - [x] Remove amber pending background from request card header row (keep amber only on pending date pills)
 - [x] Add prev/next month navigation arrows to employee Shift Demand Calendar
+
+## Decision Calendar — Unified View Rebuild
+- [ ] Read CalendarView and DecisionCalendarV2 data shapes
+- [ ] Update getDecisionCalendarDay to return WP-ranked rows with summer cap flags per shift
+- [ ] Rebuild day drill-down: all shifts visible, WP rank + seniority rank next to name, status (approved/denied/summer-capped), approve/deny toggle per pending row
+- [ ] Exclude ancillary employees and inactive employees from counts and display

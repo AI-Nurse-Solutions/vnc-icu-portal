@@ -136,11 +136,8 @@ function DecisionBadge({ decision }: { decision: string | null }) {
       <XCircle className="w-2.5 h-2.5" /> Denied
     </span>
   );
-  return (
-    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-amber-500/30 bg-amber-500/8 text-amber-400">
-      <Clock className="w-2.5 h-2.5" /> Pending
-    </span>
-  );
+  // Pending — no badge, action buttons speak for themselves
+  return null;
 }
 
 // ─── Drill-Down Panel ─────────────────────────────────────────────────────────
