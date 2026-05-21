@@ -83,7 +83,11 @@ export default function Dashboard() {
     if (!isLoading && !employee) {
       navigate("/login");
     }
-  }, [isLoading, employee]);
+    // Redirect admins and superadmins to the Admin Landing page by default
+    if (!isLoading && employee && (isAdmin || isSuperAdmin) && location === "/dashboard") {
+      navigate("/dashboard/admin/landing");
+    }
+  }, [isLoading, employee, isAdmin, isSuperAdmin, location]);
 
   if (isLoading) {
     return (
