@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   Calendar, CalendarDays, ClipboardList, Settings, Users, FileDown,
   LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
-  Star, Sun, Moon, CheckCircle2
+  Star, Sun, Moon, CheckCircle2, MessageSquare
 } from "lucide-react";
 import { useState } from "react";
 import MyRequests from "./employee/MyRequests";
@@ -26,6 +26,7 @@ import SuperAdminDates from "./superadmin/SuperAdminDates";
 import DecisionCalendarV2 from "./admin/DecisionCalendarV2";
 import DecisionBoard from "./admin/DecisionBoard";
 import AdminLanding from "./admin/AdminLanding";
+import MessageSuperAdmin from "./admin/MessageSuperAdmin";
 import AdminAnnouncements from "./admin/AdminAnnouncements";
 import MyPortal from "./employee/MyPortal";
 
@@ -180,6 +181,7 @@ export default function Dashboard() {
     { href: "/dashboard/admin/import", label: "CSV Import", icon: FileDown },
     { href: "/dashboard/admin/announcements", label: "Announcements", icon: Bell },
     { href: "/dashboard/admin/audit", label: "Audit Log (Legacy)", icon: Shield },
+    { href: "/dashboard/admin/message-superadmin", label: "Message Super Admin", icon: MessageSquare },
   ];
 
   const superAdminNav = [
@@ -195,6 +197,7 @@ export default function Dashboard() {
     "/dashboard/admin/decision-board",
     "/dashboard/admin/decision-calendar",
     "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit", "/dashboard/admin/announcements",
+    "/dashboard/admin/message-superadmin",
     "/dashboard/superadmin/add-dates",
   ];
 
@@ -387,6 +390,9 @@ export default function Dashboard() {
           )}
           {location === "/dashboard/admin/announcements" && (
             <RoleGuard allowed={isAdmin}><AdminAnnouncements /></RoleGuard>
+          )}
+          {location === "/dashboard/admin/message-superadmin" && (
+            <RoleGuard allowed={isAdmin}><MessageSuperAdmin /></RoleGuard>
           )}
           {/* ─── Super Admin ─────────────────────────────────────────────── */}
           {location === "/dashboard/superadmin/add-dates" && (
