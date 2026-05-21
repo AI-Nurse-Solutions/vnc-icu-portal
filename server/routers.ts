@@ -7,6 +7,7 @@ import { configRouter } from "./routers/config";
 import { managerToolsRouter } from "./routers/managerTools";
 import { superAdminRouter } from "./routers/superAdmin";
 import { portalRouter } from "./routers/portal";
+import { adminLandingRouter } from "./routers/adminLanding";
 import { systemRouter } from "./_core/systemRouter";
 import { router } from "./_core/trpc";
 
@@ -21,6 +22,7 @@ export const appRouter = router({
   tools: managerToolsRouter,
   superAdmin: superAdminRouter,
   portal: portalRouter,
+  adminLanding: adminLandingRouter,
 });
 
 export type AppRouter = typeof appRouter;

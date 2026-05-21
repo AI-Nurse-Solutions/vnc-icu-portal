@@ -25,6 +25,7 @@ import AuditLog from "./admin/AuditLog";
 import SuperAdminDates from "./superadmin/SuperAdminDates";
 import DecisionCalendarV2 from "./admin/DecisionCalendarV2";
 import DecisionBoard from "./admin/DecisionBoard";
+import AdminLanding from "./admin/AdminLanding";
 import AdminAnnouncements from "./admin/AdminAnnouncements";
 import MyPortal from "./employee/MyPortal";
 
@@ -168,6 +169,7 @@ export default function Dashboard() {
   ];
 
   const adminNav = [
+    { href: "/dashboard/admin/landing", label: "Admin Landing", icon: BarChart3 },
     { href: "/dashboard/admin/decision-board", label: "Decision Board", icon: CheckCircle2 },
     { href: "/dashboard/admin/decision-calendar", label: "Decision Calendar (Legacy)", icon: CalendarDays },
     { href: "/dashboard/admin/employees", label: "Employees", icon: Users },
@@ -185,6 +187,7 @@ export default function Dashboard() {
     "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
     "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
     "/dashboard/tools/audit-log",
+    "/dashboard/admin/landing",
     "/dashboard/admin/decision-board",
     "/dashboard/admin/decision-calendar",
     "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit", "/dashboard/admin/announcements",
@@ -360,6 +363,9 @@ export default function Dashboard() {
             <RoleGuard allowed={isManager}><AuditLog /></RoleGuard>
           )}
            {/* ─── Admin ────────────────────────────────────────────────────── */}
+          {location === "/dashboard/admin/landing" && (
+            <RoleGuard allowed={isAdmin}><AdminLanding /></RoleGuard>
+          )}
           {location === "/dashboard/admin/decision-board" && (
             <RoleGuard allowed={isAdmin}><DecisionBoard /></RoleGuard>
           )}

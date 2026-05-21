@@ -969,3 +969,171 @@ export async function bulkApproveDates(requestId: number, decidedBy: number) {
   // Sync request-level status — all dates approved → approved
   await syncRequestStatusFromDateDecisions(requestId);
 }
+
+// ─── Admin Landing Page Helpers ───────────────────────────────────────────────
+
+/** Recent requests for admin landing page — last N requests sorted by submittedAt DESC */
+export async function getRecentRequestsForAdmin(limit = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      requestId: requests.id,
+      employeeId: requests.employeeId,
+      firstName: employees.firstName,
+      lastName: employees.lastName,
+      shift: employees.shift,
+      requestType: requests.requestType,
+      continuityType: requests.continuityType,
+      priority: requests.priority,
+      workingPriority: requests.workingPriority,
+      status: requests.status,
+      submittedAt: requests.submittedAt,
+      comment: requests.comment,
+    })
+    .from(requests)
+    .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .where(eq(employees.isActive, true))
+    .orderBy(desc(requests.submittedAt))
+    .limit(limit);
+
+  const withDates = await Promise.all(
+    rows.map(async (r) => {
+      const dates = await db!
+        .select({ date: requestDates.date, summerShutout: requestDates.summerShutout })
+        .from(requestDates)
+        .where(eq(requestDates.requestId, r.requestId))
+        .orderBy(requestDates.date);
+      return {
+        ...r,
+        submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : String(r.submittedAt),
+        dates: dates.map(d => ({
+          date: d.date instanceof Date ? d.date.toISOString().split("T")[0] : String(d.date).split("T")[0],
+          summerShutout: d.summerShutout ?? false,
+        })),
+      };
+    })
+  );
+  return withDates;
+}
+
+/** Pending decision dates for admin landing page */
+export async function getPendingDecisionDates(startDate?: string, endDate?: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions: any[] = [
+    sql`${requests.status} != 'withdrawn'`,
+    eq(employees.isActive, true),
+    sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
+    sql`${employees.role} != 'ancillary'`,
+  ];
+  if (startDate) conditions.push(sql`${requestDates.date} >= ${startDate}`);
+  if (endDate) conditions.push(sql`${requestDates.date} <= ${endDate}`);
+
+  const rows = await db
+    .select({
+      date: requestDates.date,
+      shift: employees.shift,
+      requestType: requests.requestType,
+      requestId: requests.id,
+      employeeId: requests.employeeId,
+      firstName: employees.firstName,
+      lastName: employees.lastName,
+      dateDecision: requestDateDecisions.decision,
+      decidedBy: requestDateDecisions.decidedBy,
+    })
+    .from(requestDates)
+    .innerJoin(requests, eq(requestDates.requestId, requests.id))
+    .innerJoin(employees, eq(requests.employeeId, employees.id))
+    .leftJoin(
+      requestDateDecisions,
+      and(
+        eq(requestDateDecisions.requestId, requests.id),
+        sql`${requestDateDecisions.date} = ${requestDates.date}`
+      )
+    )
+    .where(and(...conditions))
+    .orderBy(requestDates.date, employees.shift);
+
+  const grouped = new Map<string, {
+    date: string; shift: string;
+    pendingCount: number; approvedCount: number; deniedCount: number;
+    vacationCount: number; educationCount: number;
+    requests: Array<{ requestId: number; employeeId: number; firstName: string; lastName: string; dateDecision: string | null; decidedBy: number | null; requestType: string; }>;
+  }>();
+
+  for (const r of rows) {
+    const dateStr = r.date instanceof Date ? r.date.toISOString().split("T")[0] : String(r.date).split("T")[0];
+    const key = `${dateStr}|${r.shift}`;
+    if (!grouped.has(key)) {
+      grouped.set(key, { date: dateStr, shift: r.shift, pendingCount: 0, approvedCount: 0, deniedCount: 0, vacationCount: 0, educationCount: 0, requests: [] });
+    }
+    const g = grouped.get(key)!;
+    const dec = r.dateDecision;
+    if (dec === "approved") g.approvedCount++;
+    else if (dec === "denied") g.deniedCount++;
+    else g.pendingCount++;
+    if (r.requestType === "vacation") g.vacationCount++;
+    else g.educationCount++;
+    g.requests.push({ requestId: r.requestId, employeeId: r.employeeId, firstName: r.firstName, lastName: r.lastName, dateDecision: dec ?? null, decidedBy: r.decidedBy ?? null, requestType: r.requestType });
+  }
+
+  const cap = 8;
+  return Array.from(grouped.values())
+    .sort((a, b) => a.date.localeCompare(b.date) || a.shift.localeCompare(b.shift))
+    .map(g => ({ ...g, overCap: g.approvedCount + g.pendingCount > cap, slotUsage: `${g.approvedCount + g.pendingCount} of ${cap}` }));
+}
+
+/** Full request history for a single employee (Requestor History modal) */
+export async function getRequestorHistory(employeeId: number) {
+  const db = await getDb();
+  if (!db) return { employee: null, requests: [] };
+
+  const emp = await db.select().from(employees).where(eq(employees.id, employeeId)).limit(1);
+  if (!emp.length) return { employee: null, requests: [] };
+
+  const reqs = await db
+    .select({
+      requestId: requests.id,
+      requestType: requests.requestType,
+      continuityType: requests.continuityType,
+      priority: requests.priority,
+      workingPriority: requests.workingPriority,
+      status: requests.status,
+      submittedAt: requests.submittedAt,
+      decidedAt: requests.decidedAt,
+      comment: requests.comment,
+      decisionNote: requests.decisionNote,
+    })
+    .from(requests)
+    .where(eq(requests.employeeId, employeeId))
+    .orderBy(desc(requests.submittedAt));
+
+  const withDates = await Promise.all(
+    reqs.map(async (r) => {
+      const dates = await db!
+        .select({ date: requestDates.date })
+        .from(requestDates)
+        .where(eq(requestDates.requestId, r.requestId))
+        .orderBy(requestDates.date);
+      return {
+        ...r,
+        submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : String(r.submittedAt),
+        decidedAt: r.decidedAt instanceof Date ? r.decidedAt.toISOString() : (r.decidedAt ? String(r.decidedAt) : null),
+        dates: dates.map(d => d.date instanceof Date ? d.date.toISOString().split("T")[0] : String(d.date).split("T")[0]),
+      };
+    })
+  );
+
+  const e = emp[0];
+  return {
+    employee: {
+      id: e.id, firstName: e.firstName, lastName: e.lastName, email: e.email,
+      employeeNumber: e.employeeNumber, shift: e.shift,
+      seniorityDate: e.seniorityDate instanceof Date ? e.seniorityDate.toISOString().split("T")[0] : String(e.seniorityDate).split("T")[0],
+      role: e.role,
+    },
+    requests: withDates,
+  };
+}

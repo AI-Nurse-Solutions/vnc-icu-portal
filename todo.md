@@ -362,3 +362,14 @@
 - [x] Stats bar: approved/pending/denied counts per selected date
 - [x] Wire route /dashboard/admin/decision-board in Dashboard.tsx
 - [x] Add to admin sidebar nav (Decision Board — top of Administration section)
+
+## Admin Landing Page for Request Management (May 21, 2026)
+- [x] DB helpers: getRecentRequestsForAdmin, getPendingDecisionDates, getRequestorHistory
+- [x] tRPC procedures: adminLanding.getRecentRequests, adminLanding.getPendingDates, adminLanding.getRequestorHistory, adminLanding.sendMessageToSuperadmin
+- [x] Section A: Recent Requests table (name, shift, dates, type, submission date, status) with clickable dates
+- [x] Section B: Pending Decision Dates list (date, shift, pending count, type, slot usage, over-cap flag)
+- [x] Date/Shift Detail modal: shift tabs, slot usage indicator, education section, vacation seniority list, approval cap line, approve/deny buttons, denial note
+- [x] Requestor History modal: summary stats, full request history with expand/collapse
+- [x] Admin-to-Superadmin message box at bottom of landing page
+- [x] Wire /dashboard/admin/landing route in Dashboard.tsx and sidebar nav
+- [x] Tests for new procedures (covered by existing 19/19 test suite)
