@@ -460,15 +460,4 @@ export const managerToolsRouter = router({
       return getAuditLogWithActors(input);
     }),
 
-  // Temporary diagnostic: expose raw DB error for getDecisionCalendarMonth
-  dbDiag: publicProcedure
-    .input(z.object({ year: z.number(), month: z.number() }))
-    .query(async ({ input }) => {
-      try {
-        const rows = await getDecisionCalendarMonth(input.year, input.month);
-        return { ok: true, rowCount: rows.length, error: null };
-      } catch (e: any) {
-        return { ok: false, rowCount: 0, error: String(e?.cause?.message || e?.message || e) };
-      }
-    }),
 });
