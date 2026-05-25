@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,19 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   Loader2, Mail, Lock, ArrowRight, HeartPulse,
-  User, ChevronDown
+  User, ChevronDown, AlertTriangle, X
 } from "lucide-react";
+
+function detectBrowserWarning(): string | null {
+  const ua = navigator.userAgent;
+  const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua) && !/Chromium/.test(ua);
+  const isFirefox = /Firefox/.test(ua);
+  const isBrave = typeof (navigator as unknown as { brave?: unknown }).brave !== "undefined";
+  if (isBrave) return "Brave browser detected. Please set Shields to Standard (or disable for this site) to allow session cookies.";
+  if (isSafari) return "Safari users: if login fails, go to Settings → Safari → Privacy and disable \"Prevent Cross-Site Tracking\", or use Chrome/Firefox.";
+  if (isFirefox) return "Firefox users: if login fails, click the shield icon in the address bar and disable Enhanced Tracking Protection for this site.";
+  return null;
+}
 
 type Tab = "signin" | "signup";
 
@@ -22,6 +33,9 @@ export default function Login() {
   const [, navigate] = useLocation();
   const [tab, setTab] = useState<Tab>("signin");
   const utils = trpc.useUtils();
+  const [browserWarning, setBrowserWarning] = useState<string | null>(null);
+  const [warningDismissed, setWarningDismissed] = useState(false);
+  useEffect(() => { setBrowserWarning(detectBrowserWarning()); }, []);
 
   // ── Sign In state ──────────────────────────────────────────────────────────
   const [email, setEmail] = useState("");
@@ -85,6 +99,20 @@ export default function Login() {
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom_right,oklch(0.68_0.15_200/5%)_0%,transparent_50%)] pointer-events-none" />
 
       <div className="w-full max-w-md px-4 animate-fade-in">
+        {/* Browser compatibility warning */}
+        {browserWarning && !warningDismissed && (
+          <div className="mb-4 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 text-sm">
+            <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+            <span className="text-amber-200 flex-1 leading-relaxed">{browserWarning}</span>
+            <button
+              onClick={() => setWarningDismissed(true)}
+              className="text-amber-400/60 hover:text-amber-400 shrink-0 ml-1 mt-0.5"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 mb-4 shadow-[0_0_30px_oklch(0.68_0.15_200/20%)]">
