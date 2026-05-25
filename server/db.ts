@@ -20,6 +20,8 @@ import {
   type InsertRequestDateDecision,
   type InsertSubmissionDeadline,
   type InsertUser,
+  adminMessages,
+  type AdminMessage,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1136,4 +1138,86 @@ export async function getRequestorHistory(employeeId: number) {
     },
     requests: withDates,
   };
+}
+
+// ─── Admin Messages (Admin → Super Admin Inbox) ───────────────────────────────
+export async function saveAdminMessage(data: {
+  fromEmployeeId: number;
+  subject: string;
+  body: string;
+  isUrgent?: boolean;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  const result = await db.insert(adminMessages).values({
+    fromEmployeeId: data.fromEmployeeId,
+    subject: data.subject,
+    body: data.body,
+    isUrgent: data.isUrgent ?? false,
+  });
+  return (result as any)[0].insertId as number;
+}
+
+export async function getInboxMessages(): Promise<(AdminMessage & {
+  fromFirstName: string;
+  fromLastName: string;
+  fromShift: string;
+  fromRole: string;
+})[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: adminMessages.id,
+      fromEmployeeId: adminMessages.fromEmployeeId,
+      subject: adminMessages.subject,
+      body: adminMessages.body,
+      isRead: adminMessages.isRead,
+      readAt: adminMessages.readAt,
+      replyBody: adminMessages.replyBody,
+      repliedAt: adminMessages.repliedAt,
+      repliedBy: adminMessages.repliedBy,
+      isUrgent: adminMessages.isUrgent,
+      createdAt: adminMessages.createdAt,
+      fromFirstName: employees.firstName,
+      fromLastName: employees.lastName,
+      fromShift: employees.shift,
+      fromRole: employees.role,
+    })
+    .from(adminMessages)
+    .leftJoin(employees, eq(adminMessages.fromEmployeeId, employees.id))
+    .orderBy(desc(adminMessages.createdAt));
+  return rows as any;
+}
+
+export async function markMessageRead(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(adminMessages)
+    .set({ isRead: true, readAt: new Date() })
+    .where(eq(adminMessages.id, id));
+}
+
+export async function replyToMessage(id: number, replyBody: string, repliedBy: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.update(adminMessages)
+    .set({ replyBody, repliedAt: new Date(), repliedBy, isRead: true, readAt: new Date() })
+    .where(eq(adminMessages.id, id));
+}
+
+export async function deleteAdminMessage(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.delete(adminMessages).where(eq(adminMessages.id, id));
+}
+
+export async function getUnreadMessageCount(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(adminMessages)
+    .where(eq(adminMessages.isRead, false));
+  return rows[0]?.count ?? 0;
 }

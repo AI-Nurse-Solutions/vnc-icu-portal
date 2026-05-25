@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   Calendar, CalendarDays, ClipboardList, Settings, Users, FileDown,
   LogOut, HeartPulse, BarChart3, Shield, Menu, X, Bell,
-  Star, Sun, Moon, CheckCircle2, MessageSquare
+  Star, Sun, Moon, CheckCircle2, MessageSquare, Inbox
 } from "lucide-react";
 import { useState } from "react";
 import MyRequests from "./employee/MyRequests";
@@ -28,6 +28,7 @@ import DecisionBoard from "./admin/DecisionBoard";
 import AdminLanding from "./admin/AdminLanding";
 import MessageSuperAdmin from "./admin/MessageSuperAdmin";
 import AdminAnnouncements from "./admin/AdminAnnouncements";
+import SuperAdminInbox from "./superadmin/SuperAdminInbox";
 import MyPortal from "./employee/MyPortal";
 
 /** Guard component — shows "Access Denied" if the user lacks the required role */
@@ -185,6 +186,7 @@ export default function Dashboard() {
   ];
 
   const superAdminNav = [
+    { href: "/dashboard/superadmin/inbox", label: "Admin Inbox", icon: Inbox },
     { href: "/dashboard/superadmin/add-dates", label: "Add Dates on Behalf", icon: Star },
   ];
 
@@ -199,6 +201,7 @@ export default function Dashboard() {
     "/dashboard/admin/employees", "/dashboard/admin/import", "/dashboard/admin/audit", "/dashboard/admin/announcements",
     "/dashboard/admin/message-superadmin",
     "/dashboard/superadmin/add-dates",
+    "/dashboard/superadmin/inbox",
   ];
 
   const Sidebar = ({ onClose }: { onClose?: () => void }) => (
@@ -395,6 +398,9 @@ export default function Dashboard() {
             <RoleGuard allowed={isAdmin}><MessageSuperAdmin /></RoleGuard>
           )}
           {/* ─── Super Admin ─────────────────────────────────────────────── */}
+          {location === "/dashboard/superadmin/inbox" && (
+            <RoleGuard allowed={isSuperAdmin ?? false}><SuperAdminInbox /></RoleGuard>
+          )}
           {location === "/dashboard/superadmin/add-dates" && (
             <RoleGuard allowed={isSuperAdmin ?? false}><SuperAdminDates /></RoleGuard>
           )}

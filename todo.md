@@ -373,3 +373,11 @@
 - [x] Admin-to-Superadmin message box at bottom of landing page
 - [x] Wire /dashboard/admin/landing route in Dashboard.tsx and sidebar nav
 - [x] Tests for new procedures (covered by existing 19/19 test suite)
+
+## Super Admin Inbox (May 25, 2026)
+- [ ] admin_messages table in drizzle schema + migration
+- [ ] DB helpers: saveAdminMessage, getInboxMessages, markMessageRead, saveReply
+- [ ] Update sendMessageToSuperadmin to persist to DB
+- [ ] tRPC inbox router: list, markRead, reply, deleteMessage
+- [ ] SuperAdminInbox React page: message list with unread badge, detail panel, reply form
+- [ ] Wire /dashboard/superadmin/inbox in Dashboard.tsx sidebar

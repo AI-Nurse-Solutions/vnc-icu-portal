@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `admin_messages` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`from_employee_id` int NOT NULL,\n\t`subject` varchar(200) NOT NULL,\n\t`body` text NOT NULL,\n\t`is_read` boolean NOT NULL DEFAULT false,\n\t`read_at` timestamp,\n\t`reply_body` text,\n\t`replied_at` timestamp,\n\t`replied_by` int,\n\t`is_urgent` boolean NOT NULL DEFAULT false,\n\t`created_at` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `admin_messages_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ya87wqF7ZWNWxEH.1126fdfe9484 --database 8TTpjTbwNRkm8QcJp9ko4t --execute CREATE TABLE `admin_messages` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`from_employee_id` int NOT NULL,\n\t`subject` varchar(200) NOT NULL,\n\t`body` text NOT NULL,\n\t`is_read` boolean NOT NULL DEFAULT false,\n\t`read_at` timestamp,\n\t`reply_body` text,\n\t`replied_at` timestamp,\n\t`replied_by` int,\n\t`is_urgent` boolean NOT NULL DEFAULT false,\n\t`created_at` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `admin_messages_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3042
+}

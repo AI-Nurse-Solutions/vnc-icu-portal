@@ -174,3 +174,21 @@ export const users = mysqlTable("users", {
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+// ─── Admin → Super Admin Messages ────────────────────────────────────────────
+export const adminMessages = mysqlTable("admin_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  fromEmployeeId: int("from_employee_id").notNull(),
+  subject: varchar("subject", { length: 200 }).notNull(),
+  body: text("body").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  replyBody: text("reply_body"),
+  repliedAt: timestamp("replied_at"),
+  repliedBy: int("replied_by"),
+  isUrgent: boolean("is_urgent").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AdminMessage = typeof adminMessages.$inferSelect;
+export type InsertAdminMessage = typeof adminMessages.$inferInsert;
