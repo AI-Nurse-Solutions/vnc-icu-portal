@@ -381,3 +381,21 @@
 - [ ] tRPC inbox router: list, markRead, reply, deleteMessage
 - [ ] SuperAdminInbox React page: message list with unread badge, detail panel, reply form
 - [ ] Wire /dashboard/superadmin/inbox in Dashboard.tsx sidebar
+
+## Super Admin Inbox (May 25, 2026) — COMPLETED
+- [x] admin_messages table in drizzle schema + migration
+- [x] DB helpers: saveAdminMessage, getInboxMessages, markMessageRead, saveReply
+- [x] Update sendMessageToSuperadmin to persist to DB
+- [x] tRPC inbox router: list, markRead, reply, deleteMessage
+- [x] SuperAdminInbox React page: message list with unread badge, detail panel, reply form
+- [x] Wire /dashboard/superadmin/inbox in Dashboard.tsx sidebar
+
+## Daily Automated Backup to GitHub (May 25, 2026)
+- [x] Create private GitHub repo: AI-Nurse-Solutions/vnc-icu-portal-backup
+- [x] Write server/backup.ts: dumpDatabase (mysqldump .sql.gz), exportAuditLog (.json), exportCodeSnapshot (git diff .txt), cloneOrPullBackupRepo, commitAndPush, runDailyBackup
+- [x] Fix TiDB Cloud compatibility: remove --single-transaction (uses SAVEPOINTs not supported by TiDB), add --no-tablespaces
+- [x] Install node-cron (v4.2.1) and wire cron.schedule("0 2 * * *", runDailyBackup) in server/_core/index.ts
+- [x] Store GITHUB_BACKUP_TOKEN as server secret
+- [x] Write server/backup.test.ts: validates token + GitHub API access to backup repo
+- [x] Live end-to-end test: 0.84 MB DB dump, 14 audit rows, code snapshot — all committed and pushed to backup repo
+- [x] 20/20 tests passing

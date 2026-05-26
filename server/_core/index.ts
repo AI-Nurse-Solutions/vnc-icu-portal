@@ -8,6 +8,8 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import cron from "node-cron";
+import { runDailyBackup } from "../backup";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -69,3 +71,14 @@ async function startServer() {
 }
 
 startServer().catch(console.error);
+
+// ── Daily Backup Cron ──────────────────────────────────────────────────────
+// Runs at 2:00 AM Pacific (America/Los_Angeles handles PST/PDT automatically).
+cron.schedule("0 2 * * *", async () => {
+  console.log("[Backup] Cron triggered — starting daily backup");
+  const result = await runDailyBackup();
+  if (!result.success) {
+    console.error("[Backup] FAILED:", result.message);
+  }
+}, { timezone: "America/Los_Angeles" });
+console.log("[Backup] Daily backup cron scheduled for 2:00 AM Pacific");
