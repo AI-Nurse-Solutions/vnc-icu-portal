@@ -260,6 +260,14 @@ function DateDetailModal({
                             >
                               {r.lastName}, {r.firstName}
                             </button>
+                            {r.unitSeniorityRank != null && (
+                              <span
+                                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-900/50 text-violet-300 border border-violet-700/40 shrink-0"
+                                title={`Unit-wide seniority rank: #${r.unitSeniorityRank} across all active ICU staff`}
+                              >
+                                SR#{r.unitSeniorityRank}
+                              </span>
+                            )}
                             <PriorityBadge wp={r.workingPriority} p={r.priority} />
                             <StatusBadge status={r.dateDecision ?? "pending"} />
                             {r.summerShutout && (

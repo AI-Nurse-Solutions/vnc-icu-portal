@@ -89,6 +89,10 @@ export default function Dashboard() {
     if (!isLoading && employee && (isAdmin || isSuperAdmin) && location === "/dashboard") {
       navigate("/dashboard/admin/landing");
     }
+    // Redirect managers to review page by default
+    if (!isLoading && employee && isManager && !isAdmin && !isSuperAdmin && location === "/dashboard") {
+      navigate("/dashboard/manager/review");
+    }
   }, [isLoading, employee, isAdmin, isSuperAdmin, location]);
 
   if (isLoading) {
@@ -158,7 +162,7 @@ export default function Dashboard() {
   }
 
   const employeeNav = [
-    { href: "/dashboard", label: "Calendar View", icon: Calendar },
+    { href: "/dashboard/shift-demand-calendar", label: "Shift Demand Calendar", icon: Calendar },
     { href: "/dashboard/my-requests", label: "My Requests", icon: ClipboardList },
     { href: "/dashboard/new-request", label: "New Request", icon: Bell },
   ];
@@ -192,7 +196,7 @@ export default function Dashboard() {
 
   // All known routes for "not found" fallback
   const allRoutes = [
-    "/dashboard", "/dashboard/my-requests", "/dashboard/new-request",
+    "/dashboard", "/dashboard/shift-demand-calendar", "/dashboard/my-requests", "/dashboard/new-request",
     "/dashboard/manager/review", "/dashboard/manager/export", "/dashboard/manager/policy",
     "/dashboard/tools/audit-log",
     "/dashboard/admin/landing",
@@ -356,7 +360,7 @@ export default function Dashboard() {
 
         {/* Page content — routes use location directly for reliable matching */}
         <main className="flex-1 overflow-y-auto">
-          {location === "/dashboard" && <CalendarView />}
+          {(location === "/dashboard" || location === "/dashboard/shift-demand-calendar") && <CalendarView />}
           {location === "/dashboard/my-requests" && <MyRequests />}
           {location === "/dashboard/new-request" && <NewRequest />}
           {location === "/dashboard/manager/review" && (

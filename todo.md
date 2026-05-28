@@ -408,3 +408,9 @@
 - [x] Add footer values "Transparency · Fairness · Staff Satisfaction built in." to Admin Landing
 - [x] Update WP section in guide: WP is human-reviewed every 6 months by pre-processing staff
 - [x] Document P5 as form default (may indicate priority was not set)
+
+## Bug Fixes (May 28, 2026)
+
+- [x] Fix seniority rank display in Admin Landing decision modal — now shows both date-rank (#N) and unit-wide SR badge (SR#M) next to each employee name
+- [x] Fix calendar nav not accessible to admin/manager — changed "Calendar View" nav link from /dashboard to /dashboard/shift-demand-calendar; added dedicated route in main content block; admins/managers no longer get redirect-looped when clicking the calendar nav item
+- [x] Redirect managers to /dashboard/manager/review by default (instead of /dashboard which caused redirect confusion)
