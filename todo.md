@@ -399,3 +399,12 @@
 - [x] Write server/backup.test.ts: validates token + GitHub API access to backup repo
 - [x] Live end-to-end test: 0.84 MB DB dump, 14 audit rows, code snapshot — all committed and pushed to backup repo
 - [x] 20/20 tests passing
+
+## Decision Cheat Sheet & Manager Guide (May 28, 2026)
+
+- [x] Build standalone HTML manager guide with clickable TOC at /manager-guide.html
+- [x] Add color-coded decision cheat sheet box (§3 + §4) to top of Admin Landing page
+- [x] Add "Learn more" link pointing to /manager-guide.html
+- [x] Add footer values "Transparency · Fairness · Staff Satisfaction built in." to Admin Landing
+- [x] Update WP section in guide: WP is human-reviewed every 6 months by pre-processing staff
+- [x] Document P5 as form default (may indicate priority was not set)

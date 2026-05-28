@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manager Decision Guide — VNC ICU Portal</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar TOC ──────────────────────────────────────────────── */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: #0b1120;
+      border-right: 1px solid #1e293b;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 28px 0 40px;
+    }
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #1e293b;
+      margin-bottom: 16px;
+    }
+    .sidebar-logo .unit { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .sidebar-logo .title { font-size: 14px; font-weight: 700; color: #06b6d4; }
+    .toc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #475569; padding: 0 20px 8px; }
+    .toc-list { list-style: none; }
+    .toc-list li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 13px;
+      color: #94a3b8;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all .15s;
+    }
+    .toc-list li a:hover { color: #e2e8f0; background: #1e293b; }
+    .toc-list li a.active { color: #06b6d4; border-left-color: #06b6d4; background: #0e2233; }
+    .toc-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    /* section color dots */
+    .dot-1 { background: #06b6d4; }   /* teal */
+    .dot-2 { background: #8b5cf6; }   /* violet */
+    .dot-3 { background: #f59e0b; }   /* amber */
+    .dot-4 { background: #10b981; }   /* emerald */
+    .dot-5 { background: #f97316; }   /* orange */
+    .dot-6 { background: #ec4899; }   /* pink */
+    .dot-7 { background: #3b82f6; }   /* blue */
+    .dot-8 { background: #ef4444; }   /* red */
+    .dot-9 { background: #a3e635; }   /* lime */
+
+    /* ── Main Content ─────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      max-width: 860px;
+      padding: 48px 48px 80px;
+    }
+
+    /* ── Page Header ──────────────────────────────────────────────── */
+    .page-header {
+      margin-bottom: 48px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: #f1f5f9; margin-bottom: 6px; }
+    .page-header .meta { font-size: 13px; color: #64748b; }
+    .page-header .meta span { margin-right: 16px; }
+
+    /* ── Section Headers ──────────────────────────────────────────── */
+    .section {
+      margin-bottom: 56px;
+      scroll-margin-top: 24px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-number {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .section h2 { font-size: 19px; font-weight: 700; color: #f1f5f9; }
+
+    /* Section accent colors */
+    .s1 .section-number { background: #0e4a5a; color: #06b6d4; }
+    .s2 .section-number { background: #2e1065; color: #a78bfa; }
+    .s3 .section-number { background: #451a03; color: #fbbf24; }
+    .s4 .section-number { background: #052e16; color: #34d399; }
+    .s5 .section-number { background: #431407; color: #fb923c; }
+    .s6 .section-number { background: #500724; color: #f472b6; }
+    .s7 .section-number { background: #172554; color: #60a5fa; }
+    .s8 .section-number { background: #450a0a; color: #f87171; }
+    .s9 .section-number { background: #1a2e05; color: #bef264; }
+
+    .s1 h2 { color: #06b6d4; }
+    .s2 h2 { color: #a78bfa; }
+    .s3 h2 { color: #fbbf24; }
+    .s4 h2 { color: #34d399; }
+    .s5 h2 { color: #fb923c; }
+    .s6 h2 { color: #f472b6; }
+    .s7 h2 { color: #60a5fa; }
+    .s8 h2 { color: #f87171; }
+    .s9 h2 { color: #bef264; }
+
+    /* ── Typography ───────────────────────────────────────────────── */
+    p { margin-bottom: 14px; color: #cbd5e1; }
+    strong { color: #f1f5f9; }
+    h3 { font-size: 15px; font-weight: 700; color: #e2e8f0; margin: 24px 0 10px; }
+    h4 { font-size: 14px; font-weight: 600; color: #94a3b8; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .05em; }
+
+    /* ── Tables ───────────────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+    th { background: #1e293b; color: #94a3b8; font-weight: 600; text-align: left; padding: 10px 14px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+    td { padding: 10px 14px; border-bottom: 1px solid #1e293b; color: #cbd5e1; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1a2744; }
+
+    /* ── Rule Cards (Section 3) ───────────────────────────────────── */
+    .rule-card {
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      border-left: 4px solid;
+    }
+    .rule-card .rule-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .rule-card .rule-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .rule-card p { margin: 0; font-size: 14px; color: #94a3b8; }
+    .rule-1 { background: #0e2233; border-color: #06b6d4; }
+    .rule-1 .rule-label { color: #06b6d4; }
+    .rule-1 .rule-title { color: #e0f7fa; }
+    .rule-2 { background: #1a1040; border-color: #8b5cf6; }
+    .rule-2 .rule-label { color: #a78bfa; }
+    .rule-2 .rule-title { color: #ede9fe; }
+    .rule-3 { background: #1c1200; border-color: #f59e0b; }
+    .rule-3 .rule-label { color: #fbbf24; }
+    .rule-3 .rule-title { color: #fef3c7; }
+    .rule-tie { background: #1e293b; border-color: #475569; }
+    .rule-tie .rule-label { color: #94a3b8; }
+    .rule-tie .rule-title { color: #e2e8f0; }
+
+    /* ── Path Cards (Section 4) ───────────────────────────────────── */
+    .path-card {
+      background: #111827;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .path-card .path-tag {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+      padding: 3px 10px; border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .path-card h3 { margin: 0 0 12px; font-size: 15px; }
+    .path-card ol { padding-left: 20px; color: #94a3b8; font-size: 14px; }
+    .path-card ol li { margin-bottom: 6px; }
+    .path-card ol li strong { color: #e2e8f0; }
+    .path-1 .path-tag { background: #0e4a5a; color: #06b6d4; }
+    .path-2 .path-tag { background: #052e16; color: #34d399; }
+    .path-3 .path-tag { background: #2e1065; color: #a78bfa; }
+
+    /* ── Step List (Section 6) ────────────────────────────────────── */
+    .step-list { list-style: none; counter-reset: steps; }
+    .step-list li {
+      counter-increment: steps;
+      display: flex; gap: 16px;
+      margin-bottom: 20px;
+      align-items: flex-start;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      background: #1e293b;
+      color: #f472b6;
+      font-weight: 800; font-size: 13px;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .step-list li .step-body { flex: 1; }
+    .step-list li .step-title { font-weight: 700; color: #f1f5f9; font-size: 14px; margin-bottom: 4px; }
+    .step-list li p { margin: 0; font-size: 14px; }
+
+    /* ── Badge Chips ──────────────────────────────────────────────── */
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .badge-wp1 { background: #0e4a5a; color: #06b6d4; }
+    .badge-wp2 { background: #0c2a4a; color: #38bdf8; }
+    .badge-wp34 { background: #1e1b4b; color: #818cf8; }
+    .badge-wp5 { background: #1e293b; color: #94a3b8; }
+    .badge-approved { background: #052e16; color: #34d399; }
+    .badge-denied { background: #450a0a; color: #f87171; }
+    .badge-pending { background: #451a03; color: #fbbf24; }
+
+    /* ── Callout Box ──────────────────────────────────────────────── */
+    .callout {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 14px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-info { background: #0e2233; border: 1px solid #0e4a5a; color: #7dd3fc; }
+    .callout-warn { background: #1c1200; border: 1px solid #78350f; color: #fcd34d; }
+    .callout-tip  { background: #052e16; border: 1px solid #14532d; color: #6ee7b7; }
+
+    /* ── Blockquote ───────────────────────────────────────────────── */
+    blockquote {
+      border-left: 3px solid #f472b6;
+      background: #1a0a14;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 14px;
+      color: #f9a8d4;
+      font-style: italic;
+    }
+
+    /* ── Ordered / Unordered Lists ────────────────────────────────── */
+    ol, ul { padding-left: 22px; margin-bottom: 14px; color: #94a3b8; font-size: 14px; }
+    ol li, ul li { margin-bottom: 6px; }
+    ol li strong, ul li strong { color: #e2e8f0; }
+
+    /* ── Checklist Table ──────────────────────────────────────────── */
+    .checklist-table td:first-child { width: 36px; text-align: center; font-weight: 700; color: #34d399; }
+    .checklist-table td:nth-child(3) { font-size: 13px; color: #64748b; }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    .page-footer {
+      margin-top: 64px;
+      padding-top: 28px;
+      border-top: 1px solid #1e293b;
+      text-align: center;
+    }
+    .page-footer .values {
+      font-size: 13px;
+      color: #475569;
+      letter-spacing: .04em;
+    }
+    .page-footer .values span { margin: 0 8px; }
+    .page-footer .values .dot-sep { color: #06b6d4; }
+    .page-footer .meta { font-size: 12px; color: #334155; margin-top: 8px; }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { padding: 24px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar TOC ──────────────────────────────────────────────── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="unit">VNC ICU · Van Ness Campus</div>
+      <div class="title">Manager Decision Guide</div>
+    </div>
+    <div class="toc-label">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#s1"><span class="toc-dot dot-1"></span>1. Where to Begin</a></li>
+      <li><a href="#s2"><span class="toc-dot dot-2"></span>2. Understanding the Data</a></li>
+      <li><a href="#s3"><span class="toc-dot dot-3"></span>3. Three-Rule Framework</a></li>
+      <li><a href="#s4"><span class="toc-dot dot-4"></span>4. Approve / Deny Navigation</a></li>
+      <li><a href="#s5"><span class="toc-dot dot-5"></span>5. Holiday Submissions</a></li>
+      <li><a href="#s6"><span class="toc-dot dot-6"></span>6. Closing Submission Windows</a></li>
+      <li><a href="#s7"><span class="toc-dot dot-7"></span>7. Governance Process</a></li>
+      <li><a href="#s8"><span class="toc-dot dot-8"></span>8. Escalation to Super Admin</a></li>
+      <li><a href="#s9"><span class="toc-dot dot-9"></span>9. Related Topics</a></li>
+      <li><a href="#checklist"><span class="toc-dot" style="background:#34d399"></span>Quick Checklist</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Main ─────────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <div class="page-header">
+      <h1>Manager Decision Guide</h1>
+      <div class="meta">
+        <span>VNC ICU · Van Ness Campus · Critical Care Unit</span>
+        <span>2026 Vacation Cycle</span>
+        <span>For: Charge Nurses, Managers &amp; Admins</span>
+      </div>
+    </div>
+
+    <!-- ── Section 1 ──────────────────────────────────────────────── -->
+    <section class="section s1" id="s1">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <h2>Where to Begin After Login</h2>
+      </div>
+      <p>When an admin or manager logs in, the portal redirects automatically to the <strong>Admin Landing Page</strong> (<code>/dashboard/admin/landing</code>). This page is the primary action queue and the correct starting point for every decision session.</p>
+      <table>
+        <thead><tr><th>Section</th><th>What It Shows</th><th>Primary Action</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A — Recent Requests</strong></td><td>The 30 most recently submitted requests across all shifts, sorted by submission timestamp</td><td>Click any date to open the Date/Shift Detail modal</td></tr>
+          <tr><td><strong>B — Pending Decision Dates</strong></td><td>All future dates with at least one undecided request, sorted chronologically with slot usage and over-cap flags</td><td>Click any row to drill into the shift-level detail</td></tr>
+        </tbody>
+      </table>
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <span><strong>Do not begin approvals from the employee-facing calendar.</strong> That view is read-only for employees and does not surface the decision controls. All approval actions are performed from the Admin Landing Page or the Decision Board.</span>
+      </div>
+    </section>
+
+    <!-- ── Section 2 ──────────────────────────────────────────────── -->
+    <section class="section s2" id="s2">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <h2>Understanding the Data Before You Decide</h2>
+      </div>
+      <p>Before approving or denying any request, a manager must read three pieces of information that the portal surfaces on every decision row.</p>
+
+      <h3>2.1 Working Priority (WP)</h3>
+      <p>Working Priority is a <strong>manually recalculated rank</strong> assigned by the pre-processing staff — not an automated system output. Every six months, the pre-processing team reviews all submitted requests, applies the five priority rules, and imports the resulting WP values into the portal. Between recalculation cycles, the portal falls back to the employee's self-reported Priority (P) value. WP is therefore a human-reviewed, deliberate override of the raw submission data, and managers should treat it as the authoritative ranking signal when it is present.</p>
+      <p>When no WP has been assigned (i.e., the request was submitted after the most recent pre-season computation), the portal displays the employee's self-reported P value instead. In that case, apply the standard three-rule framework using P as the ranking input.</p>
+
+      <table>
+        <thead><tr><th>Badge</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-wp1">WP1</span></td><td>Employee's top-ranked request; highest claim on the date</td></tr>
+          <tr><td><span class="badge badge-wp2">WP2</span></td><td>Second-ranked request</td></tr>
+          <tr><td><span class="badge badge-wp34">WP3–4</span></td><td>Mid-tier requests</td></tr>
+          <tr><td><span class="badge badge-wp5">WP5+</span></td><td>Lower-ranked; employee has higher-priority requests already in the system</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ️</span>
+        <span><strong>P5 is the form default.</strong> Priority 5 is pre-filled on the New Request submission form. A P5 submission may mean the employee never set a preference — not that they ranked the request fifth. Pre-processing staff treat a lone P5 as WP1. Do not penalize a P5 request solely because of the number.</span>
+      </div>
+
+      <h3>2.2 Seniority Rank (SR)</h3>
+      <p>Seniority Rank is the unit-wide rank of the employee by their official seniority date (earliest date = most senior = rank 1). When two requests share the same Working Priority on the same date, the more senior employee (lower SR number) takes precedence.</p>
+
+      <h3>2.3 Slot Usage and the 8-Person Cap</h3>
+      <p>Each shift (AM, PM, NOC) has a <strong>hard ceiling of 8 approved vacation slots per calendar day</strong>. The portal displays slot usage as a fraction (e.g., <code>5 / 8</code>) on every date row. Approving a ninth request requires a deliberate override and must be documented with a decision note.</p>
+
+      <h3>2.4 Summer 14-Day Consecutive Cap</h3>
+      <p>For July and August, dates beyond day 14 of a consecutive vacation run are flagged amber. These dates are not automatically denied — the admin retains full Approve / Deny / Clear authority — but the flag requires explicit manager judgment.</p>
+    </section>
+
+    <!-- ── Section 3 ──────────────────────────────────────────────── -->
+    <section class="section s3" id="s3">
+      <div class="section-header">
+        <div class="section-number">3</div>
+        <h2>The Three-Rule Decision Framework</h2>
+      </div>
+      <p>Every approval decision follows a strict three-rule hierarchy. Apply the rules in order; only move to the next rule if the current one does not produce a clear winner. <strong>This rubric makes more than 90% of first-choice approvals possible.</strong></p>
+
+      <div class="rule-card rule-1">
+        <div class="rule-label">Rule 1 — Applied First</div>
+        <div class="rule-title">Working Priority</div>
+        <p>The request with the lowest WP number (WP1 beats WP2, WP2 beats WP3, etc.) is approved first. This rule resolves the majority of decisions without ambiguity.</p>
+      </div>
+
+      <div class="rule-card rule-2">
+        <div class="rule-label">Rule 2 — Tiebreaker</div>
+        <div class="rule-title">Seniority Date</div>
+        <p>When two requests share the same Working Priority on the same date, the employee with the earlier seniority date is approved. The portal displays the SR rank next to each name for immediate comparison.</p>
+      </div>
+
+      <div class="rule-card rule-3">
+        <div class="rule-label">Rule 3 — Soft Yield</div>
+        <div class="rule-title">21-Day Ceiling Yield</div>
+        <p>When an employee has already accumulated 21 or more approved vacation days in a period (Period A = Jan–Jun, Period B = Jul–Dec), their Priority 2 and above requests should yield to employees who have not yet reached 21 days, even if seniority would otherwise favor them. This is a soft yield — the manager makes the final call.</p>
+      </div>
+
+      <div class="rule-card rule-tie">
+        <div class="rule-label">Ties &amp; Gray Areas</div>
+        <div class="rule-title">Manual Admin Resolution</div>
+        <p>The portal does not auto-approve. Every decision is a human action with a full audit trail. Ties and gray areas are resolved manually by the admin.</p>
+      </div>
+    </section>
+
+    <!-- ── Section 4 ──────────────────────────────────────────────── -->
+    <section class="section s4" id="s4">
+      <div class="section-header">
+        <div class="section-number">4</div>
+        <h2>Step-by-Step Approve / Deny Navigation</h2>
+      </div>
+
+      <div class="path-card path-1">
+        <span class="path-tag">Path 1</span>
+        <h3>Admin Landing Page — Daily Triage</h3>
+        <ol>
+          <li>Log in. The portal lands on the Admin Landing Page automatically.</li>
+          <li>In <strong>Section B (Pending Decision Dates)</strong>, scan for dates with the highest pending counts or over-cap flags.</li>
+          <li>Click any date row to open the <strong>Date/Shift Detail modal</strong>.</li>
+          <li>Select the shift tab (AM, PM, or NOC) to view that shift's ranked request list.</li>
+          <li>Read the WP badge, SR number, and slot usage for each row.</li>
+          <li>Click <strong>Approve</strong> or <strong>Deny</strong> on each row. For denials, enter a denial note.</li>
+          <li>The slot usage counter updates in real time. Repeat for all pending dates.</li>
+        </ol>
+      </div>
+
+      <div class="path-card path-2">
+        <span class="path-tag">Path 2</span>
+        <h3>Decision Board — Monthly Processing Runs</h3>
+        <ol>
+          <li>Navigate to <strong>Administration → Decision Board</strong> in the sidebar.</li>
+          <li>Select the target month (July 2026 – January 2027).</li>
+          <li>Select the shift tab (AM, PM, or NOC).</li>
+          <li>Left panel: all dates with per-date pending / approved / denied counts.</li>
+          <li>Click any date to load ranked request rows in the right panel.</li>
+          <li>Work top-to-bottom: Approve / Deny / Clear. The cap divider line shows the 8-person ceiling.</li>
+          <li>Summer Cap rows (amber) require an explicit decision — they will not auto-resolve.</li>
+          <li>Green checkmarks appear when all rows on a date are decided.</li>
+        </ol>
+        <div class="callout callout-tip" style="margin-top:12px">
+          <span class="callout-icon">⏱</span>
+          <span><strong>Target pace:</strong> One month per working day. The full July–December cycle should be completed within one week of the submission window closing.</span>
+        </div>
+      </div>
+
+      <div class="path-card path-3">
+        <span class="path-tag">Path 3</span>
+        <h3>Date/Shift Detail Modal — Spot Decisions from Section A</h3>
+        <ol>
+          <li>In Section A (Recent Requests), click the date link on any row.</li>
+          <li>The Date/Shift Detail modal opens pre-filtered to that date and shift.</li>
+          <li>Apply Approve / Deny / Clear as needed.</li>
+        </ol>
+      </div>
+
+      <h3>Clearing a Decision</h3>
+      <p>Every approved or denied row has a <strong>Clear</strong> (undo) button — a circular arrow icon. Use Clear when a decision was made in error or when circumstances change (e.g., a competing request is withdrawn, freeing a slot). Clearing returns the row to pending and recalculates the slot usage counter.</p>
+    </section>
+
+    <!-- ── Section 5 ──────────────────────────────────────────────── -->
+    <section class="section s5" id="s5">
+      <div class="section-header">
+        <div class="section-number">5</div>
+        <h2>Holiday and High-Demand Period Submissions</h2>
+      </div>
+      <h3>5.1 High-Demand Periods</h3>
+      <table>
+        <thead><tr><th>Period</th><th>Dates</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Summer Block</strong></td><td>July 1 – Aug 31</td><td>Subject to the 14-day consecutive cap</td></tr>
+          <tr><td><strong>Thanksgiving Week</strong></td><td>Nov 23 – Nov 29</td><td>Typically the highest single-week demand</td></tr>
+          <tr><td><strong>Winter Holiday Block</strong></td><td>Dec 20 – Jan 5</td><td>Spans two calendar years; process as a single block</td></tr>
+          <tr><td><strong>New Year's Eve / Day</strong></td><td>Dec 31 – Jan 1</td><td>Most contested 2-day window</td></tr>
+          <tr><td><strong>Memorial Day Weekend</strong></td><td>Last Mon of May ± 2 days</td><td>Long weekend premium</td></tr>
+          <tr><td><strong>Labor Day Weekend</strong></td><td>First Mon of Sep ± 2 days</td><td>Long weekend premium</td></tr>
+        </tbody>
+      </table>
+      <h3>5.2 Recommended Submission Deadlines</h3>
+      <table>
+        <thead><tr><th>Period Type</th><th>Recommended Deadline</th></tr></thead>
+        <tbody>
+          <tr><td>Summer Block</td><td>60 days before July 1 (i.e., May 1)</td></tr>
+          <tr><td>Thanksgiving Week</td><td>45 days before Nov 23 (i.e., Oct 9)</td></tr>
+          <tr><td>Winter Holiday Block</td><td>60 days before Dec 20 (i.e., Oct 21)</td></tr>
+          <tr><td>Long Weekends</td><td>30 days before the holiday</td></tr>
+        </tbody>
+      </table>
+      <h3>5.3 Blackout Dates</h3>
+      <p>Certain dates may be designated as <strong>blackout dates</strong> — days on which no vacation requests are accepted regardless of seniority or priority. Configured in <strong>Policy Settings → Blackout Dates</strong>. Common triggers: mandatory unit-wide training, Joint Commission survey windows, critically short staffing periods.</p>
+    </section>
+
+    <!-- ── Section 6 ──────────────────────────────────────────────── -->
+    <section class="section s6" id="s6">
+      <div class="section-header">
+        <div class="section-number">6</div>
+        <h2>Announcing the Close of Submission Windows</h2>
+      </div>
+      <p>Closing a submission window is a governance action, not just a system setting. It requires both a portal configuration change and a staff communication.</p>
+      <ul class="step-list">
+        <li>
+          <div class="step-body">
+            <div class="step-title">Set the Deadline in the Portal — 14 Days Before Close</div>
+            <p>Navigate to <strong>Administration → Policy Settings → Submission Deadlines</strong>. Enter the deadline date, coverage start, and coverage end. Save. The portal immediately displays the deadline to employees on the New Request form and My Portal page.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <div class="step-title">Post an Announcement — 7 Days Before Close</div>
+            <p>Navigate to <strong>Administration → Announcements</strong>. Create an announcement stating the exact deadline date and time (11:59 PM Pacific), the coverage period, and a reminder that no requests will be accepted after the deadline regardless of seniority.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <div class="step-title">Send a Direct Email — 3 Days Before Close</div>
+            <p>Use the <strong>Message Super Admin</strong> feature or your unit email distribution list to send a final reminder directly to all staff. This step is a manual manager action.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <div class="step-title">Lock the Window — On the Deadline Date</div>
+            <p>Verify in Policy Settings that the deadline is correctly recorded. The portal enforces the deadline automatically at midnight — no further action is required.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <div class="step-title">Begin the Approval Run — Within 5 Business Days of Close</div>
+            <p>Start the formal approval run using the Decision Board. The standard commitment is decisions within <strong>10 business days</strong> of the submission deadline.</p>
+          </div>
+        </li>
+      </ul>
+      <blockquote>
+        <strong>Sample Announcement:</strong> "The submission window for the Winter Holiday Block (December 20 – January 5) closes on October 21, 2026 at 11:59 PM Pacific. All requests for dates in this period must be submitted before this deadline. Decisions will be communicated by November 15, 2026."
+      </blockquote>
+    </section>
+
+    <!-- ── Section 7 ──────────────────────────────────────────────── -->
+    <section class="section s7" id="s7">
+      <div class="section-header">
+        <div class="section-number">7</div>
+        <h2>Governance Process</h2>
+      </div>
+      <h3>7.1 Who Decides</h3>
+      <table>
+        <thead><tr><th>Role</th><th>Decision Authority</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Manager / Charge Nurse</strong></td><td>Approves or denies individual date-level requests using Approve / Deny / Clear controls</td></tr>
+          <tr><td><strong>Admin (Anne Kiboi, Carol Robinson)</strong></td><td>Full access to all decision tools; can override manager decisions; manages deadlines, blackout dates, and announcements</td></tr>
+          <tr><td><strong>Super Admin (Robert Domondon)</strong></td><td>Can add dates on behalf of any employee; receives escalated messages; final authority on all disputes</td></tr>
+        </tbody>
+      </table>
+      <h3>7.2 Decision Audit Trail</h3>
+      <p>Every approve, deny, and clear action is recorded in the <strong>Audit Log</strong> with the actor's name, request ID, date, decision, and timestamp. Accessible at <strong>Administration → Audit Log</strong>. No decision can be made without leaving an audit entry — enforced at the database level.</p>
+      <h3>7.3 Decision Note Policy</h3>
+      <p>A decision note is <strong>required</strong> for any denial where the slot was available (within the 8-person cap). A decision note is <strong>strongly recommended</strong> for any approval that overrides the normal priority order. Notes are visible to the employee in their My Portal request history.</p>
+      <h3>7.4 The PM Shift as a Staffing Equalizer</h3>
+      <p>The PM shift acts as a staffing equalizer and smoother for both AM and NOC shifts. Most clinical procedures occur during the AM-PM overlap window. When reviewing PM shift requests, consider the downstream effect on AM and NOC coverage — a heavily approved PM date may require a compensating denial on an adjacent shift date.</p>
+      <h3>7.5 Ancillary &amp; Inactive Employees</h3>
+      <p>Ancillary employees are excluded from all slot counts, calendar tallies, and approval run data. Inactive employees' requests are archived and excluded from all active counts. Both exclusions are enforced automatically across all portal views.</p>
+    </section>
+
+    <!-- ── Section 8 ──────────────────────────────────────────────── -->
+    <section class="section s8" id="s8">
+      <div class="section-header">
+        <div class="section-number">8</div>
+        <h2>Escalation to Super Admin</h2>
+      </div>
+      <p>When a manager or admin encounters a situation that exceeds their decision authority — a dispute between two employees of equal seniority and priority, a request to override a blackout date, or a staffing emergency requiring an exception — the correct escalation path is the <strong>Message Super Admin</strong> feature.</p>
+      <p>Navigate to <strong>Administration → Message Super Admin</strong> in the sidebar. The message is delivered to the Super Admin inbox and simultaneously sent by email to <code>great.ai.nurses@gmail.com</code>. The Super Admin can reply directly from the inbox.</p>
+      <div class="callout callout-warn">
+        <span class="callout-icon">🚫</span>
+        <span><strong>Do not use personal email or text for escalations involving vacation decisions.</strong> The portal's messaging system creates a documented record of the escalation and the response, which is important for union compliance and grievance defense.</span>
+      </div>
+    </section>
+
+    <!-- ── Section 9 ──────────────────────────────────────────────── -->
+    <section class="section s9" id="s9">
+      <div class="section-header">
+        <div class="section-number">9</div>
+        <h2>Related Topics</h2>
+      </div>
+      <h3>9.1 Period Day Count Tracking</h3>
+      <p>Vacation usage is tracked in two periods: <strong>Period A (January–June)</strong> and <strong>Period B (July–December)</strong>. The soft ceiling is 21 days per period. Employees approaching or exceeding 21 days are flagged in the 21-Day Ceiling Tracker (<strong>Administration → 21-Day Ceiling Tracker</strong>). Review this before beginning any approval run.</p>
+      <h3>9.2 Education Requests</h3>
+      <p>Education requests do not count against the 8-person vacation cap and do not appear in the vacation seniority-ranked lists. They have their own export report under <strong>Administration → Export Data → Education Report</strong>. The approval standard is generally more permissive than vacation, subject to shift coverage requirements.</p>
+      <h3>9.3 Working Priority CSV and Pre-Season Computation</h3>
+      <p>Before the annual vacation cycle opens, the Super Admin runs a working priority computation that assigns WP values to all submitted requests. Managers do not run this computation — it is a pre-season administrative step. WP values are fixed at import time and do not change unless the Super Admin manually updates them. For mid-cycle submissions, the portal automatically assigns <code>working_priority = priority</code> at submission time.</p>
+      <h3>9.4 Weekend-3 Rotation Policy (Upcoming)</h3>
+      <p>A revised weekend rotation policy is planned: nurses will work every other two weekends (Weekend-3 pattern). When this policy goes live, the portal will add a <strong>Rotation Group</strong> field (Group A, B, or C) to each employee record. Until the policy is formally activated, weekend requests are evaluated under the standard three-rule framework.</p>
+      <h3>9.5 Daily Automated Backup</h3>
+      <p>All portal data is automatically backed up at <strong>2:00 AM Pacific every day</strong> to the private GitHub repository at <code>AI-Nurse-Solutions/vnc-icu-portal-backup</code>. This includes the full database dump, the last 24 hours of audit log entries, and a git diff summary of any code changes.</p>
+      <h3>9.6 Browser Compatibility</h3>
+      <p><strong>Safari Private Browsing, Firefox with Strict ETP, and Brave with Aggressive Shields</strong> will block the session cookie and prevent login. Staff should use Chrome or Edge in standard (non-private) browsing mode.</p>
+      <h3>9.7 Password and Account Management</h3>
+      <p>Employees can use <strong>Forgot Password</strong> on the login page to receive a reset link (expires in 60 minutes). Admins can reset any employee's password from <strong>Administration → Employees</strong>. New self-registered employees are marked <strong>Unverified</strong> until an admin sets their official employee number and seniority date.</p>
+    </section>
+
+    <!-- ── Quick Checklist ─────────────────────────────────────────── -->
+    <section class="section" id="checklist" style="scroll-margin-top:24px">
+      <div class="section-header">
+        <div class="section-number" style="background:#052e16;color:#34d399">✓</div>
+        <h2 style="color:#34d399">Quick Reference: Decision Checklist</h2>
+      </div>
+      <table class="checklist-table">
+        <thead><tr><th>#</th><th>Action</th><th>Portal Location</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Review the 21-Day Ceiling Tracker for over-limit employees</td><td>Administration → 21-Day Ceiling Tracker</td></tr>
+          <tr><td>2</td><td>Open the Decision Board and select the target month</td><td>Administration → Decision Board</td></tr>
+          <tr><td>3</td><td>For each date, read WP, SR, and slot usage before acting</td><td>Decision Board right panel</td></tr>
+          <tr><td>4</td><td>Approve WP1 requests first; apply seniority tiebreaker for ties</td><td>Decision Board row actions</td></tr>
+          <tr><td>5</td><td>Apply the 21-day yield rule for over-limit employees</td><td>Decision Board + Ceiling Tracker</td></tr>
+          <tr><td>6</td><td>Enter a denial note for all cap-available denials</td><td>Denial note field in modal</td></tr>
+          <tr><td>7</td><td>Review Summer Cap flagged rows and decide explicitly</td><td>Decision Board amber rows</td></tr>
+          <tr><td>8</td><td>Verify all dates show green checkmarks (fully decided)</td><td>Decision Board left panel</td></tr>
+          <tr><td>9</td><td>Post an announcement with decision outcomes</td><td>Administration → Announcements</td></tr>
+          <tr><td>10</td><td>Escalate any unresolved disputes to Super Admin</td><td>Administration → Message Super Admin</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Footer ──────────────────────────────────────────────────── -->
+    <footer class="page-footer">
+      <div class="values">
+        <span>Transparency</span>
+        <span class="dot-sep">·</span>
+        <span>Fairness</span>
+        <span class="dot-sep">·</span>
+        <span>Staff Satisfaction built in.</span>
+      </div>
+      <div class="meta">VNC ICU Vacation Request Portal · <a href="https://vncticuport-8ttpjtbw.manus.space" style="color:#334155">vncticuport-8ttpjtbw.manus.space</a> · 2026 Vacation Cycle</div>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // Highlight active TOC link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.toc-list a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.toc-list a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

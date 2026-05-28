@@ -475,6 +475,114 @@ export default function AdminLanding() {
         <p className="text-slate-400 text-sm mt-1">Request management overview — recent submissions and pending decisions</p>
       </div>
 
+      {/* ── Decision Cheat Sheet ─────────────────────────────────────────────── */}
+      <div className="rounded-xl border border-slate-700 bg-slate-900/80 overflow-hidden">
+        {/* Header bar */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700 bg-slate-800/60">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-cyan-400" />
+            <span className="text-sm font-bold text-slate-100">Decision Cheat Sheet</span>
+            <span className="text-xs text-slate-500 ml-1">— This rubric makes more than 90% of first-choice approvals possible</span>
+          </div>
+          <a
+            href="/manager-guide.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 underline underline-offset-2 transition-colors"
+          >
+            Learn more →
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-y md:divide-y-0 md:divide-x divide-slate-700/60">
+          {/* Left: Three-Rule Framework */}
+          <div className="p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">§3 — Three-Rule Decision Framework</p>
+            <div className="space-y-2.5">
+              {/* Rule 1 */}
+              <div className="flex gap-3 items-start rounded-lg bg-cyan-950/40 border border-cyan-800/30 px-3 py-2.5">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-900/60 flex items-center justify-center text-xs font-black text-cyan-300">1</div>
+                <div>
+                  <div className="text-xs font-bold text-cyan-300 mb-0.5">Working Priority (WP)</div>
+                  <div className="text-xs text-slate-400">Lowest WP wins. WP1 beats WP2, WP2 beats WP3. Resolves most decisions. <span className="text-slate-500 italic">WP is recalculated every 6 months by pre-processing staff.</span></div>
+                </div>
+              </div>
+              {/* Rule 2 */}
+              <div className="flex gap-3 items-start rounded-lg bg-violet-950/40 border border-violet-800/30 px-3 py-2.5">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-900/60 flex items-center justify-center text-xs font-black text-violet-300">2</div>
+                <div>
+                  <div className="text-xs font-bold text-violet-300 mb-0.5">Seniority Date (SR)</div>
+                  <div className="text-xs text-slate-400">Same WP on same date? Earlier seniority date wins. SR rank shown next to each name.</div>
+                </div>
+              </div>
+              {/* Rule 3 */}
+              <div className="flex gap-3 items-start rounded-lg bg-amber-950/40 border border-amber-800/30 px-3 py-2.5">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-900/60 flex items-center justify-center text-xs font-black text-amber-300">3</div>
+                <div>
+                  <div className="text-xs font-bold text-amber-300 mb-0.5">21-Day Ceiling Yield <span className="font-normal text-amber-600">(soft)</span></div>
+                  <div className="text-xs text-slate-400">Employee at 21+ days in a period yields P2+ requests to employees under 21 days. Manager makes the final call.</div>
+                </div>
+              </div>
+              {/* Tie */}
+              <div className="flex gap-3 items-start rounded-lg bg-slate-800/50 border border-slate-700/40 px-3 py-2.5">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-black text-slate-400">~</div>
+                <div>
+                  <div className="text-xs font-bold text-slate-300 mb-0.5">Ties &amp; Gray Areas</div>
+                  <div className="text-xs text-slate-400">Resolved manually by the admin. The portal never auto-approves. Every action leaves an audit trail.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Approve / Deny Navigation */}
+          <div className="p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">§4 — Approve / Deny Navigation</p>
+            <div className="space-y-2.5">
+              {/* Path 1 */}
+              <div className="rounded-lg bg-emerald-950/40 border border-emerald-800/30 px-3 py-2.5">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-emerald-300">Path 1 — Daily Triage</span>
+                  <span className="text-xs text-slate-500">Admin Landing → Section B</span>
+                </div>
+                <div className="text-xs text-slate-400">Scan Pending Dates for over-cap flags → click date → select shift tab → read WP + SR + slot usage → Approve or Deny each row.</div>
+              </div>
+              {/* Path 2 */}
+              <div className="rounded-lg bg-sky-950/40 border border-sky-800/30 px-3 py-2.5">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-sky-300">Path 2 — Monthly Run</span>
+                  <span className="text-xs text-slate-500">Administration → Decision Board</span>
+                </div>
+                <div className="text-xs text-slate-400">Select month + shift → work left panel date-by-date → top-to-bottom rows → cap divider at 8 → amber Summer Cap rows need explicit decision. Target: 1 month per day.</div>
+              </div>
+              {/* Path 3 */}
+              <div className="rounded-lg bg-indigo-950/40 border border-indigo-800/30 px-3 py-2.5">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-indigo-300">Path 3 — Spot Decision</span>
+                  <span className="text-xs text-slate-500">Section A → click date link</span>
+                </div>
+                <div className="text-xs text-slate-400">Opens the Date/Shift Detail modal pre-filtered to that date and shift. Use for immediate action on a specific request.</div>
+              </div>
+              {/* Clear */}
+              <div className="rounded-lg bg-slate-800/50 border border-slate-700/40 px-3 py-2.5">
+                <div className="flex items-center gap-2 mb-1">
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-xs font-bold text-slate-300">Clear / Undo</span>
+                </div>
+                <div className="text-xs text-slate-400">Every row has a Clear button. Use it when a decision was made in error or a competing request was withdrawn. Returns row to pending and recalculates slot count.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* P5 note */}
+        <div className="px-5 py-2.5 border-t border-slate-700/60 bg-slate-800/30 flex items-start gap-2">
+          <Info className="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-slate-400">
+            <span className="text-amber-300 font-semibold">P5 is the form default</span> — a P5 submission may mean the employee never set a preference, not that they ranked the request fifth. Pre-processing staff treat a lone P5 as WP1. Do not penalize a P5 request solely because of the number.
+          </p>
+        </div>
+      </div>
+
       {/* ── Section A: Recent Requests ──────────────────────────────────────── */}
       <section>
         <h2 className="text-base font-semibold text-slate-200 mb-3 flex items-center gap-2">
@@ -678,6 +786,17 @@ export default function AdminLanding() {
           onClose={() => setHistoryEmployeeId(null)}
         />
       )}
+
+      {/* ── Footer Values ─────────────────────────────────────────────── */}
+      <div className="border-t border-slate-700/50 pt-6 mt-2 text-center">
+        <p className="text-xs text-slate-500 tracking-wide">
+          <span className="text-slate-400 font-medium">Transparency</span>
+          <span className="mx-2 text-cyan-700">·</span>
+          <span className="text-slate-400 font-medium">Fairness</span>
+          <span className="mx-2 text-cyan-700">·</span>
+          <span className="text-slate-400 font-medium">Staff Satisfaction built in.</span>
+        </p>
+      </div>
     </div>
   );
 }
