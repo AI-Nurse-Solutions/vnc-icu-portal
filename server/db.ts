@@ -685,7 +685,8 @@ export async function getDecisionCalendarDay(date: string, shift?: string) {
   const whereConditions = [
     sql`${requestDates.date} = ${date}`,
     sql`${requests.status} != 'withdrawn'`,
-    eq(requests.requestType, "vacation"),
+    // Include both vacation and education requests (education does not count toward the cap)
+    sql`${requests.requestType} IN ('vacation', 'education')`,
     eq(employees.isActive, true),
     sql`COALESCE(${employees.category}, 'icu') != 'ancillary'`,
     sql`${employees.role} != 'ancillary'`,

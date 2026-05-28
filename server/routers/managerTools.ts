@@ -371,11 +371,13 @@ export const managerToolsRouter = router({
           return a.seniorityDate.localeCompare(b.seniorityDate);
         });
         // Assign ranks and cap flags.
-        // Summer shut-out rows are always excluded from the cap count and ranked last.
+        // Education requests and summer shut-out rows are excluded from the cap count.
         let capSlot = 0;
         shiftRows.forEach((r, i) => {
           r.seniorityRank = i + 1;
-          if (r.summerShutout) {
+          if (r.requestType === "education") {
+            r.overCap = false; // education never counts against the vacation cap
+          } else if (r.summerShutout) {
             r.overCap = true; // shut-out rows are always over cap
           } else {
             r.overCap = capSlot >= cap;

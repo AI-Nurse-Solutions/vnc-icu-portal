@@ -414,3 +414,7 @@
 - [x] Fix seniority rank display in Admin Landing decision modal — now shows both date-rank (#N) and unit-wide SR badge (SR#M) next to each employee name
 - [x] Fix calendar nav not accessible to admin/manager — changed "Calendar View" nav link from /dashboard to /dashboard/shift-demand-calendar; added dedicated route in main content block; admins/managers no longer get redirect-looped when clicking the calendar nav item
 - [x] Redirect managers to /dashboard/manager/review by default (instead of /dashboard which caused redirect confusion)
+
+## Bug Fix (May 28, 2026 — Education Requests in Modal)
+
+- [x] Fix education requests not showing in Admin Landing date drill-down modal — removed vacation-only filter from getDecisionCalendarDay DB helper; education requests now appear in their own section above vacation rows, do not count against the 8-person cap
