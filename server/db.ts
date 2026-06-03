@@ -1063,6 +1063,7 @@ export async function getPendingDecisionDates(startDate?: string, endDate?: stri
       employeeId: requests.employeeId,
       firstName: employees.firstName,
       lastName: employees.lastName,
+      requestStatus: requests.status,
       dateDecision: requestDateDecisions.decision,
       decidedBy: requestDateDecisions.decidedBy,
     })
@@ -1094,9 +1095,13 @@ export async function getPendingDecisionDates(startDate?: string, endDate?: stri
     }
     const g = grouped.get(key)!;
     const dec = r.dateDecision;
-    if (dec === "approved") g.approvedCount++;
+    // Treat a request as decided if it has a per-date decision row OR if the
+    // request-level status is already approved/denied (prevents phantom pending
+    // rows when the sync ran before a per-date decision was recorded).
+    const reqDecided = r.requestStatus === "approved" || r.requestStatus === "denied";
+    if (dec === "approved" || (reqDecided && !dec)) g.approvedCount++;
     else if (dec === "denied") g.deniedCount++;
-    else g.pendingCount++;
+    else if (!reqDecided) g.pendingCount++;
     if (r.requestType === "vacation") g.vacationCount++;
     else g.educationCount++;
     g.requests.push({ requestId: r.requestId, employeeId: r.employeeId, firstName: r.firstName, lastName: r.lastName, dateDecision: dec ?? null, decidedBy: r.decidedBy ?? null, requestType: r.requestType });

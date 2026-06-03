@@ -51,17 +51,25 @@ function fmtSubmitted(iso: string) {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status, decidedCount, totalDates }: { status: string; decidedCount?: number; totalDates?: number }) {
-  // Partially decided: some dates acted on but not all — override "pending" label
-  const isPartial = status === "pending" && decidedCount != null && totalDates != null && decidedCount > 0 && decidedCount < totalDates;
-
   const map: Record<string, string> = {
     pending: "bg-amber-500/20 text-amber-300 border-amber-500/30",
     approved: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
     denied: "bg-red-500/20 text-red-300 border-red-500/30",
     withdrawn: "bg-slate-500/20 text-slate-400 border-slate-500/30",
     partial: "bg-orange-500/20 text-orange-300 border-orange-500/30",
+    allDecided: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
   };
-
+  // All dates decided but request-level status still shows pending (sync lag or mixed)
+  const isAllDecided = status === "pending" && decidedCount != null && totalDates != null && totalDates > 0 && decidedCount >= totalDates;
+  // Partially decided: some dates acted on but not all
+  const isPartial = status === "pending" && decidedCount != null && totalDates != null && decidedCount > 0 && decidedCount < totalDates;
+  if (isAllDecided) {
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border ${map.allDecided}`}>
+        <span>All Dates Decided</span>
+      </span>
+    );
+  }
   if (isPartial) {
     return (
       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border ${map.partial}`}>
@@ -70,7 +78,6 @@ function StatusBadge({ status, decidedCount, totalDates }: { status: string; dec
       </span>
     );
   }
-
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${map[status] ?? map.pending}`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
