@@ -1007,6 +1007,22 @@ export async function getRecentRequestsForAdmin(limit = 30) {
         .from(requestDates)
         .where(eq(requestDates.requestId, r.requestId))
         .orderBy(requestDates.date);
+
+      // Count how many dates have been decided (approved or denied)
+      const decisionCounts = await db!
+        .select({
+          decidedCount: sql<number>`COUNT(*)`,
+          approvedCount: sql<number>`SUM(CASE WHEN ${requestDateDecisions.decision} = 'approved' THEN 1 ELSE 0 END)`,
+          deniedCount: sql<number>`SUM(CASE WHEN ${requestDateDecisions.decision} = 'denied' THEN 1 ELSE 0 END)`,
+        })
+        .from(requestDateDecisions)
+        .where(eq(requestDateDecisions.requestId, r.requestId));
+
+      const decidedCount = Number(decisionCounts[0]?.decidedCount ?? 0);
+      const approvedCount = Number(decisionCounts[0]?.approvedCount ?? 0);
+      const deniedCount = Number(decisionCounts[0]?.deniedCount ?? 0);
+      const totalDates = dates.length;
+
       return {
         ...r,
         submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : String(r.submittedAt),
@@ -1014,6 +1030,10 @@ export async function getRecentRequestsForAdmin(limit = 30) {
           date: d.date instanceof Date ? d.date.toISOString().split("T")[0] : String(d.date).split("T")[0],
           summerShutout: d.summerShutout ?? false,
         })),
+        decidedCount,
+        approvedCount,
+        deniedCount,
+        totalDates,
       };
     })
   );
@@ -1120,11 +1140,25 @@ export async function getRequestorHistory(employeeId: number) {
         .from(requestDates)
         .where(eq(requestDates.requestId, r.requestId))
         .orderBy(requestDates.date);
+
+      // Count per-date decisions for this request
+      const decisionCounts = await db!
+        .select({
+          decidedCount: sql<number>`COUNT(*)`,
+        })
+        .from(requestDateDecisions)
+        .where(eq(requestDateDecisions.requestId, r.requestId));
+
+      const decidedCount = Number(decisionCounts[0]?.decidedCount ?? 0);
+      const totalDates = dates.length;
+
       return {
         ...r,
         submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : String(r.submittedAt),
         decidedAt: r.decidedAt instanceof Date ? r.decidedAt.toISOString() : (r.decidedAt ? String(r.decidedAt) : null),
         dates: dates.map(d => d.date instanceof Date ? d.date.toISOString().split("T")[0] : String(d.date).split("T")[0]),
+        decidedCount,
+        totalDates,
       };
     })
   );

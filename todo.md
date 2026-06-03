@@ -418,3 +418,9 @@
 ## Bug Fix (May 28, 2026 — Education Requests in Modal)
 
 - [x] Fix education requests not showing in Admin Landing date drill-down modal — removed vacation-only filter from getDecisionCalendarDay DB helper; education requests now appear in their own section above vacation rows, do not count against the 8-person cap
+
+## Status Clarity UI Changes (Jun 2, 2026)
+
+- [x] Extend getRecentRequestsForAdmin to return decidedCount and totalDates per request
+- [x] Section A Recent Requests: show "X of N dates decided" compound indicator and "Partially Decided" badge
+- [x] Date drill-down modal header: add "X of N dates on this request have been decided" summary line

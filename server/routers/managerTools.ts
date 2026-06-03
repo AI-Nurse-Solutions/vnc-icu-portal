@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { COOKIE_NAME } from "../../shared/const";
 import { verifyJwt } from "../_core/jwt";
@@ -311,7 +312,26 @@ export const managerToolsRouter = router({
       const cap = 8;
       const rows = await getDecisionCalendarDay(input.date, input.shift);
 
-      // Compute working_priority server-side using the same 5 rules as the CSV script.
+      // Fetch per-request total date count and decided count for the summary line in the modal
+      const { getDb } = await import("../db");
+      const { requestDates: rdTable, requestDateDecisions: rddTable } = await import("../../drizzle/schema");
+      const db = await getDb();
+      const requestTotalsMap = new Map<number, { totalDates: number; decidedCount: number }>();
+      if (db && rows.length > 0) {
+        const uniqueRequestIds = Array.from(new Set(rows.map(r => r.requestId)));
+        await Promise.all(uniqueRequestIds.map(async (reqId) => {
+          const [totalRes, decidedRes] = await Promise.all([
+            db.select({ cnt: sql<number>`COUNT(*)` }).from(rdTable).where(eq(rdTable.requestId, reqId)),
+            db.select({ cnt: sql<number>`COUNT(*)` }).from(rddTable).where(eq(rddTable.requestId, reqId)),
+          ]);
+          requestTotalsMap.set(reqId, {
+            totalDates: Number(totalRes[0]?.cnt ?? 0),
+            decidedCount: Number(decidedRes[0]?.cnt ?? 0),
+          });
+        }));
+      }
+
+      // Compute working_priority server-side using the same 5 rules as the CSV script..
       // Group all rows by employee to determine their working_priority.
       // Note: rows here are only for this date; we need to know the employee's
       // full request set to apply the rules. We use the priority and submittedAt
@@ -351,6 +371,9 @@ export const managerToolsRouter = router({
         seniorityRank: idx + 1,
         // Over cap flag
         overCap: idx >= cap,
+        // Per-request total dates and decided count for the modal summary line
+        requestTotalDates: requestTotalsMap.get(r.requestId)?.totalDates ?? 0,
+        requestDecidedCount: requestTotalsMap.get(r.requestId)?.decidedCount ?? 0,
       }));
 
       // Group by shift for the UI

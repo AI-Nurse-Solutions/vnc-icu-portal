@@ -50,13 +50,27 @@ function fmtSubmitted(iso: string) {
 }
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, decidedCount, totalDates }: { status: string; decidedCount?: number; totalDates?: number }) {
+  // Partially decided: some dates acted on but not all — override "pending" label
+  const isPartial = status === "pending" && decidedCount != null && totalDates != null && decidedCount > 0 && decidedCount < totalDates;
+
   const map: Record<string, string> = {
     pending: "bg-amber-500/20 text-amber-300 border-amber-500/30",
     approved: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
     denied: "bg-red-500/20 text-red-300 border-red-500/30",
     withdrawn: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    partial: "bg-orange-500/20 text-orange-300 border-orange-500/30",
   };
+
+  if (isPartial) {
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border ${map.partial}`}>
+        <span>Partially Decided</span>
+        <span className="opacity-70">({decidedCount}/{totalDates})</span>
+      </span>
+    );
+  }
+
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${map[status] ?? map.pending}`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -270,6 +284,18 @@ function DateDetailModal({
                             )}
                             <PriorityBadge wp={r.workingPriority} p={r.priority} />
                             <StatusBadge status={r.dateDecision ?? "pending"} />
+                            {/* Request-level progress: X of N dates decided */}
+                            {r.requestTotalDates > 1 && (
+                              <span className={`text-[10px] font-medium px-1 py-0.5 rounded ${
+                                r.requestDecidedCount === 0 ? "text-slate-500"
+                                : r.requestDecidedCount === r.requestTotalDates ? "text-emerald-400"
+                                : "text-orange-300"
+                              }`}
+                                title={`This request spans ${r.requestTotalDates} dates total. ${r.requestDecidedCount} of those dates have been decided.`}
+                              >
+                                {r.requestDecidedCount}/{r.requestTotalDates}d
+                              </span>
+                            )}
                             {r.summerShutout && (
                               <span className="text-xs text-orange-400 font-semibold">Summer Cap</span>
                             )}
@@ -407,7 +433,7 @@ function RequestorHistoryModal({ employeeId, onClose }: { employeeId: number; on
                       className="w-full flex items-center justify-between px-3 py-2.5 text-sm hover:bg-slate-700/50 transition-colors"
                     >
                       <div className="flex items-center gap-2 flex-wrap">
-                        <StatusBadge status={r.status} />
+                        <StatusBadge status={r.status} decidedCount={r.decidedCount} totalDates={r.totalDates} />
                         <span className="text-slate-300 font-medium capitalize">{r.requestType}</span>
                         <span className="text-slate-500">·</span>
                         <span className="text-slate-400 capitalize">{r.continuityType}</span>
@@ -415,6 +441,22 @@ function RequestorHistoryModal({ employeeId, onClose }: { employeeId: number; on
                         <PriorityBadge wp={r.workingPriority} p={r.priority} />
                         <span className="text-slate-500">·</span>
                         <span className="text-slate-400">{r.dates.length} day{r.dates.length !== 1 ? "s" : ""}</span>
+                        {/* Compound date-decision progress indicator */}
+                        {r.decidedCount != null && r.totalDates != null && r.totalDates > 0 && (
+                          <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                            r.decidedCount === 0
+                              ? "text-slate-500"
+                              : r.decidedCount === r.totalDates
+                              ? "text-emerald-400"
+                              : "text-orange-400"
+                          }`}>
+                            {r.decidedCount === 0
+                              ? "No dates decided"
+                              : r.decidedCount === r.totalDates
+                              ? `All ${r.totalDates} dates decided`
+                              : `${r.decidedCount} of ${r.totalDates} dates decided`}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
                         <span className="text-xs text-slate-500">{fmtSubmitted(r.submittedAt)}</span>
@@ -425,7 +467,7 @@ function RequestorHistoryModal({ employeeId, onClose }: { employeeId: number; on
                       <div className="px-3 pb-3 pt-1 border-t border-slate-700/50 text-xs text-slate-400 space-y-1.5">
                         <div className="flex flex-wrap gap-1">
                           {r.dates.map(d => (
-                            <span key={d} className="bg-slate-700 rounded px-1.5 py-0.5 text-slate-300">{fmtShort(d)}</span>
+                            <span key={d as string} className="bg-slate-700 rounded px-1.5 py-0.5 text-slate-300">{fmtShort(d as string)}</span>
                           ))}
                         </div>
                         {r.comment && (
@@ -579,7 +621,22 @@ export default function AdminLanding() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-xs text-slate-400">{fmtSubmitted(r.submittedAt)}</td>
-                    <td className="px-4 py-2.5"><StatusBadge status={r.status} /></td>
+                    <td className="px-4 py-2.5">
+                      <StatusBadge status={r.status} decidedCount={r.decidedCount} totalDates={r.totalDates} />
+                      {r.decidedCount != null && r.totalDates != null && r.totalDates > 0 && (
+                        <div className={`text-xs mt-0.5 font-medium ${
+                          r.decidedCount === 0 ? "text-slate-500"
+                          : r.decidedCount === r.totalDates ? "text-emerald-400"
+                          : "text-orange-400"
+                        }`}>
+                          {r.decidedCount === 0
+                            ? "No dates decided"
+                            : r.decidedCount === r.totalDates
+                            ? `All ${r.totalDates} decided`
+                            : `${r.decidedCount}/${r.totalDates} dates decided`}
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
