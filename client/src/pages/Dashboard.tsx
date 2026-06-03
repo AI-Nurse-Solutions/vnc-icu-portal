@@ -89,9 +89,9 @@ export default function Dashboard() {
     if (!isLoading && employee && (isAdmin || isSuperAdmin) && location === "/dashboard") {
       navigate("/dashboard/admin/landing");
     }
-    // Redirect managers to review page by default
+    // Redirect managers to export page by default (review is hidden)
     if (!isLoading && employee && isManager && !isAdmin && !isSuperAdmin && location === "/dashboard") {
-      navigate("/dashboard/manager/review");
+      navigate("/dashboard/manager/export");
     }
   }, [isLoading, employee, isAdmin, isSuperAdmin, location]);
 
@@ -168,24 +168,23 @@ export default function Dashboard() {
   ];
 
   const managerNav = [
-    { href: "/dashboard/manager/review", label: "Review Requests", icon: BarChart3 },
+    // "Review Requests" hidden — redundant with Admin Landing
     { href: "/dashboard/manager/export", label: "Export Data", icon: FileDown },
     { href: "/dashboard/manager/policy", label: "Policy Settings", icon: Settings },
   ];
 
-  // ─── Tools section (manager + admin) ───────────────────────────────────────
-  const toolsNav = [
-    { href: "/dashboard/tools/audit-log", label: "Audit Log", icon: Shield },
-  ];
+  // ─── Tools section — now empty; Audit Log moved to Administration ──────────
+  const toolsNav: { href: string; label: string; icon: React.ElementType }[] = [];
 
   const adminNav = [
     { href: "/dashboard/admin/landing", label: "Admin Landing", icon: BarChart3 },
-    { href: "/dashboard/admin/decision-board", label: "Decision Board", icon: CheckCircle2 },
-    { href: "/dashboard/admin/decision-calendar", label: "Decision Calendar (Legacy)", icon: CalendarDays },
+    // "Decision Board" hidden — redundant with Admin Landing workflow
+    { href: "/dashboard/admin/decision-calendar", label: "Decide by Month", icon: CalendarDays },
     { href: "/dashboard/admin/employees", label: "Employees", icon: Users },
     { href: "/dashboard/admin/import", label: "CSV Import", icon: FileDown },
     { href: "/dashboard/admin/announcements", label: "Announcements", icon: Bell },
-    { href: "/dashboard/admin/audit", label: "Audit Log (Legacy)", icon: Shield },
+    { href: "/dashboard/admin/audit", label: "Audit Log", icon: Shield },
+    { href: "/dashboard/tools/audit-log", label: "Audit Log (Manager)", icon: Shield },
     { href: "/dashboard/admin/message-superadmin", label: "Message Super Admin", icon: MessageSquare },
   ];
 
@@ -248,7 +247,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {isManager && (
+        {isManager && toolsNav.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
               Manager Tools
