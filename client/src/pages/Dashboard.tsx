@@ -228,7 +228,7 @@ export default function Dashboard() {
       {/* Nav */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">My Portal</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Employee: My Portal</p>
           <div className="space-y-1">
             {employeeNav.map(n => (
               <NavItem key={n.href} {...n} active={location === n.href} onClick={onClose} />
